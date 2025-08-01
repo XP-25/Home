@@ -44,8 +44,9 @@ nav {
     width: 100px;
     object-fit: cover;
     padding: 5px;
-/*     background-color: rgba(255, 255, 255, 0); */
-    background-color: red;
+    color: white;
+    background-color: rgba(255, 255, 255, 0);
+   
 }
 
 .site-title {
