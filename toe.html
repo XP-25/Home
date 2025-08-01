@@ -1,0 +1,30 @@
+<!-- toe.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="toe.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="mode-selection">
+            <h2>Choose Game Mode</h2>
+            <button id="friend-mode">Play with Friend</button>
+            <button id="computer-mode">Play with Computer</button>
+        </div>
+        <div id="difficulty-selection" style="display: none;color:white;">
+            <h2>Choose Difficulty</h2>
+            <button id="easy-mode">Easy</button>
+            <button id="medium-mode">Medium</button>
+            <button id="hard-mode">Hard</button>
+        </div>
+        <div id="status" style="display: none;color:white;">Player X's turn</div>
+        <div id="board" style="display: none;"></div>
+        <button id="restart-btn" style="display: none;">Restart Game</button>
+    </div>
+
+    <script src="toe.js"></script>
+</body>
+</html>
