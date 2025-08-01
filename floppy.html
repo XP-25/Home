@@ -7,34 +7,7 @@
   <link rel="stylesheet" href="floppy.css">
   <!-- Add the confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-  <style>
-    /* Add styles for the welcome animation */
-    #welcome-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      pointer-events: none;
-    }
-    
-    #welcome-text {
-      font-size: 5rem;
-      font-weight: bold;
-      color: #ff5722;
-      text-shadow: 3px 3px 0 #ffeb3b, 6px 6px 0 #2196f3;
-      transition: all 1s ease-out;
-    }
-    
-    .welcome-letter {
-      display: inline-block;
-      transition: all 1s ease-out;
-    }
-  </style>
+ 
 </head>
 <body>
   <div id="welcome-container">
@@ -73,38 +46,7 @@
   </div>
 
   <script src="floppy.js"></script>
-  <script>
-    // Welcome animation and confetti effect
-    document.addEventListener('DOMContentLoaded', function() {
-      // Fire confetti
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-      
-      // Animate welcome text
-      setTimeout(() => {
-        const letters = document.querySelectorAll('.welcome-letter');
-        letters.forEach((letter, index) => {
-          setTimeout(() => {
-            const angle = (Math.random() - 0.5) * 180;
-            const x = (Math.random() - 0.5) * 500;
-            const y = (Math.random() - 0.5) * 500;
-            const rotate = (Math.random() - 0.5) * 360;
-            
-            letter.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
-            letter.style.opacity = '0';
-          }, index * 100);
-        });
-        
-        // Remove welcome container after animation
-        setTimeout(() => {
-          document.getElementById('welcome-container').remove();
-        }, 1000 + letters.length * 100);
-      }, 1000);
-    });
-  </script>
+  
 <!--   <script type='text/javascript' src='//pl27311303.profitableratecpm.com/54/92/5d/54925dc37b17f6a9f92a34b40a035ed2.js'></script> -->
 <!--   <script type="text/javascript">
 	atOptions = {
