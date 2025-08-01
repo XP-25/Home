@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -127,5 +127,153 @@
 <script type="text/javascript" src="//luciuscratediffers.com/83f1c0fe2a0b0768de2c9c151c35b8ee/invoke.js"></script>
 <script type="text/javascript" src="//luciuscratediffers.com/83f1c0fe2a0b0768de2c9c151c35b8ee/invoke.js"></script>
 <script type='text/javascript' src='//luciuscratediffers.com/54/92/5d/54925dc37b17f6a9f92a34b40a035ed2.js'></script> -->
+</body>
+</html>
+
+
+
+  -->
+
+
+
+
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flappy Bird</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      background-color: #222;
+      overflow: hidden;
+    }
+    
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #game-canvas {
+      background-color: #87CEEB;
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    #score-display, #high-score-display {
+      position: absolute;
+      top: 20px;
+      color: white;
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    #score-display {
+      left: 20px;
+    }
+    
+    #high-score-display {
+      right: 20px;
+    }
+    
+    #pause-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    #start-screen, #game-over-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      text-align: center;
+      z-index: 5;
+    }
+    
+    #game-over-screen {
+      display: none;
+    }
+    
+    #start-screen h1, #game-over-screen h1 {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #FFD700;
+    }
+    
+    #start-screen p, #game-over-screen p {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    
+    #start-btn, #restart-btn {
+      margin-top: 30px;
+      padding: 12px 30px;
+      font-size: 1.2rem;
+      background-color: #FF5722;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: "Poppins", sans-serif;
+    }
+    
+    .controls-info {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <div id="score-display">0</div>
+    <div id="high-score-display">High Score: 0</div>
+    <button id="pause-btn">⏸️</button>
+
+    <div id="start-screen">
+      <h1>Flappy Bird</h1>
+      <p>Tap anywhere to make the bird fly</p>
+      <p>Avoid the pipes!</p>
+      <button id="start-btn">▶ Start Game</button>
+      <div class="controls-info">Press 'P' to pause on desktop</div>
+    </div>
+
+    <div id="game-over-screen">
+      <h1>Game Over!</h1>
+      <p>Your score: <span id="final-score">0</span></p>
+      <p>High score: <span id="final-high-score">0</span></p>
+      <button id="restart-btn">🔄 Restart</button>
+    </div>
+  </div>
+
+  <script src="floppy.js"></script>
 </body>
 </html>
