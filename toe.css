@@ -39,12 +39,12 @@ body {
     font-size: 1.2em;
     margin-bottom: 10px;
 }
-#restart-btn, #otherGames {
+#restart-btn {
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
 }
-button, .button-style {
+/* button, .button-style {
     margin: 5px;
     padding: 10px;
     background-color: #40407a; /* Dark gray to match border and theme */
@@ -60,6 +60,33 @@ button:hover, .button-style:hover {
 }
 button:active, .button-style:active {
     transform: scale(0.95); /* Scale down on click for feedback */
+}
+ */
+
+
+#button-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    margin-top: 10px;
+}
+
+button, .button-style {
+    padding: 10px 20px;
+    background-color: #40407a;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.454);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+button:hover, .button-style:hover {
+    transform: scale(1.05);
+    background-color: #555;
+}
+
+button:active, .button-style:active {
+    transform: scale(0.95);
 }
 
 
