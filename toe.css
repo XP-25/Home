@@ -58,9 +58,10 @@ button:hover, .button-style:hover {
     transform: scale(1.05); /* Slight scale up animation */
     background-color: #555; /* Lighter dark gray for hover, maintaining color theory */
 }
-button:active, .button-style:hover {
+button:active, .button-style:active {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
+
 
 
 
