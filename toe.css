@@ -39,7 +39,7 @@ body {
     font-size: 1.2em;
     margin-bottom: 10px;
 }
-#restart-btn {
+#restart-btn, #otherGames {
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
@@ -61,6 +61,7 @@ button:hover, .button-style:hover {
 button:active, .button-style:hover {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
+
 
 
 
