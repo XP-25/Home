@@ -44,7 +44,7 @@ body {
     font-size: 1em;
     cursor: pointer;
 }
-button {
+button #otherGames {
     margin: 5px;
     padding: 10px;
     background-color: #40407a; /* Dark gray to match border and theme */
@@ -61,3 +61,4 @@ button:hover {
 button:active {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
+
