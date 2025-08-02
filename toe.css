@@ -44,7 +44,7 @@ body {
     font-size: 1em;
     cursor: pointer;
 }
-button {
+button, .button-style {
     margin: 5px;
     padding: 10px;
     background-color: #40407a; /* Dark gray to match border and theme */
@@ -54,12 +54,13 @@ button {
     cursor: pointer;
     transition: transform 0.3s ease, background-color 0.3s ease; /* Smooth animation for hover */
 }
-button:hover {
+button:hover, .button-style:hover {
     transform: scale(1.05); /* Slight scale up animation */
     background-color: #555; /* Lighter dark gray for hover, maintaining color theory */
 }
-button:active {
+button:active, .button-style:hover {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
+
 
 
