@@ -39,11 +39,11 @@ body {
     font-size: 1.2em;
     margin-bottom: 10px;
 }
-#restart-btn {
+/* #restart-btn {
     padding: 10px 20px;
     font-size: 1em;
     cursor: pointer;
-}
+} */
 /* button, .button-style {
     margin: 5px;
     padding: 10px;
@@ -88,6 +88,7 @@ button:hover, .button-style:hover {
 button:active, .button-style:active {
     transform: scale(0.95);
 }
+
 
 
 
