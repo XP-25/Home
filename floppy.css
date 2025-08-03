@@ -158,6 +158,13 @@ p {
     cursor: pointer;
     transition: transform 0.3s ease, background-color 0.3s ease; /* Your smooth animation */
     z-index: 1000; /* Ensures it stays on top of other elements */
+   background-image: url('path-to-home-icon.svg');
+    background-size: cover;
+}
+
+
+.floating-home-btn i {
+    display: none; /* Hide icon if fallback is used */
 }
 
 .floating-home-btn:hover {
