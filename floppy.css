@@ -139,3 +139,32 @@ p {
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* Floating Home Button Styles */
+.floating-home-btn {
+    position: fixed; /* Keeps it floating on the screen */
+    bottom: 20px;    /* Positioned at the bottom-right for easy access */
+    right: 20px;
+    background-color: #40407a; /* Matches your button background */
+    color: white; /* White text/icon for contrast */
+    border: solid rgba(255, 255, 255, 0.454); /* Same subtle border */
+    border-radius: 50%; /* Circular shape for a modern, button-like feel */
+    width: 50px; /* Compact size */
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5em; /* Larger icon for visibility */
+    text-decoration: none; /* No underline */
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease; /* Your smooth animation */
+    z-index: 1000; /* Ensures it stays on top of other elements */
+}
+
+.floating-home-btn:hover {
+    transform: scale(1.05); /* Slight scale up, matching your buttons */
+    background-color: #555; /* Lighter dark gray hover */
+}
+
+.floating-home-btn:active {
+    transform: scale(0.95); /* Scale down on click for feedback */
+}
