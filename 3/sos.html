@@ -4,9 +4,318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Play Free SOS Game Online | RaiseXP - Best Free Games 2025</title>
-    <meta name="description" content="Play the classic SOS game online for free on RaiseXP! Challenge the AI or a friend to form SOS sequences on a grid—no downloads needed. Discover top free puzzle games like SOS in 2025.">
+    <meta name="description"
+        content="Play the classic SOS game online for free on RaiseXP! Challenge the AI or a friend to form SOS sequences on a grid—no downloads needed. Discover top free puzzle games like SOS in 2025.">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Inline CSS for low LCP: Matches your dark theme */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #mode-selection {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            background-color: #40407a;
+            color: white;
+            border: solid rgba(255, 255, 255, 0.454);
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 1.5em;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            transform: scale(1.05);
+            background-color: #555;
+        }
+
+        .mode-btn:active {
+            transform: scale(0.95);
+        }
+
+        #game-container {
+            display: none;
+            /* Hidden initially */
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        #scoreboard {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        #scoreboard div {
+            margin: 0 10px;
+            font-size: 1.1em;
+        }
+
+        #scoreboard .current-player {
+            font-weight: bold;
+            color: #46a396;
+            text-shadow: 0 0 5px #f5f5f559;
+            border: #e0e0e0;
+            border-radius: 10px;
+            background-color: wheat;
+            padding: 5px;
+        }
+
+        #controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .letter-toggle {
+            width: 40px;
+            height: 40px;
+            margin: 0 8px;
+            background-color: #40407a;
+            color: white;
+            border: solid rgba(255, 255, 255, 0.454);
+            border-radius: 5px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .letter-toggle.selected {
+            background-color: #555;
+        }
+
+        .letter-toggle:hover {
+            transform: scale(1.05);
+            background-color: #555;
+        }
+
+        .letter-toggle:active {
+            transform: scale(0.95);
+        }
+
+        #board {
+            display: grid;
+            grid-gap: 2px;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+
+        #board .col {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: black;
+            cursor: pointer;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        #board .col:hover {
+            background-color: #e0e0e0;
+        }
+
+        #board .col.empty {
+            cursor: pointer;
+        }
+
+        /* Strike-through line for SOS sequences */
+        #board .col.sos::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 3px;
+            border-radius: 2px;
+            transform: rotate(0deg);
+            transform-origin: center;
+            z-index: 10;
+        }
+
+        #board .col.player1.sos::after {
+            background-color: #28a745;
+            /* Green for Player 1 */
+        }
+
+        #board .col.player2.sos::after {
+            background-color: #dc3545;
+            /* Red for Player 2 */
+        }
+
+        /* Rotations for different directions */
+        #board .col.sos-horizontal::after {
+            transform: rotate(0deg);
+        }
+
+        #board .col.sos-vertical::after {
+            transform: rotate(90deg);
+        }
+
+        #board .col.sos-diagonal1::after {
+            transform: rotate(45deg);
+        }
+
+        #board .col.sos-diagonal2::after {
+            transform: rotate(-45deg);
+        }
+
+        #board .col.last-move {
+            outline: 2px solid #56c0b1;
+        }
+
+        #alert {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #40407a;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            font-size: 0.9em;
+        }
+
+        /* Enhanced loading effect on alert bar */
+        #alert.loading {
+            background: linear-gradient(90deg, #40407a 0%, #555 50%, #40407a 100%);
+            background-size: 200% 100%;
+            animation: loading-bar 2s linear infinite;
+        }
+
+        @keyframes loading-bar {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        #reset {
+            padding: 8px 16px;
+            background-color: #40407a;
+            color: white;
+            border: solid rgba(255, 255, 255, 0.454);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        #reset:hover {
+            transform: scale(1.05);
+            background-color: #555;
+        }
+
+        #reset:active {
+            transform: scale(0.95);
+        }
+
+        /* Floating Home Button */
+        .floating-home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #40407a;
+            color: white;
+            border: solid rgba(255, 255, 255, 0.454);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-home-btn:hover {
+            transform: scale(1.05);
+            background-color: #555;
+        }
+
+        .floating-home-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Responsive grid: 6x6 on mobile, 8x8 on desktop */
+        @media (max-width: 768px) {
+            #board {
+                grid-template-columns: repeat(6, 40px);
+            }
+
+            .letter-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5em;
+            }
+        }
+
+        @media (min-width: 769px) {
+            #board {
+                grid-template-columns: repeat(8, 50px);
+            }
+
+            #board .col {
+                width: 50px;
+                height: 50px;
+                font-size: 2em;
+            }
+
+            .letter-toggle {
+                width: 50px;
+                height: 50px;
+                font-size: 2em;
+            }
+
+            #scoreboard div {
+                margin: 0 20px;
+                font-size: 1.2em;
+            }
+
+            #alert {
+                font-size: 1em;
+            }
+
+            #reset {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            .floating-home-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
 </head>
 <body>
     <div id="mode-selection">
@@ -30,6 +339,6 @@
     <a href="index.html" class="floating-home-btn">
         <i class="bi bi-house"></i>
     </a>
-    <script src="script.js"></script>
+    <script src="sos.js"></script>  <!-- Link to the separate JS file -->
 </body>
 </html>
