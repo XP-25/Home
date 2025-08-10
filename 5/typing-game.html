@@ -325,17 +325,30 @@
         document.getElementById('friends-form').style.display = 'none';
         document.getElementById('online-form').style.display = 'none';
 
-        // Mode selection
+        // Mode selection with input clear
         document.getElementById('friends-mode').addEventListener('click', () => {
             document.getElementById('mode-selection').style.display = 'none';
             document.getElementById('friends-form').style.display = 'block';
             mode = 'friends';
+            inputBox.value = ''; // Clear input
         });
 
         document.getElementById('online-mode').addEventListener('click', () => {
             document.getElementById('mode-selection').style.display = 'none';
             document.getElementById('online-form').style.display = 'block';
             mode = 'online';
+            inputBox.value = ''; // Clear input
+        });
+
+        document.getElementById('solo-mode').addEventListener('click', () => {
+            mode = 'solo';
+            passageText = paragraphs.length > 0 ? paragraphs[Math.floor(Math.random() * paragraphs.length)] : 'Default passage: The quick brown fox jumps over the lazy dog.';
+            words = passageText.split(' ');
+            startTime = Date.now();
+            serverStartTime = startTime;
+            startGame();
+            startTimer();
+            inputBox.value = ''; // Clear input
         });
 
         document.getElementById('join-online').addEventListener('click', () => {
@@ -343,17 +356,6 @@
             if (playerName) {
                 socket.emit('joinRoom', { room: 'public', playerName });
             }
-        });
-
-        document.getElementById('solo-mode').addEventListener('click', () => {
-            mode = 'solo';
-            // Fallback local selection for solo mode with check
-            passageText = paragraphs.length > 0 ? paragraphs[Math.floor(Math.random() * paragraphs.length)] : 'Default passage: The quick brown fox jumps over the lazy dog.';
-            words = passageText.split(' ');
-            startTime = Date.now();  // Ensure local startTime is set immediately
-            serverStartTime = startTime;  // Sync for consistency
-            startGame();
-            startTimer(); // Start timer for solo
         });
 
         // Friends form
@@ -447,26 +449,26 @@
             document.getElementById('status').textContent = 'Time: 0:00';
             passageText = '';
             words = [];
-            clearInterval(timerInterval); // Clear any running timer
+            clearInterval(timerInterval);
         });
 
         function resetToModeSelection() {
-            // Reset UI to mode selection
             document.getElementById('typing-area').style.display = 'none';
             document.getElementById('room-info').style.display = 'none';
             document.getElementById('waiting-message').style.display = 'none';
-            document.getElementById('leaderboard').style.display = 'none'; // Explicitly hide
+            document.getElementById('leaderboard').style.display = 'none';
             document.getElementById('restart-btn').style.display = 'none';
             document.getElementById('mode-selection').style.display = 'block';
-            document.getElementById('friends-form').style.display = 'none'; // Hide forms
+            document.getElementById('friends-form').style.display = 'none';
             document.getElementById('online-form').style.display = 'none';
-            document.getElementById('leaderboard').innerHTML = ''; // Clear content
+            document.getElementById('leaderboard').innerHTML = '';
             players = {};
             isGameStarted = false;
             isGameOver = false;
             room = '';
             playerName = '';
-            clearInterval(timerInterval); // Stop timer on reset
+            inputBox.value = ''; // Clear input box
+            clearInterval(timerInterval);
         }
 
         // Anti-cheat for input box and passage
@@ -501,8 +503,8 @@
             if (data && data.passage && data.startTime) {
                 passageText = data.passage;
                 words = passageText.split(' ');
-                startTime = data.startTime; // Use server timestamp
-                serverStartTime = startTime; // Sync for NaN fix
+                startTime = data.startTime;
+                serverStartTime = startTime;
             } else {
                 alert('Error: No passage available');
                 resetToModeSelection();
@@ -511,7 +513,7 @@
             document.getElementById('room-info').style.display = 'none';
             document.getElementById('waiting-message').style.display = 'none';
             startGame();
-            startTimer(); // Start timer immediately on game start
+            startTimer();
             isGameStarted = true;
         });
 
@@ -521,7 +523,8 @@
             document.getElementById('online-form').style.display = 'none';
             document.getElementById('typing-area').style.display = 'block';
             renderPassage();
-            inputBox.focus(); // Auto-focus for better UX
+            inputBox.focus();
+            inputBox.value = ''; // Ensure clear on start
         }
 
         function renderPassage() {
@@ -537,32 +540,33 @@
                 const wordSpan = passageSpans[wordIndex];
                 wordSpan.classList.remove('correct', 'incorrect');
                 let isCorrect = true;
+                let isStarted = false;
                 for (let charIndex = 0; charIndex < word.length; charIndex++) {
-                    if (typedIndex >= typedText.length || typedText[typedIndex] !== word[charIndex]) {
+                    if (typedIndex >= typedText.length) {
                         isCorrect = false;
                         break;
                     }
+                    if (typedText[typedIndex] !== word[charIndex]) {
+                        isCorrect = false;
+                    }
                     typedIndex++;
+                    isStarted = true;
                 }
-                // Check for space after word
                 if (isCorrect && typedIndex < typedText.length && typedText[typedIndex] === ' ') {
                     typedIndex++;
-                } else if (isCorrect) {
-                    isCorrect = false; // Incomplete without space
+                    wordSpan.classList.add('correct');
+                } else if (isStarted && !isCorrect) {
+                    wordSpan.classList.add('incorrect');
                 }
-                if (typedIndex > 0) {
-                    wordSpan.classList.add(isCorrect ? 'correct' : 'incorrect');
-                }
+                // Incomplete words stay plain
             });
         }
 
         function startTimer() {
-            const effectiveStart = serverStartTime || startTime || Date.now();  // Fallback to now if undefined
+            const effectiveStart = serverStartTime || startTime || Date.now();
             timerInterval = setInterval(() => {
                 let elapsed = Math.floor((Date.now() - effectiveStart) / 1000);
-                if (isNaN(elapsed) || elapsed < 0) {
-                    elapsed = 0;
-                }
+                if (isNaN(elapsed) || elapsed < 0) elapsed = 0;
                 const minutes = Math.floor(elapsed / 60);
                 const seconds = elapsed % 60;
                 document.getElementById('status').textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -574,19 +578,16 @@
             clearInterval(timerInterval);
             inputBox.readOnly = true;
             inputBox.disabled = true;
-            const now = Date.now();
-            const start = serverStartTime || startTime;
-            let elapsed = (now - start) / 60000;
-            if (elapsed <= 0 || isNaN(elapsed)) {
-                elapsed = 0.0167; // Minimum 1 second to avoid NaN
-            }
+            const elapsed = (Date.now() - startTime) / 60000;
             const wpm = (passageText.length / 5) / elapsed;
             const accuracy = calculateAccuracy(inputBox.value);
             if (mode !== 'solo') {
-                socket.emit('finish', { room, playerName, wpm, accuracy, typedLength: inputBox.value.length, elapsed });
+                socket.emit('finish', { room, playerName, wpm, accuracy, typedText: inputBox.value });
             }
             showResults(wpm, accuracy);
-            document.getElementById('reset-game').style.display = isCreator ? 'inline' : 'none';
+            if (isCreator) {
+                document.getElementById('reset-game').style.display = 'inline';
+            }
         }
 
         function calculateAccuracy(typedText) {
