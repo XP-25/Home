@@ -8,9 +8,12 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: '*', // Kept as * for testing
+        origin: 'https://raisexp.games',  // Paste your frontend domain here (without the /5/typing-game.html path)
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 });
+
 
 const rooms = {};
 let publicRoomCounter = 0; // For creating multiple public rooms
@@ -291,3 +294,4 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
