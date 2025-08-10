@@ -537,34 +537,46 @@
         }
 
         function updateHighlights(typedText) {
-            const passageSpans = document.querySelectorAll('#passage span');
-            if (passageSpans.length === 0) return;
-            let typedIndex = 0;
-            words.forEach((word, wordIndex) => {
-                const wordSpan = passageSpans[wordIndex];
-                wordSpan.classList.remove('correct', 'incorrect');
-                let isCorrect = true;
-                let isStarted = false;
-                for (let charIndex = 0; charIndex < word.length; charIndex++) {
-                    if (typedIndex >= typedText.length) {
-                        isCorrect = false;
-                        break;
-                    }
-                    if (typedText[typedIndex] !== word[charIndex]) {
-                        isCorrect = false;
-                    }
-                    typedIndex++;
-                    isStarted = true;
-                }
-                if (isCorrect && typedIndex < typedText.length && typedText[typedIndex] === ' ') {
-                    typedIndex++;
-                    wordSpan.classList.add('correct');
-                } else if (isStarted && !isCorrect) {
-                    wordSpan.classList.add('incorrect');
-                }
-                // Incomplete words stay plain
-            });
+    const passageSpans = document.querySelectorAll('#passage span');
+    if (passageSpans.length === 0) return;
+    let typedIndex = 0;
+    words.forEach((word, wordIndex) => {
+        const wordSpan = passageSpans[wordIndex];
+        wordSpan.classList.remove('correct', 'incorrect');
+        let isCorrect = true;
+        let isStarted = false;
+        for (let charIndex = 0; charIndex < word.length; charIndex++) {
+            if (typedIndex >= typedText.length) {
+                isCorrect = false;
+                break;
+            }
+            if (typedText[typedIndex] !== word[charIndex]) {
+                isCorrect = false;
+            }
+            typedIndex++;
+            isStarted = true;
         }
+        const isLastWord = wordIndex === words.length - 1;
+        if (isCorrect) {
+            if (isLastWord) {
+                // For last word, no space needed; mark correct if typing ends here
+                if (typedIndex === typedText.length) {
+                    wordSpan.classList.add('correct');
+                }
+            } else if (typedIndex < typedText.length && typedText[typedIndex] === ' ') {
+                typedIndex++;
+                wordSpan.classList.add('correct');
+            } else {
+                isCorrect = false;
+            }
+        }
+        if (isStarted && !isCorrect) {
+            wordSpan.classList.add('incorrect');
+        }
+        // Incomplete words stay plain
+    });
+}
+
 
         function startTimer() {
             const effectiveStart = serverStartTime || startTime || Date.now();
