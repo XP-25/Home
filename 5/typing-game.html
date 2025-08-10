@@ -74,7 +74,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.3;
+            opacity: 0.6; /* Increased for better visibility */
             z-index: -1;
         }
         #passage span.correct::after {
@@ -312,6 +312,7 @@
         let currentWordIndex = 0;
         let timerInterval;
         let startTime;
+        let serverStartTime; // For NaN fix
         let mode = '';
         let room = '';
         let playerName = '';
@@ -343,17 +344,17 @@
                 socket.emit('joinRoom', { room: 'public', playerName });
             }
         });
-//NaN error fixing
-    document.getElementById('solo-mode').addEventListener('click', () => {
-    mode = 'solo';
-    // Fallback local selection for solo mode with check
-    passageText = paragraphs.length > 0 ? paragraphs[Math.floor(Math.random() * paragraphs.length)] : defaultPassage;
-    words = passageText.split(' ');
-    startTime = Date.now();  // Ensure local startTime is set immediately
-    serverStartTime = startTime;  // Sync for consistency
-    startGame();
-});
 
+        document.getElementById('solo-mode').addEventListener('click', () => {
+            mode = 'solo';
+            // Fallback local selection for solo mode with check
+            passageText = paragraphs.length > 0 ? paragraphs[Math.floor(Math.random() * paragraphs.length)] : 'Default passage: The quick brown fox jumps over the lazy dog.';
+            words = passageText.split(' ');
+            startTime = Date.now();  // Ensure local startTime is set immediately
+            serverStartTime = startTime;  // Sync for consistency
+            startGame();
+            startTimer(); // Start timer for solo
+        });
 
         // Friends form
         document.getElementById('create-room').addEventListener('click', () => {
@@ -446,6 +447,7 @@
             document.getElementById('status').textContent = 'Time: 0:00';
             passageText = '';
             words = [];
+            clearInterval(timerInterval); // Clear any running timer
         });
 
         function resetToModeSelection() {
@@ -464,6 +466,7 @@
             isGameOver = false;
             room = '';
             playerName = '';
+            clearInterval(timerInterval); // Stop timer on reset
         }
 
         // Anti-cheat for input box and passage
@@ -476,11 +479,6 @@
         // Typing logic
         inputBox.addEventListener('input', (e) => {
             if (isGameOver) return;
-            if (!isGameStarted) {
-                startTimer();
-                isGameStarted = true;
-                if (mode !== 'solo') socket.emit('gameStart', room);
-            }
             const typedText = inputBox.value;
             updateHighlights(typedText);
             if (mode !== 'solo') {
@@ -504,6 +502,7 @@
                 passageText = data.passage;
                 words = passageText.split(' ');
                 startTime = data.startTime; // Use server timestamp
+                serverStartTime = startTime; // Sync for NaN fix
             } else {
                 alert('Error: No passage available');
                 resetToModeSelection();
@@ -512,6 +511,8 @@
             document.getElementById('room-info').style.display = 'none';
             document.getElementById('waiting-message').style.display = 'none';
             startGame();
+            startTimer(); // Start timer immediately on game start
+            isGameStarted = true;
         });
 
         function startGame() {
@@ -520,6 +521,7 @@
             document.getElementById('online-form').style.display = 'none';
             document.getElementById('typing-area').style.display = 'block';
             renderPassage();
+            inputBox.focus(); // Auto-focus for better UX
         }
 
         function renderPassage() {
@@ -528,49 +530,63 @@
         }
 
         function updateHighlights(typedText) {
-            const typedWords = typedText.trim().split(/\s+/);
-            for (let i = 0; i < words.length; i++) {
-                const wordSpan = document.getElementById(`word-${i}`);
+            const passageSpans = document.querySelectorAll('#passage span');
+            if (passageSpans.length === 0) return;
+            let typedIndex = 0;
+            words.forEach((word, wordIndex) => {
+                const wordSpan = passageSpans[wordIndex];
                 wordSpan.classList.remove('correct', 'incorrect');
-                if (i < typedWords.length) {
-                    wordSpan.classList.add(typedWords[i] === words[i] ? 'correct' : 'incorrect');
+                let isCorrect = true;
+                for (let charIndex = 0; charIndex < word.length; charIndex++) {
+                    if (typedIndex >= typedText.length || typedText[typedIndex] !== word[charIndex]) {
+                        isCorrect = false;
+                        break;
+                    }
+                    typedIndex++;
                 }
-            }
-            currentWordIndex = typedWords.length;
+                // Check for space after word
+                if (isCorrect && typedIndex < typedText.length && typedText[typedIndex] === ' ') {
+                    typedIndex++;
+                } else if (isCorrect) {
+                    isCorrect = false; // Incomplete without space
+                }
+                if (typedIndex > 0) {
+                    wordSpan.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+            });
         }
-//fixing NaN error
-function startTimer() {
-    const effectiveStart = serverStartTime || startTime || Date.now();  // Fallback to now if undefined
-    timerInterval = setInterval(() => {
-        let elapsed = Math.floor((Date.now() - effectiveStart) / 1000);
-        
-        // Fix: Handle invalid/negative elapsed
-        if (isNaN(elapsed) || elapsed < 0) {
-            elapsed = 0;
-        }
-        
-        const minutes = Math.floor(elapsed / 60);
-        const seconds = elapsed % 60;
-        document.getElementById('status').textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    }, 1000);
-}
 
+        function startTimer() {
+            const effectiveStart = serverStartTime || startTime || Date.now();  // Fallback to now if undefined
+            timerInterval = setInterval(() => {
+                let elapsed = Math.floor((Date.now() - effectiveStart) / 1000);
+                if (isNaN(elapsed) || elapsed < 0) {
+                    elapsed = 0;
+                }
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                document.getElementById('status').textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }, 1000);
+        }
 
         function endGame() {
             isGameOver = true;
             clearInterval(timerInterval);
             inputBox.readOnly = true;
             inputBox.disabled = true;
-            const elapsed = (Date.now() - startTime) / 60000;
+            const now = Date.now();
+            const start = serverStartTime || startTime;
+            let elapsed = (now - start) / 60000;
+            if (elapsed <= 0 || isNaN(elapsed)) {
+                elapsed = 0.0167; // Minimum 1 second to avoid NaN
+            }
             const wpm = (passageText.length / 5) / elapsed;
             const accuracy = calculateAccuracy(inputBox.value);
             if (mode !== 'solo') {
-                socket.emit('finish', { room, playerName, wpm, accuracy, typedText: inputBox.value });
+                socket.emit('finish', { room, playerName, wpm, accuracy, typedLength: inputBox.value.length, elapsed });
             }
             showResults(wpm, accuracy);
-            if (isCreator) {
-                document.getElementById('reset-game').style.display = 'inline';
-            }
+            document.getElementById('reset-game').style.display = isCreator ? 'inline' : 'none';
         }
 
         function calculateAccuracy(typedText) {
