@@ -343,18 +343,17 @@
                 socket.emit('joinRoom', { room: 'public', playerName });
             }
         });
+//NaN error fixing
+    document.getElementById('solo-mode').addEventListener('click', () => {
+    mode = 'solo';
+    // Fallback local selection for solo mode with check
+    passageText = paragraphs.length > 0 ? paragraphs[Math.floor(Math.random() * paragraphs.length)] : defaultPassage;
+    words = passageText.split(' ');
+    startTime = Date.now();  // Ensure local startTime is set immediately
+    serverStartTime = startTime;  // Sync for consistency
+    startGame();
+});
 
-        document.getElementById('solo-mode').addEventListener('click', () => {
-            mode = 'solo';
-            // Fallback local selection for solo mode
-            if (paragraphs.length === 0) {
-                passageText = 'Default passage: The quick brown fox jumps over the lazy dog.';
-            } else {
-                passageText = paragraphs[Math.floor(Math.random() * paragraphs.length)];
-            }
-            words = passageText.split(' ');
-            startGame();
-        });
 
         // Friends form
         document.getElementById('create-room').addEventListener('click', () => {
@@ -539,13 +538,23 @@
             }
             currentWordIndex = typedWords.length;
         }
-
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                document.getElementById('status').textContent = `Time: ${Math.floor(elapsed / 60)}:${elapsed % 60 < 10 ? '0' : ''}${elapsed % 60}`;
-            }, 1000);
+//fixing NaN error
+function startTimer() {
+    const effectiveStart = serverStartTime || startTime || Date.now();  // Fallback to now if undefined
+    timerInterval = setInterval(() => {
+        let elapsed = Math.floor((Date.now() - effectiveStart) / 1000);
+        
+        // Fix: Handle invalid/negative elapsed
+        if (isNaN(elapsed) || elapsed < 0) {
+            elapsed = 0;
         }
+        
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('status').textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }, 1000);
+}
+
 
         function endGame() {
             isGameOver = true;
