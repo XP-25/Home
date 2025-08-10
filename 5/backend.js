@@ -8,11 +8,16 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: 'https://raisexp.games',  // Paste your frontend domain here (without the /5/typing-game.html path)
+        origin: (origin, callback) => {
+            const allowed = ['https://raisexp.games', 'http://localhost']; // Add local for testing
+            if (allowed.includes(origin) || !origin) callback(null, true);
+            else callback(new Error('Not allowed by CORS'));
+        },
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
+
 
 
 const rooms = {};
@@ -294,4 +299,5 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
