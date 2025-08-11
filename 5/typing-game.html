@@ -149,7 +149,30 @@
             font-size: 1.2em;
             margin: 20px;
         }
+
+        #mode-selection h4 {
+        display: none;
+                /* color: aliceblue; */
+        }
+
+        
         @media (max-width: 768px) {
+
+            #mode-selection h4 {
+                display: block;
+                color: aliceblue;
+            }
+            #waiting-message pre {
+                display: none;
+            }
+
+            html, body {
+            overflow: hidden;
+            height: 100%;
+            margin: 0;
+            }
+
+            
             #form, #online-form {
                 width: 90%;
             }
@@ -170,6 +193,7 @@
             <button id="friends-mode">Compete with Friends</button>
             <button id="online-mode">Compete Online (Max 100 Players)</button>
             <button id="solo-mode">Test Your Speed</button>
+            <h4>If no activity for 15s the server will remove you from the room and it checks your activity every 30s.</h4>
         </div>
         <div id="friends-form" style="display: none;">
             <div id="form">
