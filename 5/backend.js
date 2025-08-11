@@ -3,7 +3,6 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
 const escapeHtml = require('escape-html');
-const axios = require('axios');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +17,10 @@ const io = socketIo(server, {
         credentials: true
     }
 });
+
+
+
+
 
 const rooms = {};
 let publicRoomCounter = 0; // For creating multiple public rooms
@@ -296,17 +299,8 @@ setInterval(() => {
     }
 }, 30000);
 
-// Self-ping to prevent Render free tier sleep
-const url = 'https://games-fwqb.onrender.com'; // Replace with your actual Render URL
-const interval = 1000 * 60 * 14; // 14 minutes
-
-function keepAlive() {
-   axios.get(url)
-     .then(() => console.log('Ping to self successful'))
-     .catch(err => console.error('Ping to self failed:', err.message));
-}
-
-setInterval(keepAlive, interval);
-
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+
