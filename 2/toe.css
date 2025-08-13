@@ -92,13 +92,14 @@ button:active {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
 
-	@media (min-width: 768px){
+	@media (max-width: 768px){
         	#ad {
-            display: block;
+            display: none;
             position: fixed;
             bottom: 0px;
 /*             background-color: aqua; */
             }
 	}
+
 
 
