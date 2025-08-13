@@ -92,5 +92,13 @@ button:active {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
 
+	@media (min-width: 768px){
+        	#ad {
+            display: block;
+            position: fixed;
+            bottom: 0px;
+/*             background-color: aqua; */
+            }
+	}
 
 
