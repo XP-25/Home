@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="toe.css">
     <style>
+	@media (min-width: 768px){
         	#ad {
             display: block;
             position: fixed;
             bottom: 0px;
 /*             background-color: aqua; */
             }
+	}
     </style>
     <script type='text/javascript' src='//luciuscratediffers.com/54/92/5d/54925dc37b17f6a9f92a34b40a035ed2.js'></script>
 </head>
@@ -32,26 +34,20 @@
             <h2>Choose Difficulty</h2>
             <button id="easy-mode">Easy</button>
             <button id="medium-mode">Medium</button>
-            <button id="hard-mode">Hard</button>
-            <div id="ad" style="width:468px; height:60px;">
-            <script type="text/javascript">
-	        atOptions = {
-		    'key' : '87838032e1e0ae99d54a9113ac59791f',
-		    'format' : 'iframe',
-		    'height' : 60,
-		    'width' : 468,
-		    'params' : {}
-	        };
-            </script>
-            <script type="text/javascript" src="//luciuscratediffers.com/87838032e1e0ae99d54a9113ac59791f/invoke.js"></script>
-        </div>    
+            <button id="hard-mode">Hard</button>  
         </div>
         <div id="difficulty-selection" style="display: none;color:white;">
             <h2>Choose Difficulty</h2>
             <button id="easy-mode">Easy</button>
             <button id="medium-mode">Medium</button>
             <button id="hard-mode">Hard</button>
-            <div id="ad" style="width:468px; height:60px;">
+        </div>
+        <div id="status" style="display: none;color:white;">Player X's turn</div>
+        <div id="board" style="display: none;"></div>
+         <button id="restart-btn" style="display: none;">Restart Game</button>
+        
+    </div>
+	<div id="ad" style="width:468px; height:60px; display:none;">
             <script type="text/javascript">
 	        atOptions = {
 		    'key' : '87838032e1e0ae99d54a9113ac59791f',
@@ -63,16 +59,10 @@
             </script>
             <script type="text/javascript" src="//luciuscratediffers.com/87838032e1e0ae99d54a9113ac59791f/invoke.js"></script>
         </div>
-        </div>
-        <div id="status" style="display: none;color:white;">Player X's turn</div>
-        <div id="board" style="display: none;"></div>
-         <button id="restart-btn" style="display: none;">Restart Game</button>
-        
-    </div>
-
     <script src="toe.js"></script>
 </body>
 </html>
+
 
 
 
