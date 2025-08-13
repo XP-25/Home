@@ -95,11 +95,10 @@ button:active {
 	@media (max-width: 768px){
         	#ad {
             display: none;
-            position: fixed;
-            bottom: 0px;
 /*             background-color: aqua; */
             }
 	}
+
 
 
 
