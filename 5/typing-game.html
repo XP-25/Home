@@ -206,7 +206,18 @@
                 <input type="text" id="player-name" placeholder="Enter your name" required>
                 <input type="text" id="room-code" placeholder="Enter room code (optional)">
                 <button type="button" id="create-room" onclick="if(document.getElementById('player-name').value.trim()){document.getElementById('connecting').style.display='block'} else {alert('Enter the name')}">Create Room</button>
-                <button type="button" id="join-room" onclick="if(document.getElementById('player-name').value.trim()){document.getElementById('connecting').style.display='block'} else {alert('Enter the name')}">Join Room</button>
+				<button type="button" id="join-room" 
+    			onclick="
+    			let name = document.getElementById('player-name').value.trim();
+    			let code = document.getElementById('room-code').value.trim();
+    			if(name && code){
+       	 		document.getElementById('connecting').style.display='block';
+    			} else {
+       			 alert('Enter both Name and Room Code to join a room');
+    			}">
+    			Join Room
+				</button>
+
                 <div style="color: #1a1a2e;display:none;" id="connecting">
                 <p>
                 Connecting to server ...
