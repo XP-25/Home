@@ -228,9 +228,9 @@
         <div id="online-form" style="display: none;">
             <div id="form">
                 <input type="text" id="online-player-name" placeholder="Enter your name" required>
-                <button type="button" id="join-online" onclick="let name = document.getElementById('player-name').value.trim();
+                <button type="button" id="join-online" onclick="let name = document.getElementById('online-player-name').value.trim();
 				if(name){
-    			document.getElementById('connecting').style.display='block';
+    			document.getElementById('connect').style.display='block';
 				} else {
     			alert('Enter the name');
 				}">Join Online</button>
