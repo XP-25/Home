@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST'] } // TODO: Restrict to your frontend domain in production, e.g., 'https://raisexp.games'
+  cors: { origin: 'https://raisexp.games/', methods: ['GET', 'POST'] } // TODO: Restrict to your frontend domain in production, e.g., 'https://raisexp.games'
 });
 
 // ---- In-memory state ----
@@ -234,3 +234,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
+
