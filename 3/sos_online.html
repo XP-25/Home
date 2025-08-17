@@ -294,8 +294,13 @@
       </div>
     </div>
     <div class="row">
-      <button class="form-btn" id="create-room">Create Room</button>
+      <button class="form-btn" id="create-room" onclick="document.getElementById('connect').style.display='block';">Create Room</button>
       <button class="form-btn" id="join-room">Join Room</button>
+      <div style="color: #1a1a2e;display:none;" id="connect">
+      <p>
+      Connecting to server...
+      </p>
+      </div>
     </div>
   </div>
   <!-- Compete Online form -->
@@ -309,7 +314,12 @@
     </div>
     <div class="row">
       <div style="display: none; align-items: center;margin: 16px 0px;" id="NoOpp"><h5>NO OPPONENT FOUND, PLAY WITH YOUR FRIEND IN A PRIVATE ROOM</h5></div>
-      <button class="form-btn" id="find-opponent">Find Opponent</button>
+      <button class="form-btn" id="find-opponent" onclick="document.getElementById('connecting').style.display='block';">Find Opponent</button>
+      <div style="color: #1a1a2e;display:none;" id="connecting">
+      <p>
+      Connecting to server...
+      </p>
+      </div>
     </div>
   </div>
   <!-- Room code display for creator -->
@@ -763,6 +773,7 @@
   </script>
 </body>
 </html>
+
 
 
 
