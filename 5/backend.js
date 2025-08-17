@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: (origin, callback) => {
-            const allowed = ['https://raisexp.games', 'http://localhost']; // Add local for testing
+            const allowed = ['https://raisexp.games']; // Add local for testing
             if (allowed.includes(origin) || !origin) callback(null, true);
             else callback(new Error('Not allowed by CORS'));
         },
@@ -301,6 +301,7 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
