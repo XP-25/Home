@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Play Free SOS Game Online | RaiseXP - Best Free Games 2025</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <meta name="description"
+    content="Play the classic SOS game online for free on RaiseXP! Challenge a friend online to form SOS sequences on a grid—no downloads needed. 15s timer with auto-move." />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #1a1a2e;
+      color: white;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0.2rem 0 0.8rem;
+    }
+
+    /* Layout blocks */
+    #mode-selection,
+    .online-form,
+    #room-code-display,
+    #waiting-screen,
+    #game-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 16px;
+      background: #151528;
+      border: 1px solid #2f2f5e;
+      border-radius: 12px;
+      padding: 16px;
+      justify-items: center;
+    }
+
+    #mode-selection {
+      text-align: center;
+      margin-top: 32px;
+    }
+
+    .row {
+      display: flex column;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #reset {
+     display: none;
+    }
+
+    .mode-btn,
+    .form-btn,
+    #reset {
+      padding: 10px 8px;
+      margin: 18px 5px;
+      background-color: #40407a;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: transform .2s, background-color .2s;
+    }
+
+    .mode-btn:hover,
+    .form-btn:hover,
+    #reset:hover {
+      transform: translateY(-1px);
+      background-color: #555;
+    }
+
+    .mode-btn:active,
+    .form-btn:active,
+    #reset:active {
+      transform: translateY(0);
+    }
+
+    input[type="text"] {
+      width: min(340px, 90%);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #0f0f22;
+      color: #fff;
+      margin-top: 10px;
+    }
+
+    label {
+      font-size: .9rem;
+      opacity: .85;
+      display: none;
+    }
+
+    #game-container {
+      display: none;
+      text-align: center;
+    }
+
+    #scoreboard {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    #scoreboard .pill {
+      padding: 6px 10px;
+      border-radius: 10px;
+      background: #22224a;
+      border: 1px solid #2f2f5e;
+    }
+
+    #scoreboard .current-player {
+      font-weight: bold;
+      color: #46a396;
+      background: #fff;
+      text-shadow: none;
+    }
+
+    #turn-timer {
+      display: none;
+      margin: 10px;
+      padding: 4px 8px;
+      background: #ffffff;
+      border-radius: 25px;
+      font-size: 1rem;
+      color: #000000;
+    }
+
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .letter-toggle {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      font-size: 1.2rem;
+      background-color: #40407a;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, .45);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform .2s, background-color .2s;
+    }
+
+    .letter-toggle.selected,
+    .letter-toggle:hover {
+      background-color: #555;
+    }
+
+    #board {
+      display: grid;
+      grid-gap: 2px;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    #board .cell {
+      width: 47px;
+      height: 47px;
+      background: #fff;
+      border: 2px solid #333;
+      color: #000;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      cursor: pointer;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    #board .cell:hover {
+      background: #e0e0e0;
+    }
+
+    #board .cell.empty {
+      cursor: pointer;
+    }
+
+    #board .cell.last-move {
+      outline: 2px solid #56c0b1;
+    }
+
+    /* SOS strike line */
+    #board .cell.sos::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 5%;
+      right: 5%;
+      height: 3px;
+      border-radius: 2px;
+      transform-origin: center;
+      z-index: 10;
+    }
+
+    #board .cell.player1.sos::after {
+      background-color: #28a745;
+    }
+
+    #board .cell.player2.sos::after {
+      background-color: #dc3545;
+    }
+
+    #board .cell.sos-horizontal::after {
+      transform: rotate(0deg);
+    }
+
+    #board .cell.sos-vertical::after {
+      transform: rotate(90deg);
+    }
+
+    #board .cell.sos-diagonal1::after {
+      transform: rotate(45deg);
+    }
+
+    #board .cell.sos-diagonal2::after {
+      transform: rotate(-45deg);
+    }
+
+    #alert {
+      margin: 10px auto 14px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #26264a;
+      border: 1px solid #2f2f5e;
+    }
+
+    #alert.loading {
+      background: linear-gradient(90deg, #40407a 0%, #555 50%, #40407a 100%);
+      background-size: 200% 100%;
+      animation: loading-bar 2s linear infinite;
+    }
+
+    @keyframes loading-bar {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    #reset {
+      margin-top: 6px;
+    }
+
+    /* Sections initially hidden */
+    .online-form,
+    #room-code-display,
+    #waiting-screen {
+      display: none;
+    }
+
+    /* Responsive board sizing – the server tells us NBOARD; we compute css columns dynamically in JS. */
+    @media (min-width: 900px) {
+      #board .cell {
+        width: 47px;
+        height: 47Px;
+        font-size: 1.8rem;
+      }
+    }
+
+    /* Floating home (optional) */
+    .floating-home-btn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #40407a;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, .45);
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform .2s, background-color .2s;
+      z-index: 10;
+    }
+
+    .floating-home-btn:hover {
+      transform: scale(1.05);
+      background-color: #555;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Mode selection -->
+  <div id="mode-selection">
+    <h1>Select Mode</h1>
+    <div class="row">
+      <button class="mode-btn" id="play-friend">Play with Friend (Private Room)</button>
+      <button class="mode-btn" id="compete-online">Compete Online (Matchmaking)</button>
+    </div>
+  </div>
+
+  <!-- Play with Friend form -->
+  <div id="friend-form" class="online-form">
+    <h2>Play with Friend</h2>
+    <div class="row">
+      <div class="col">
+        <label>Your name</label>
+        <input type="text" id="friend-name" placeholder="Enter your name">
+      </div>
+      <div class="col">
+        <label>Room code (to join)</label>
+        <input type="text" id="room-code" placeholder="Enter room code">
+      </div>
+    </div>
+    <div class="row">
+      <button class="form-btn" id="create-room">Create Room</button>
+      <button class="form-btn" id="join-room">Join Room</button>
+    </div>
+  </div>
+
+  <!-- Compete Online form -->
+  <div id="compete-form" class="online-form">
+    <h2>Compete Online</h2>
+    <div class="row">
+      <div class="col">
+        <label>Your name</label>
+        <input type="text" id="compete-name" placeholder="Enter your name">
+      </div>
+    </div>
+    <div class="row">
+      <div style="display: none; align-items: center;margin: 16px 0px;" id="NoOpp"><h5>NO OPPONENT FOUND, PLAY WITH YOUR FRIEND IN A PRIVATE ROOM</h5></div>
+      <button class="form-btn" id="find-opponent">Find Opponent</button>
+    </div>
+  </div>
+
+  <!-- Room code display for creator -->
+  <div id="room-code-display">
+    <h2>Room Created</h2>
+    <p>Share this code with your friend:</p>
+    <h3 id="code-text"></h3>
+    <div class="row">
+      <button class="form-btn" id="copy-btn">Copy Code</button>
+      <button class="form-btn" id="start-game-btn" style="display:none;">Start Game</button>
+    </div>
+    <p id="player-status">Waiting for friend to join…</p>
+  </div>
+
+  <!-- Waiting screen for joiner -->
+  <div id="waiting-screen">
+    <h2>Joined Room!</h2>
+    <p>Waiting for the host to start the game…</p>
+  </div>
+
+  <!-- Game UI -->
+  <div id="game-container">
+    <div id="scoreboard">
+      <div id="score-player1" class="pill"><i class="bi bi-person"></i> Player 1: 0</div>
+      <div id="score-player2" class="pill"><i class="bi bi-person-fill"></i> Player 2: 0</div>
+    </div>
+
+    <div id="turn-timer">15</div> <!-- New countdown display -->
+
+    <div id="controls">
+      <button class="letter-toggle selected" id="select-s">S</button>
+      <button class="letter-toggle" id="select-o">O</button>
+    </div>
+
+    <div id="board"></div>
+
+    <div id="alert">Waiting…</div>
+
+    <button id="reset">Reset Game</button>
+  </div>
+
+  <a href="/" class="floating-home-btn" title="Home"><i class="bi bi-house"></i></a>
+
+  <!-- Socket.IO (served by backend) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // ---- Game constants ----
+    const PIECES = { S: { string: "S", html: "S" }, O: { string: "O", html: "O" }, empty: { string: "empty", html: "" } };
+    const STATUS = { PLAYER1_MOVE: "player1 move", PLAYER2_MOVE: "player2 move", GAMEOVER: "gameover" };
+    const TURN_TIME = 15000; // 15s
+
+    // ---- Socket / Device detection ----
+    const socket = io(); // same origin
+    const isMobile = window.innerWidth <= 768;
+    const deviceType = isMobile ? 'mobile' : 'desktop';
+
+    // ---- State ----
+    let GAME;
+    let NBOARD = 6; // server will overwrite at startGame
+    let selectedLetter = 'S';
+    let myPlayer = null; // 'player1' or 'player2'
+    let playerNames = { player1: 'Player 1', player2: 'Player 2' };
+    let currentRoomCode = null;
+    let isCreator = false;
+
+    // Turn timer
+    let timerTimeout = null;
+    let countdownInterval = null;
+    const turnTimerElem = document.getElementById('turn-timer');
+
+    // ---- DOM ----
+    const modeSelection = document.getElementById('mode-selection');
+    const friendForm = document.getElementById('friend-form');
+    const competeForm = document.getElementById('compete-form');
+    const roomCodeDisplay = document.getElementById('room-code-display');
+    const codeText = document.getElementById('code-text');
+    const copyBtn = document.getElementById('copy-btn');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const playerStatus = document.getElementById('player-status');
+    const waitingScreen = document.getElementById('waiting-screen');
+
+    const gameContainer = document.getElementById('game-container');
+    const boardElem = document.getElementById('board');
+    const alertElem = document.getElementById('alert');
+    const scorePlayer1Elem = document.getElementById('score-player1');
+    const scorePlayer2Elem = document.getElementById('score-player2');
+    const selectS = document.getElementById('select-s');
+    const selectO = document.getElementById('select-o');
+    const resetBtn = document.getElementById('reset');
+
+    const playFriendBtn = document.getElementById('play-friend');
+    const competeOnlineBtn = document.getElementById('compete-online');
+    const friendNameInput = document.getElementById('friend-name');
+    const roomCodeInput = document.getElementById('room-code');
+    const createRoomBtn = document.getElementById('create-room');
+    const joinRoomBtn = document.getElementById('join-room');
+    const competeNameInput = document.getElementById('compete-name');
+    const findOpponentBtn = document.getElementById('find-opponent');
+
+    // ---- SOS Game Class (client-side rules) ----
+    class SOS {
+      static PIECES = PIECES;
+      static STATUS = STATUS;
+
+      #player1; #player2; #lastMove = null; #status; #winner = null; #board; nboard;
+
+      constructor(board = null, status = null, player1 = null, player2 = null, nboard) {
+        this.nboard = nboard || 8;
+        this.#status = status || SOS.STATUS.PLAYER1_MOVE;
+        this.#player1 = player1 || { score: 0, sos: [] };
+        this.#player2 = player2 || { score: 0, sos: [] };
+        if (board) {
+          this.#board = board;
+        } else {
+          this.#board = [];
+          for (let r = 0; r < this.nboard; r++) {
+            this.#board[r] = [];
+            for (let c = 0; c < this.nboard; c++) this.#board[r][c] = SOS.PIECES.empty.string;
+          }
+        }
+      }
+      getStatus() { return this.#status; }
+      getCell(r, c) { return this.#board[r][c]; }
+      getWinner() { return this.#winner; }
+      getPlayer1() { return this.#player1; }
+      getPlayer2() { return this.#player2; }
+      getLastMove() { return this.#lastMove; }
+
+      setMove(piece, row, col) {
+        let score = 0;
+        this.#board[row][col] = SOS.PIECES[piece].string;
+        this.#lastMove = { row, col };
+        const player = this.#status === SOS.STATUS.PLAYER1_MOVE ? this.#player1 : this.#player2;
+
+        score = this.#getScore(row, col);
+        player.score += score;
+
+        if (this.#hasEnd()) {
+          const p1 = this.#player1.score, p2 = this.#player2.score;
+          this.#winner = p1 > p2 ? 'player1' : (p1 < p2 ? 'player2' : 'draw');
+          this.#status = STATUS.GAMEOVER;
+        } else if (score === 0) {
+          this.#next();
+        }
+        return score; // Added: Return score to check for SOS
+      }
+
+      #next() {
+        this.#status = (this.#status === STATUS.PLAYER1_MOVE) ? STATUS.PLAYER2_MOVE : STATUS.PLAYER1_MOVE;
+      }
+
+      countPieces() {
+        return this.#board.flat().reduce((r, c) => ((r[c] = (r[c] || 0) + 1), r), {});
+      }
+      #hasEnd() { return this.countPieces()[SOS.PIECES.empty.string] === undefined; }
+      #getScore(r, c) { return (this.#board[r][c] === SOS.PIECES.S.string) ? this.#getScoreS(r, c) : this.#getScoreO(r, c); }
+
+      #getScoreO(row, col) {
+        let player = (this.#status === STATUS.PLAYER1_MOVE) ? this.#player1 : this.#player2;
+        let result = 0;
+        if (this.#check(['S'], row, col, +1, 0) && this.#check(['S'], row, col, -1, 0)) {
+          result++; player.sos.push([{ row, col, dirClass: 'sos-vertical' }, { row: row + 1, col, dirClass: 'sos-vertical' }, { row: row - 1, col, dirClass: 'sos-vertical' }]);
+        }
+        if (this.#check(['S'], row, col, 0, +1) && this.#check(['S'], row, col, 0, -1)) {
+          result++; player.sos.push([{ row, col, dirClass: 'sos-horizontal' }, { row, col: col + 1, dirClass: 'sos-horizontal' }, { row, col: col - 1, dirClass: 'sos-horizontal' }]);
+        }
+        if (this.#check(['S'], row, col, +1, +1) && this.#check(['S'], row, col, -1, -1)) {
+          result++; player.sos.push([{ row, col, dirClass: 'sos-diagonal1' }, { row: row + 1, col: col + 1, dirClass: 'sos-diagonal1' }, { row: row - 1, col: col - 1, dirClass: 'sos-diagonal1' }]);
+        }
+        if (this.#check(['S'], row, col, -1, +1) && this.#check(['S'], row, col, +1, -1)) {
+          result++; player.sos.push([{ row, col, dirClass: 'sos-diagonal2' }, { row: row - 1, col: col + 1, dirClass: 'sos-diagonal2' }, { row: row + 1, col: col - 1, dirClass: 'sos-diagonal2' }]);
+        }
+        return result;
+      }
+
+      #getScoreS(row, col) {
+        let result = 0;
+        [1, -1].forEach(d => result += this.#dirS(row, col, d));
+        return result;
+      }
+      #dirS(row, col, d) {
+        let player = (this.#status === STATUS.PLAYER1_MOVE) ? this.#player1 : this.#player2;
+        let res = 0;
+        if (this.#check(['O'], row, col, 1 * d, 0) && this.#check(['S'], row, col, 2 * d, 0)) {
+          res++; player.sos.push([{ row, col, dirClass: 'sos-vertical' }, { row: row + 1 * d, col, dirClass: 'sos-vertical' }, { row: row + 2 * d, col, dirClass: 'sos-vertical' }]);
+        }
+        if (this.#check(['O'], row, col, 0, 1 * d) && this.#check(['S'], row, col, 0, 2 * d)) {
+          res++; player.sos.push([{ row, col, dirClass: 'sos-horizontal' }, { row, col: col + 1 * d, dirClass: 'sos-horizontal' }, { row, col: col + 2 * d, dirClass: 'sos-horizontal' }]);
+        }
+        if (this.#check(['O'], row, col, 1 * d, 1 * d) && this.#check(['S'], row, col, 2 * d, 2 * d)) {
+          res++; player.sos.push([{ row, col, dirClass: 'sos-diagonal1' }, { row: row + 1 * d, col: col + 1 * d, dirClass: 'sos-diagonal1' }, { row: row + 2 * d, col: col + 2 * d, dirClass: 'sos-diagonal1' }]);
+        }
+        if (this.#check(['O'], row, col, -1 * d, 1 * d) && this.#check(['S'], row, col, -2 * d, 2 * d)) {
+          res++; player.sos.push([{ row, col, dirClass: 'sos-diagonal2' }, { row: row - 1 * d, col: col + 1 * d, dirClass: 'sos-diagonal2' }, { row: row - 2 * d, col: col + 2 * d, dirClass: 'sos-diagonal2' }]);
+        }
+        return res;
+      }
+      #check(pieces, row, col, ri, ci) {
+        const nr = row + ri, nc = col + ci;
+        return nr >= 0 && nr < this.#board.length && nc >= 0 && nc < this.#board[row].length && pieces.includes(this.#board[nr][nc]);
+      }
+      hasFinished() { return this.countPieces()[PIECES.empty.string] === undefined; }
+    }
+
+    // ---- UI helpers ----
+    function renderBoard() {
+      boardElem.style.gridTemplateColumns = `repeat(${NBOARD}, ${NBOARD === 6 ? '46px' : '50px'})`;
+      boardElem.innerHTML = '';
+      for (let r = 0; r < NBOARD; r++) {
+        for (let c = 0; c < NBOARD; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell', 'empty');
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', onCellClick);
+          cell.addEventListener('mouseenter', onCellEnter);
+          cell.addEventListener('mouseleave', onCellLeave);
+          boardElem.appendChild(cell);
+        }
+      }
+    }
+
+    function sync() {
+      const cells = boardElem.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const r = +cell.dataset.row, c = +cell.dataset.col, v = GAME.getCell(r, c);
+        cell.className = 'cell';
+        cell.textContent = (v === PIECES.empty.string) ? '' : v;
+        if (v === PIECES.empty.string) cell.classList.add('empty');
+      });
+
+      scorePlayer1Elem.innerHTML = `<i class="bi bi-person"></i> ${playerNames.player1}: ${GAME.getPlayer1().score}`;
+      scorePlayer2Elem.innerHTML = `<i class="bi bi-person-fill"></i> ${playerNames.player2}: ${GAME.getPlayer2().score}`;
+
+      switch (GAME.getStatus()) {
+        case STATUS.PLAYER1_MOVE:
+          alertElem.textContent = `${playerNames.player1}'s turn! Choose S or O and click a cell.`;
+          alertElem.classList.remove('loading'); break;
+        case STATUS.PLAYER2_MOVE:
+          alertElem.textContent = `${playerNames.player2}'s turn! Choose S or O and click a cell.`;
+          alertElem.classList.remove('loading'); break;
+        case STATUS.GAMEOVER:
+          let txt = (GAME.getWinner() === 'player1') ? `${playerNames.player1} wins!` :
+            (GAME.getWinner() === 'player2') ? `${playerNames.player2} wins!` : `It's a draw!`;
+          alertElem.textContent = txt;
+          stopTurnTimer();
+          break;
+      }
+
+      // draw SOS lines
+      GAME.getPlayer1().sos.forEach(sos => {
+        sos.forEach(p => {
+          const el = boardElem.querySelector(`.cell[data-row="${p.row}"][data-col="${p.col}"]`);
+          if (el) el.classList.add('player1', 'sos', p.dirClass);
+        });
+      });
+      GAME.getPlayer2().sos.forEach(sos => {
+        sos.forEach(p => {
+          const el = boardElem.querySelector(`.cell[data-row="${p.row}"][data-col="${p.col}"]`);
+          if (el) el.classList.add('player2', 'sos', p.dirClass);
+        });
+      });
+
+      // last move highlight
+      const last = GAME.getLastMove();
+      if (last) {
+        const el = boardElem.querySelector(`.cell[data-row="${last.row}"][data-col="${last.col}"]`);
+        if (el) el.classList.add('last-move');
+      }
+
+      // current player highlight (no animation)
+      scorePlayer1Elem.classList.remove('current-player');
+      scorePlayer2Elem.classList.remove('current-player');
+      if (GAME.getStatus() === STATUS.PLAYER1_MOVE) {
+        scorePlayer1Elem.classList.add('current-player');
+      } else if (GAME.getStatus() === STATUS.PLAYER2_MOVE) {
+        scorePlayer2Elem.classList.add('current-player');
+      }
+    }
+
+    function myTurn() {
+      return (myPlayer === 'player1' && GAME.getStatus() === STATUS.PLAYER1_MOVE) ||
+        (myPlayer === 'player2' && GAME.getStatus() === STATUS.PLAYER2_MOVE);
+    }
+
+    function startTurnTimer() {
+      // Only start timer for my turn and if game not over
+      stopTurnTimer();
+      if (GAME.getStatus() === STATUS.GAMEOVER) return;
+      if (!myTurn()) return;
+
+      let remaining = 15;
+      turnTimerElem.textContent = remaining;
+      turnTimerElem.style.display = 'block';
+
+      countdownInterval = setInterval(() => {
+        remaining--;
+        turnTimerElem.textContent = remaining;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          if (myTurn()) makeRandomMove();
+        }
+      }, 1000);
+
+      timerTimeout = setTimeout(() => {
+        if (myTurn()) makeRandomMove();
+      }, TURN_TIME);
+    }
+
+    function stopTurnTimer() {
+      clearTimeout(timerTimeout);
+      clearInterval(countdownInterval);
+      turnTimerElem.style.display = 'none';
+    }
+
+    function makeRandomMove() {
+      const empty = [];
+      for (let r = 0; r < NBOARD; r++) {
+        for (let c = 0; c < NBOARD; c++) {
+          if (GAME.getCell(r, c) === PIECES.empty.string) empty.push({ r, c });
+        }
+      }
+      if (empty.length === 0) return;
+      const pick = empty[Math.floor(Math.random() * empty.length)];
+      const letter = Math.random() > 0.5 ? 'S' : 'O';
+      // send to server
+      socket.emit('makeMove', { roomCode: currentRoomCode, piece: letter, row: pick.r, col: pick.c });
+      // apply locally
+      const score = GAME.setMove(letter, pick.r, pick.c);
+      sync();
+      stopTurnTimer();
+      if (score > 0 && myTurn()) startTurnTimer(); // Restart if SOS formed and still my turn
+    }
+
+    // ---- Event Handlers: Board ----
+    function parseCell(el) {
+      return { row: +el.dataset.row, col: +el.dataset.col, value: GAME.getCell(+el.dataset.row, +el.dataset.col) };
+    }
+    function onCellEnter(evt) {
+      const cell = evt.currentTarget;
+      const { value } = parseCell(cell);
+      if (value === PIECES.empty.string && myTurn()) cell.textContent = selectedLetter;
+    }
+    function onCellLeave(evt) {
+      const cell = evt.currentTarget;
+      const { value } = parseCell(cell);
+      if (value === PIECES.empty.string) cell.textContent = '';
+    }
+    function onCellClick(evt) {
+      if (!myTurn()) return;
+      const cell = evt.currentTarget;
+      const { row, col, value } = parseCell(cell);
+      if (value !== PIECES.empty.string) return;
+
+      // send to server
+      socket.emit('makeMove', { roomCode: currentRoomCode, piece: selectedLetter, row, col });
+      // apply locally
+      const score = GAME.setMove(selectedLetter, row, col);
+      sync();
+      stopTurnTimer();
+      if (score > 0 && myTurn()) startTurnTimer(); // Restart if SOS formed and still my turn
+    }
+
+    // ---- Letter selection ----
+    selectS.addEventListener('click', () => { selectedLetter = 'S'; selectS.classList.add('selected'); selectO.classList.remove('selected'); });
+    selectO.addEventListener('click', () => { selectedLetter = 'O'; selectO.classList.add('selected'); selectS.classList.remove('selected'); });
+
+    // ---- Reset ----
+    resetBtn.addEventListener('click', () => {
+      socket.emit('resetGame', { roomCode: currentRoomCode });
+      GAME = new SOS(null, STATUS.PLAYER1_MOVE, null, null, NBOARD);
+      sync();
+      if (myPlayer === 'player1') startTurnTimer();
+    });
+
+    // ---- Mode selection buttons ----
+    playFriendBtn.addEventListener('click', () => {
+      modeSelection.style.display = 'none';
+      friendForm.style.display = 'block';
+    });
+    competeOnlineBtn.addEventListener('click', () => {
+      modeSelection.style.display = 'none';
+      competeForm.style.display = 'block';
+    });
+
+    // ---- Friend form handlers ----
+    createRoomBtn.addEventListener('click', () => {
+      const name = friendNameInput.value.trim();
+      if (!name) { alert('Please enter your name.'); return; }
+      socket.emit('createRoom', { name, deviceType });
+      alertElem.textContent = 'Creating room…'; alertElem.classList.add('loading');
+    });
+
+    joinRoomBtn.addEventListener('click', () => {
+      const name = friendNameInput.value.trim();
+      const roomCode = roomCodeInput.value.trim().toUpperCase();
+      if (!name || !roomCode) { alert('Enter your name and a room code.'); return; }
+      socket.emit('joinRoom', { name, roomCode, deviceType });
+      alertElem.textContent = 'Joining room…'; alertElem.classList.add('loading');
+    });
+
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(codeText.textContent).then(() => alert('Room code copied!'));
+    });
+
+    startGameBtn.addEventListener('click', () => {
+      socket.emit('startGame', { roomCode: currentRoomCode });
+    });
+
+    // ---- Compete form handler ----
+    findOpponentBtn.addEventListener('click', () => {
+      const name = competeNameInput.value.trim();
+      if (!name) { alert('Please enter your name.'); return; }
+      socket.emit('findOpponent', { name, deviceType });
+      alertElem.textContent = 'Finding opponent…'; alertElem.classList.add('loading');
+    });
+
+    // ---- Socket listeners ----
+    socket.on('connect', () => console.log('Connected as', socket.id));
+
+    socket.on('roomCreated', ({ roomCode }) => {
+      alertElem.classList.remove('loading');
+      friendForm.style.display = 'none';
+      roomCodeDisplay.style.display = 'block';
+      codeText.textContent = roomCode;
+      currentRoomCode = roomCode;
+      isCreator = true;
+    });
+
+    socket.on('playerJoined', ({ name }) => {
+      if (isCreator) {
+        playerStatus.textContent = `${name} joined!`;
+        startGameBtn.style.display = 'inline-block';
+      }
+    });
+
+    socket.on('joinedRoom', (d) => {
+      alertElem.classList.remove('loading');
+      if (!d.success) { alert(d.message || 'Failed to join room.'); return; }
+      currentRoomCode = d.roomCode;
+      isCreator = false;
+      friendForm.style.display = 'none';
+      waitingScreen.style.display = 'block';
+    });
+
+    socket.on('startGame', ({ roomCode, nboard, playerNames: names, myPlayer: me }) => {
+      // Hide lobby screens
+      roomCodeDisplay.style.display = 'none';
+      waitingScreen.style.display = 'none';
+      competeForm.style.display = 'none';
+      friendForm.style.display = 'none';
+      modeSelection.style.display = 'none';
+
+      // Show game
+      gameContainer.style.display = 'block';
+
+      // Setup game
+      currentRoomCode = roomCode;
+      NBOARD = nboard;
+      playerNames = names;
+      myPlayer = me;
+      GAME = new SOS(null, STATUS.PLAYER1_MOVE, null, null, NBOARD);
+      renderBoard();
+      sync();
+
+      // Start timer if I'm player1
+      if (myTurn()) startTurnTimer();
+    });
+
+    socket.on('move', ({ piece, row, col }) => {
+      // apply opponent move
+      GAME.setMove(piece, row, col);
+      sync();
+
+      // If now it's my turn, start my timer
+      if (myTurn()) startTurnTimer();
+    });
+
+    socket.on('gameReset', () => {
+      GAME = new SOS(null, STATUS.PLAYER1_MOVE, null, null, NBOARD);
+      sync();
+      if (myPlayer === 'player1') startTurnTimer();
+    });
+
+    socket.on('opponentLeft', () => {
+      alert('Your opponent left the game.');
+      alertElem.textContent = 'Opponent left. You can share the code again or go back.';
+      setTimeout(() => {
+        location.reload(true);
+      }, 3000); // 5000 milliseconds = 5 seconds
+
+      stopTurnTimer();
+    });
+
+    let noOpponentAlertShown = false;
+    socket.on('findOpponentResult', ({ success, message }) => {
+      alertElem.classList.remove('loading');
+      if (!success) {
+        if (!noOpponentAlertShown && gameContainer.style.display !== 'block') {
+          setTimeout(() => {
+            document.getElementById('NoOpp').style.display='block';
+            document.getElementById('find-opponent').style.display='none';
+            noOpponentAlertShown = true;
+          }, 10000); // 10-second delay
+        };
+      }
+    });
+
+    // ---- Boot: keep board hidden until game actually starts ----
+  </script>
+
+</body>
+
+</html>
