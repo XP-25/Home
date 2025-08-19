@@ -284,10 +284,10 @@
   <div id="mode-selection">
     <h1>Select Mode</h1>
     <div class="row">
-      <button class="mode-btn" id="play-friend">Play with Friend (Private Room)</button>
-      <button class="mode-btn" id="compete-online">Compete Online </button>
+      <button class="mode-btn" id="play-friend" onclick="document.getElementById('c2server').style.display='block';">Play with Friend (Private Room)</button>
+      <button class="mode-btn" id="compete-online" onclick="document.getElementById('c2server').style.display='block';">Compete Online </button>
     </div>
-	<div id="c2server" style="color: #FFFFFF; display:none;" onclick="document.getElementById('c2server').style.display='block';">
+	<div id="c2server" style="color: #FFFFFF; display:none;">
 		<p>Connecting to server...</p>
 	</div>
   </div>
@@ -799,6 +799,7 @@
   </script>
 </body>
 </html>
+
 
 
 
