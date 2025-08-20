@@ -649,15 +649,17 @@
         }
 
 function calculateAccuracy(typedText) {
-    typedText = typedText.trim();
+    const cleanTyped = typedText.replace(/\s+/g, '');
+    const cleanPassage = passageText.replace(/\s+/g, '');
+
     let correctChars = 0;
-    for (let i = 0; i < passageText.length; i++) {
-        if (i < typedText.length && typedText[i] === passageText[i]) {
-            correctChars++;
-        }
+    for (let i = 0; i < Math.min(cleanTyped.length, cleanPassage.length); i++) {
+        if (cleanTyped[i] === cleanPassage[i]) correctChars++;
     }
-    return Math.round((correctChars / passageText.length) * 100);
+
+    return Math.round((correctChars / cleanPassage.length) * 100);
 }
+
 
 
         function showResults(wpm, accuracy) {
