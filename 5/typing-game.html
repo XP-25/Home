@@ -564,11 +564,14 @@
         inputBox.addEventListener('keydown', (e) => {
             if (isGameOver) return;
             if (e.key === 'Enter') {
-                const typedText = inputBox.value.trim();
-                if (typedText === passageText.trim()) {
-                    endGame();
-                }
-            }
+        const typedText = inputBox.value.trim();
+        const typedWords = typedText.split(/\s+/);
+
+        // only end game if Enter is pressed after the last word
+        if (typedWords.length >= words.length) {
+            endGame();
+        }
+    }
         });
 
         socket.on('startGame', (data) => {
