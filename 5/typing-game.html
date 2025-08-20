@@ -648,13 +648,17 @@
             }
         }
 
-        function calculateAccuracy(typedText) {
-            let correctChars = 0;
-            for (let i = 0; i < Math.min(typedText.length, passageText.length); i++) {
-                if (typedText[i] === passageText[i]) correctChars++;
-            }
-            return Math.round((correctChars / passageText.length) * 100);
+function calculateAccuracy(typedText) {
+    typedText = typedText.trim();
+    let correctChars = 0;
+    for (let i = 0; i < passageText.length; i++) {
+        if (i < typedText.length && typedText[i] === passageText[i]) {
+            correctChars++;
         }
+    }
+    return Math.round((correctChars / passageText.length) * 100);
+}
+
 
         function showResults(wpm, accuracy) {
             document.getElementById('status').textContent = `WPM: ${wpm.toFixed(2)} | Accuracy: ${accuracy}%`;
