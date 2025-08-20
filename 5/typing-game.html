@@ -638,7 +638,7 @@
             inputBox.disabled = true;
             const elapsed = (Date.now() - startTime) / 60000;
             const wpm = (passageText.length / 5) / elapsed;
-            const accuracy = calculateAccuracy(inputBox.value);
+            const accuracy = calculateAccuracy(inputBox.value.trim());
             if (mode !== 'solo') {
                 socket.emit('finish', { room, playerName, wpm, accuracy, typedText: inputBox.value });
             }
