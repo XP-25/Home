@@ -169,11 +169,5 @@ p {
     transform: scale(0.95); /* Scale down on click for feedback */
 }
 
-#ad {
-            display: block;
-            position: fixed;
-            top: 0px;
-/*             background-color: aqua; */
-        }
 
 
