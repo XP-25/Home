@@ -1,0 +1,56 @@
+{
+  "short_name": "RaiseXP",
+  "name": "RaiseXP Games",
+  "description": "Gaming platform for browser-based multiplayer games.Dive into free online games on RaiseXP now! Play top picks with no downloads—discover the best free games for mobile and desktop.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "theme_color": "",
+  "background_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "icons/android-chrome-36x36.png",
+      "type": "image/png",
+      "sizes": "36x36"
+    },
+    {
+      "src": "icons/android-chrome-48x48.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "icons/android-chrome-72x72.png",
+      "type": "image/png",
+      "sizes": "72x72"
+    },
+    {
+      "src": "icons/android-chrome-96x96.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "icons/android-chrome-144x144.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    },
+    {
+      "src": "icons/android-chrome-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons/android-chrome-256x256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "icons/android-chrome-384x384.png",
+      "type": "image/png",
+      "sizes": "384x384"
+    },
+    {
+      "src": "icons/android-chrome-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
