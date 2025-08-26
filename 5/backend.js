@@ -287,7 +287,7 @@ setInterval(() => {
         if (rooms[room].started) {
             for (const id in rooms[room].players) {
                 const player = rooms[room].players[id];
-                if (Date.now() - player.lastActivity > 20000) {
+                if (Date.now() - player.lastActivity > 20000 && !(player.finished)) {
                     io.to(id).emit('inactiveRemoval');
                     delete rooms[room].players[id];
                     io.to(room).emit('playerLeft', id);
@@ -301,6 +301,7 @@ setInterval(() => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
 
 
 
