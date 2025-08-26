@@ -495,7 +495,8 @@
 
         socket.on('inactiveRemoval', () => {
             alert('No activity detected server removed you from the room');
-            resetToModeSelection();
+			setTimeout(() => location.reload(), 5000);
+
         });
 
         socket.on('gameReset', () => {
