@@ -9,21 +9,33 @@ const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: (origin, callback) => {
-            const allowed = ['https://raisexp.games']; // Add local for testing
-            if (allowed.includes(origin) || !origin) callback(null, true);
-            else callback(new Error('Not allowed by CORS'));
+            const allowed = ['https://raisexp.games'];
+            if (allowed.includes(origin) || !origin) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
         },
         methods: ['GET', 'POST'],
         credentials: true
     }
 });
 
-
-
-
-
 const rooms = {};
-let publicRoomCounter = 0; // For creating multiple public rooms
+const publicRooms = new Set(); // Track active public rooms
+
+// Utility functions for validation
+function isValidRoomId(roomId) {
+    return typeof roomId === 'string' && /^[A-Z0-9-]{1,20}$/.test(roomId);
+}
+
+function isValidName(name) {
+    return typeof name === 'string' && name.length >= 1 && name.length <= 20;
+}
+
+function isValidProgress(progress) {
+    return typeof progress === 'number' && progress >= 0 && progress <= 1;
+}
 
 // Parse the paragraphs
 const paras = `
@@ -80,10 +92,10 @@ const paras = `
 "At dawn, the small fishing village awakens to the sounds of gulls and crashing waves. Boats sway gently in the harbor, their wooden hulls creaking as fishermen prepare nets and baskets. Children run along the docks chasing each other, while the smell of salt and seaweed fills the air."
 "The rainforest canopy stretches high above, filtering sunlight into golden shafts that dance across the forest floor. Exotic birds flash red, yellow, and blue as they dart between branches, while monkeys swing effortlessly through the trees. Somewhere in the distance, a jaguar growls softly, unseen yet felt."
 "Beneath the waves, coral reefs teem with life: schools of shimmering fish move like living clouds, sea turtles glide lazily, and tiny creatures peek out from colorful anemones. The water is so clear that every ripple of sand can be seen, swaying gently in the ocean current."
-"In a hidden valley surrounded by snow-capped peaks, a crystal-clear lake reflects the sky like a mirror. Deer drink at the water’s edge, and the air is so pure it carries the scent of pine and wildflowers. The silence here feels ancient, untouched by human hands."
+"In a hidden valley surrounded by snow-capped peaks, a crystal-clear lake reflects the sky like a mirror. Deer drink at the water's edge, and the air is so pure it carries the scent of pine and wildflowers. The silence here feels ancient, untouched by human hands."
 "The city never sleeps: neon lights flicker, cars honk impatiently, and the aroma of street food fills every corner. Crowds weave through narrow alleys lined with vendors selling everything from glowing toys to sizzling skewers. Somewhere, a lone saxophonist plays under a flickering streetlamp."
 "A grand opera house rises at the heart of the capital, its marble columns and golden domes glowing in the setting sun. Inside, velvet curtains shimmer under crystal chandeliers as the orchestra tunes their instruments, preparing for a night of music that will echo for centuries."
-"A desert storm rolls across the horizon, swallowing the sun in a wall of sand. The wind screams against the dunes, erasing footprints within seconds. Travelers pull scarves over their faces, their camels kneeling low to weather the storm’s fury until the sky clears once more."
+"A desert storm rolls across the horizon, swallowing the sun in a wall of sand. The wind screams against the dunes, erasing footprints within seconds. Travelers pull scarves over their faces, their camels kneeling low to weather the storm's fury until the sky clears once more."
 "In the Arctic night, the aurora borealis weaves ribbons of green and purple across the sky. The snow reflects the colors, turning the world into a dream. Huskies pull sleds through the glowing landscape, their breath steaming in the frozen air with every step."
 "An ancient library sits at the edge of a forgotten city. Inside, towering shelves overflow with scrolls, maps, and manuscripts, their edges brittle with age. Dust motes float in shafts of light, and the faint scent of parchment lingers in the cool, still air."
 "The ocean liner glides through calm waters, its decks filled with passengers enjoying the warm breeze. Waiters in white uniforms serve drinks with perfect balance, and somewhere below, the steady hum of the engines reminds everyone of the great journey still ahead."
@@ -97,7 +109,7 @@ const paras = `
 "A great storm lashes the coast, waves smashing against cliffs as rain whips sideways. Fishermen haul their boats ashore, shouting over the roar of the wind. In the distance, the lighthouse blinks steadily, its beam cutting through the chaos."
 "A caravan winds its way across the desert, the air shimmering in the heat. Camels sway with slow, steady steps, and the leader carries an ancient map marked with symbols no one in the group fully understands."
 "Deep in a vast underground cavern, stalactites drip water into glowing pools. The walls glitter faintly with mineral deposits, and strange echoes bounce in ways that make the space feel alive."
-"A medieval castle looms over the valley, its high walls casting deep shadows. Inside, knights train in the courtyard, their armor clashing loudly, while servants rush to prepare for the king’s return from battle."
+"A medieval castle looms over the valley, its high walls casting deep shadows. Inside, knights train in the courtyard, their armor clashing loudly, while servants rush to prepare for the king's return from battle."
 "A great glacier groans as it shifts, sending shards of ice tumbling into a river below. The sound is deep and resonant, echoing through valleys untouched by human footsteps."
 "The city square erupts in celebration as fireworks burst overhead. Musicians play lively tunes, dancers spin in colorful skirts, and children chase each other through clouds of confetti."
 "A volcanic eruption paints the night sky red. Lava flows like molten rivers, lighting the landscape in an otherworldly glow, while ash falls silently over the surrounding villages."
@@ -133,161 +145,291 @@ const paragraphs = paras.match(/"([^"]+)"/g).map(p => p.replace(/"/g, '')) || []
 
 // Define broadcastPlayerList globally
 function broadcastPlayerList(room) {
-    const playerList = Object.values(rooms[room]?.players || {});
-    io.to(room).emit('updatePlayerList', playerList);
+    if (rooms[room]) {
+        const playerList = Object.values(rooms[room].players || {});
+        io.to(room).emit('updatePlayerList', playerList);
+    }
+}
+
+function findAvailablePublicRoom() {
+    // Try to find existing public room with space
+    for (const roomId of publicRooms) {
+        if (rooms[roomId] && !rooms[roomId].started && Object.keys(rooms[roomId].players).length < 100) {
+            return roomId;
+        }
+    }
+    
+    // Create new public room
+    let newRoomId;
+    let counter = 1;
+    do {
+        newRoomId = `public-${counter}`;
+        counter++;
+    } while (publicRooms.has(newRoomId));
+    
+    publicRooms.add(newRoomId);
+    return newRoomId;
 }
 
 io.on('connection', (socket) => {
     console.log(`New client connected: ${socket.id}`);
 
     socket.on('createRoom', (playerName) => {
-        playerName = escapeHtml(playerName);
-        if (playerName.length > 20 || playerName.length < 1) return socket.emit('error', 'Invalid name');
-        const room = uuidv4().slice(0, 6).toUpperCase();
-        rooms[room] = { players: {}, started: false, creator: socket.id, sharedPassage: '' };
-        socket.join(room);
-        rooms[room].players[socket.id] = { id: socket.id, name: playerName, progress: 0, lastActivity: Date.now() };
-        socket.emit('roomCreated', room);
-        broadcastPlayerList(room);
+        try {
+            playerName = escapeHtml(playerName);
+            if (!isValidName(playerName)) {
+                return socket.emit('error', 'Invalid name. Must be 1-20 characters.');
+            }
+            
+            const room = uuidv4().slice(0, 6).toUpperCase();
+            rooms[room] = { 
+                players: {}, 
+                started: false, 
+                creator: socket.id, 
+                sharedPassage: '',
+                createdAt: Date.now()
+            };
+            
+            socket.join(room);
+            rooms[room].players[socket.id] = { 
+                id: socket.id, 
+                name: playerName, 
+                progress: 0, 
+                lastActivity: Date.now() 
+            };
+            
+            socket.emit('roomCreated', room);
+            broadcastPlayerList(room);
+        } catch (error) {
+            console.error('Error creating room:', error);
+            socket.emit('error', 'Failed to create room');
+        }
     });
 
     socket.on('joinRoom', ({ room, playerName }) => {
-        playerName = escapeHtml(playerName);
-        if (playerName.length > 20 || playerName.length < 1) return socket.emit('error', 'Invalid name');
-        if (room === 'public') {
-            // Find or create a public room
-            let publicRoom = null;
-            for (let i = 1; i <= publicRoomCounter + 1; i++) {
-                const pubRoomId = `public-${i}`;
-                if (!rooms[pubRoomId]) {
-                    publicRoomCounter = i;
-                    rooms[pubRoomId] = { players: {}, started: false, creator: null, sharedPassage: '' };
-                    publicRoom = pubRoomId;
-                    break;
-                } else if (!rooms[pubRoomId].started && Object.keys(rooms[pubRoomId].players).length < 100) {
-                    publicRoom = pubRoomId;
-                    break;
+        try {
+            playerName = escapeHtml(playerName);
+            if (!isValidName(playerName)) {
+                return socket.emit('error', 'Invalid name. Must be 1-20 characters.');
+            }
+            
+            if (room === 'public') {
+                room = findAvailablePublicRoom();
+                if (!rooms[room]) {
+                    rooms[room] = { 
+                        players: {}, 
+                        started: false, 
+                        creator: null, 
+                        sharedPassage: '',
+                        createdAt: Date.now()
+                    };
                 }
             }
-            if (!publicRoom) {
-                publicRoomCounter++;
-                publicRoom = `public-${publicRoomCounter}`;
-                rooms[publicRoom] = { players: {}, started: false, creator: null, sharedPassage: '' };
+            
+            if (!rooms[room]) {
+                return socket.emit('error', 'Room does not exist');
             }
-            room = publicRoom;
-        }
-        if (rooms[room] && Object.keys(rooms[room].players).length < 100) {
+            
+            if (Object.keys(rooms[room].players).length >= 100) {
+                return socket.emit('error', 'Room is full (max 100 players)');
+            }
+            
             const nameExists = Object.values(rooms[room].players).some(p => p.name === playerName);
             if (nameExists) {
-                socket.emit('nameTaken', 'Name is already taken in this room. Choose another.');
-                return;
+                return socket.emit('nameTaken', 'Name is already taken in this room. Choose another.');
             }
+            
             socket.join(room);
-            rooms[room].players[socket.id] = { id: socket.id, name: playerName, progress: 0, lastActivity: Date.now() };
-            socket.emit('joinedRoom', room); // Emit the specific room back
+            rooms[room].players[socket.id] = { 
+                id: socket.id, 
+                name: playerName, 
+                progress: 0, 
+                lastActivity: Date.now() 
+            };
+            
+            socket.emit('joinedRoom', room);
             broadcastPlayerList(room);
-        } else {
-            socket.emit('error', 'Room full or does not exist');
+        } catch (error) {
+            console.error('Error joining room:', error);
+            socket.emit('error', 'Failed to join room');
         }
     });
 
     socket.on('gameStart', (room) => {
-        if (rooms[room] && !rooms[room].started && socket.id === rooms[room].creator) {
+        try {
+            if (!isValidRoomId(room) || !rooms[room]) {
+                return socket.emit('error', 'Invalid room');
+            }
+            
+            if (rooms[room].started) {
+                return socket.emit('error', 'Game already started');
+            }
+            
+            if (socket.id !== rooms[room].creator) {
+                return socket.emit('error', 'Only room creator can start the game');
+            }
+            
+            const playerCount = Object.keys(rooms[room].players).length;
+            if (playerCount < 2) {
+                return socket.emit('error', 'Need at least 2 players to start');
+            }
+            
             const sharedPassage = paragraphs[Math.floor(Math.random() * paragraphs.length)];
             rooms[room].started = true;
             rooms[room].sharedPassage = sharedPassage;
             const startTime = Date.now();
+            
             io.to(room).emit('startGame', { passage: sharedPassage, startTime });
             broadcastPlayerList(room);
+        } catch (error) {
+            console.error('Error starting game:', error);
+            socket.emit('error', 'Failed to start game');
         }
     });
 
     socket.on('checkStartPublicGame', (room) => {
-        if (room.startsWith('public-') && rooms[room] && !rooms[room].started) {
+        try {
+            if (!room.startsWith('public-') || !rooms[room] || rooms[room].started) {
+                return;
+            }
+            
             const playerCount = Object.keys(rooms[room].players).length;
             if (playerCount >= 2 && playerCount <= 100) {
                 const sharedPassage = paragraphs[Math.floor(Math.random() * paragraphs.length)];
                 rooms[room].started = true;
                 rooms[room].sharedPassage = sharedPassage;
                 const startTime = Date.now();
+                
                 io.to(room).emit('startGame', { passage: sharedPassage, startTime });
                 broadcastPlayerList(room);
-            } else {
-                io.to(room).emit('error', playerCount < 2 ? 'Need at least 2 players to start.' : 'Too many players.');
             }
+        } catch (error) {
+            console.error('Error checking public game start:', error);
         }
     });
 
     socket.on('progress', ({ room, progress }) => {
-        if (rooms[room] && rooms[room].players[socket.id]) {
-            rooms[room].players[socket.id].progress = Math.min(progress, 1); // Cap at 1
+        try {
+            if (!isValidRoomId(room) || !rooms[room] || !rooms[room].players[socket.id]) {
+                return;
+            }
+            
+            if (!isValidProgress(progress)) {
+                return socket.emit('error', 'Invalid progress value');
+            }
+            
+            rooms[room].players[socket.id].progress = Math.min(progress, 1);
             rooms[room].players[socket.id].lastActivity = Date.now();
-            io.to(room).emit('progressUpdate', { id: socket.id, progress: rooms[room].players[socket.id].progress });
+            
+            io.to(room).emit('progressUpdate', { 
+                id: socket.id, 
+                progress: rooms[room].players[socket.id].progress 
+            });
+            
             broadcastPlayerList(room);
+        } catch (error) {
+            console.error('Error updating progress:', error);
         }
     });
 
     socket.on('finish', ({ room, playerName, wpm, accuracy, typedText }) => {
-        if (rooms[room] && rooms[room].players[socket.id]) {
+        try {
+            if (!isValidRoomId(room) || !rooms[room] || !rooms[room].players[socket.id]) {
+                return;
+            }
+            
             const passage = rooms[room].sharedPassage;
-            if (!passage) return socket.emit('error', 'No passage available');
+            if (!passage) {
+                return socket.emit('error', 'No passage available');
+            }
+            
+            // Server-side validation
             let correctChars = 0;
             for (let i = 0; i < Math.min(typedText.length, passage.length); i++) {
                 if (typedText[i] === passage[i]) correctChars++;
             }
             const serverAccuracy = Math.round((correctChars / passage.length) * 100);
-            if (serverAccuracy !== accuracy) return socket.emit('error', 'Invalid finish data');
+            
+            if (Math.abs(serverAccuracy - accuracy) > 5) { // Allow small margin of error
+                return socket.emit('error', 'Accuracy validation failed');
+            }
+            
             rooms[room].players[socket.id].wpm = wpm;
             rooms[room].players[socket.id].accuracy = accuracy;
             rooms[room].players[socket.id].lastActivity = Date.now();
+            
             io.to(room).emit('playerFinished', { id: socket.id, wpm, accuracy });
             broadcastPlayerList(room);
+        } catch (error) {
+            console.error('Error handling finish:', error);
+            socket.emit('error', 'Failed to process finish');
         }
     });
 
-    socket.on('updatePlayerCount', ({ room, count }) => {
-        io.to(room).emit('playerCountUpdate', count);
-    });
-
     socket.on('gameReset', (room) => {
-        if (rooms[room] && socket.id === rooms[room].creator) {
+        try {
+            if (!isValidRoomId(room) || !rooms[room]) {
+                return;
+            }
+            
+            if (socket.id !== rooms[room].creator) {
+                return socket.emit('error', 'Only room creator can reset the game');
+            }
+            
             rooms[room].started = false;
             rooms[room].sharedPassage = '';
+            
             for (const id in rooms[room].players) {
                 rooms[room].players[id].progress = 0;
                 rooms[room].players[id].wpm = undefined;
                 rooms[room].players[id].accuracy = undefined;
             }
+            
             io.to(room).emit('gameReset');
             broadcastPlayerList(room);
+        } catch (error) {
+            console.error('Error resetting game:', error);
+            socket.emit('error', 'Failed to reset game');
         }
     });
 
     socket.on('disconnect', () => {
-        for (const room in rooms) {
-            if (rooms[room].players[socket.id]) {
-                delete rooms[room].players[socket.id];
-                if (rooms[room].creator === socket.id && Object.keys(rooms[room].players).length > 0) {
-                    rooms[room].creator = Object.keys(rooms[room].players)[0];
-                }
-                io.to(room).emit('playerLeft', socket.id);
-                broadcastPlayerList(room);
-                if (Object.keys(rooms[room].players).length === 0) {
-                    delete rooms[room];
+        try {
+            for (const room in rooms) {
+                if (rooms[room].players[socket.id]) {
+                    delete rooms[room].players[socket.id];
+                    
+                    if (rooms[room].creator === socket.id && Object.keys(rooms[room].players).length > 0) {
+                        rooms[room].creator = Object.keys(rooms[room].players)[0];
+                    }
+                    
+                    io.to(room).emit('playerLeft', socket.id);
+                    broadcastPlayerList(room);
+                    
+                    if (Object.keys(rooms[room].players).length === 0) {
+                        if (room.startsWith('public-')) {
+                            publicRooms.delete(room);
+                        }
+                        delete rooms[room];
+                    }
                 }
             }
+            
+            console.log(`Client disconnected: ${socket.id}`);
+        } catch (error) {
+            console.error('Error handling disconnect:', error);
         }
-        console.log(`Client disconnected: ${socket.id}`);
     });
 });
 
-// Inactivity checker (unchanged as per request)
+// Inactivity checker
 setInterval(() => {
     for (const room in rooms) {
         if (rooms[room].started) {
             for (const id in rooms[room].players) {
                 const player = rooms[room].players[id];
-                if (Date.now() - player.lastActivity > 20000 && !(player.finished)) {
+                if (Date.now() - player.lastActivity > 20000 && !player.wpm) {
+                    // Player is inactive and hasn't finished
                     io.to(id).emit('inactiveRemoval');
                     delete rooms[room].players[id];
                     io.to(room).emit('playerLeft', id);
@@ -299,10 +441,19 @@ setInterval(() => {
     }
 }, 30000);
 
+// Room cleanup (remove empty rooms after 5 minutes)
+setInterval(() => {
+    const now = Date.now();
+    for (const room in rooms) {
+        if (Object.keys(rooms[room].players).length === 0 && now - rooms[room].createdAt > 300000) {
+            if (room.startsWith('public-')) {
+                publicRooms.delete(room);
+            }
+            delete rooms[room];
+            console.log(`Cleaned up empty room: ${room}`);
+        }
+    }
+}, 60000);
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
-
-
