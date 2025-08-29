@@ -94,10 +94,12 @@ button:active {
 
 #ad {
 
-	width:468px;
+	width:100vw;
 	height:60px;
 	display:block;
 	position: fixed;
+	margin: 0 auto;
+    text-align: center;
 	bottom: 0px;
 }
 
@@ -107,6 +109,7 @@ button:active {
 /*             background-color: aqua; */
             }
 	}
+
 
 
 
