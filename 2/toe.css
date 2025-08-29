@@ -98,7 +98,7 @@ button:active {
 	height:60px;
 	display:block;
 	position: fixed;
-	margin: 2 auto;
+	margin: 2px auto;
     text-align: center;
 	bottom: 0px;
 }
@@ -109,6 +109,7 @@ button:active {
 /*             background-color: aqua; */
             }
 	} */
+
 
 
 
