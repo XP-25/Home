@@ -94,21 +94,22 @@ button:active {
 
 #ad {
 
-	width:80vw;
+	width:70vw;
 	height:60px;
 	display:block;
 	position: fixed;
 	margin: 0 auto;
     text-align: center;
-	bottom: 0px;
+	bottom: 2px;
 }
 
-	@media (max-width: 768px){
+/* 	@media (max-width: 768px){
         	#ad {
             display: none;
 /*             background-color: aqua; */
             }
-	}
+	} */
+
 
 
 
