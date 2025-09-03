@@ -94,8 +94,8 @@ button:active {
 
 #ad {
 
-	width:70vw;
-	height:60px;
+/* 	width:70vw;
+	height:60px; */
 	display:block;
 	position: fixed;
 	margin: 2px auto;
@@ -109,6 +109,7 @@ button:active {
 /*             background-color: aqua; */
             }
 	} */
+
 
 
 
