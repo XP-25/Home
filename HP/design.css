@@ -41,12 +41,13 @@
 }
 
 #contact {
-
-    margin: 2px;
-    text-decoration: none;
-    font-size: 5px;
-    
+    margin: 2px;    
 }
+
+#contact a {
+    text-decoration: none;
+}
+
 
 
 
