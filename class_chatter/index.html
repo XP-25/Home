@@ -9,7 +9,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
     <style>
-        /* Your CSS remains the same */
         :root {
             --wood-dark: #6b5b4b;
             --wood-light: #8c6f5a;
@@ -528,7 +527,7 @@
                 {
                     name: "21 Savage",
                     verse: "I was born with a knife in my hand!",
-                    color: "#a46422",
+                    color: "##a46422",
                     image: "savage.png"
                 },
                 {
@@ -603,8 +602,9 @@
             function connectWebSocket() {
                 console.log("Connecting to game server...");
                 
-                // Use local server instead of remote one
-                const wsUrl = "wss://class-chatter.onrender.com";
+                // Use dynamic URL based on current host
+                const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+                const wsUrl = `${protocol}//${window.location.host}`;
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
@@ -663,7 +663,7 @@
                         break;
 
                     case "game_start":
-                        initGame(message.students, message.teacher, message.monitor);
+                        initGame(message.students, message.teacher, message.firstMonitor);
                         break;
 
                     case "chat_message":
