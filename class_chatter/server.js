@@ -232,7 +232,7 @@ wss.on("connection", ws => {
 
       // Check if game can start
       let room = rooms[roomId];
-      if (room.players.length >= 2 && room.players.every(p => p.ready) && !room.gameState.started) {
+      if (room.players.every(p => p.ready) && !room.gameState.started) {
         startGame(roomId);
       }
     }
