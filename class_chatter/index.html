@@ -603,7 +603,7 @@
                 console.log("Connecting to game server...");
                 
                 // In production, replace with your server URL
-                const wsUrl = "ws://localhost:8080";
+                const wsUrl = "wss://class-chatter.onrender.com";
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
