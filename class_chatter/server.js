@@ -1,39 +1,23 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const WebSocket = require("ws");
+const express = require('express');
+const path = require('path');
+const WebSocket = require('ws');
+const http = require('http');
 
-const PORT = 8080;
-
-// Static file server
-const server = http.createServer((req, res) => {
-  let filePath = req.url === "/" ? "index.html" : req.url;
-  filePath = path.join(__dirname, filePath);
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404);
-      res.end("Not found");
-    } else {
-      let ext = path.extname(filePath).toLowerCase();
-      let type = "text/html";
-      if (ext === ".js") type = "application/javascript";
-      if (ext === ".css") type = "text/css";
-      if (ext === ".png") type = "image/png";
-      if (ext === ".jpg" || ext === ".jpeg") type = "image/jpeg";
-      res.writeHead(200, { "Content-Type": type });
-      res.end(data);
-    }
-  });
-});
-
-// WebSocket server
+const app = express();
+const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-let rooms = {};
-let roomCounter = 1;
-let playerCounter = 0;
+const PORT = process.env.PORT || 8080;
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Handle all routes by serving index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Artist data
 const ARTISTS = [
   {
     name: "Kendrick Lamar",
@@ -133,167 +117,211 @@ const ARTISTS = [
   }
 ];
 
+let rooms = {};
+let roomCounter = 1;
+let playerCounter = 0;
+
 // Broadcast helper
-function broadcast(roomId, msg) {
+function broadcastToRoom(roomId, message, excludeWs = null) {
   if (!rooms[roomId]) return;
-  
-  rooms[roomId].players.forEach(p => {
-    if (p.ws.readyState === WebSocket.OPEN) {
-      p.ws.send(JSON.stringify(msg));
+
+  rooms[roomId].players.forEach(player => {
+    if (player.ws !== excludeWs && player.ws.readyState === WebSocket.OPEN) {
+      player.ws.send(JSON.stringify(message));
     }
   });
 }
 
 // Start game
 function startGame(roomId) {
-  let room = rooms[roomId];
-  room.gameState.started = true;
-  
-  // Assign artist data to each player
-  room.players.forEach((player, index) => {
-    player.artist = ARTISTS[index];
-    player.isExpelled = false;
-    player.isStanding = false;
-    player.isTalking = false;
+  const room = rooms[roomId];
+  console.log(`Starting game in room ${roomId} with ${room.players.length} players`);
+
+  room.gameState.students = room.players.map((player, index) => {
+    const artist = ARTISTS[index];
+    return {
+      id: player.id,
+      name: artist.name,
+      credits: player.credits,
+      isStanding: false,
+      isExpelled: false,
+      benchmateId: index % 2 === 0 ? index + 1 : index - 1,
+      color: artist.color,
+      verse: artist.verse,
+      image: artist.image
+    };
   });
-  
-  room.gameState.monitor = room.players[Math.floor(Math.random() * room.players.length)].id;
-  
-  broadcast(roomId, { 
-    type: "game_start", 
-    students: room.players, 
-    teacher: { name: "MC Stan" }, 
-    firstMonitor: room.gameState.monitor 
+
+  room.gameState.monitor = Math.floor(Math.random() * room.players.length);
+  room.gameState.gameStarted = true;
+
+  broadcastToRoom(roomId, {
+    type: 'game_start',
+    students: room.gameState.students,
+    teacher: { name: "MC Stan" },
+    firstMonitor: room.gameState.monitor
   });
 }
 
-wss.on("connection", ws => {
-  let roomId;
-  let playerId;
+wss.on('connection', function connection(ws) {
+  console.log('New player connected');
 
-  // Assign room
-  let room = Object.values(rooms).find(r => r.players.length < 16);
-  if (!room) {
-    roomId = "room" + roomCounter++;
-    rooms[roomId] = { players: [], gameState: { started: false, monitor: null } };
-  } else {
-    roomId = Object.keys(rooms).find(k => rooms[k] === room);
+  let roomId = Object.keys(rooms).find(id => rooms[id].players.length < 16);
+  if (!roomId) {
+    roomId = 'room' + roomCounter++;
+    rooms[roomId] = {
+      players: [],
+      gameState: {
+        students: [],
+        teacher: { name: "MC Stan" },
+        monitor: null,
+        gameStarted: false
+      }
+    };
   }
 
-  playerId = playerCounter++;
-  let player = {
+  const playerId = playerCounter++;
+  const player = {
     id: playerId,
+    ws: ws,
     name: "Waiting...",
+    ready: false,
     credits: 15,
-    ws,
-    ready: false
+    roomId: roomId
   };
+
   rooms[roomId].players.push(player);
 
-  // Send player their ID and room info
-  ws.send(JSON.stringify({ 
-    type: "player_joined", 
+  // Send initial info to new player
+  ws.send(JSON.stringify({
+    type: 'player_joined',
     playerId: playerId,
     roomId: roomId,
-    players: rooms[roomId].players
+    players: rooms[roomId].players.map(p => ({
+      id: p.id,
+      name: p.name,
+      credits: p.credits,
+      ready: p.ready
+    }))
   }));
 
-  // Inform everyone about the new player
-  broadcast(roomId, { 
-    type: "player_joined", 
-    player: player,
-    players: rooms[roomId].players
-  });
-
-  ws.on("message", msg => {
-    let data;
+  ws.on('message', function incoming(data) {
     try {
-      data = JSON.parse(msg);
-    } catch (e) {
-      console.error("Error parsing message:", e);
-      return;
-    }
+      const message = JSON.parse(data);
 
-    if (data.type === "set_name") {
-      player.name = data.name;
-      player.ready = true;
-      
-      // Update the player's own view
-      ws.send(JSON.stringify({ 
-        type: "update_state", 
-        player: player 
-      }));
-      
-      // Inform others
-      broadcast(roomId, { 
-        type: "update_state", 
-        player: player 
-      });
+      switch (message.type) {
+        case 'set_name':
+          player.name = message.name;
+          player.ready = true;
 
-      // Check if game can start
-      let room = rooms[roomId];
-      if (room.players.every(p => p.ready) && !room.gameState.started) {
-        startGame(roomId);
+          // Send confirmation to the player who set their name
+          ws.send(JSON.stringify({
+            type: 'update_state',
+            player: player,
+            players: rooms[roomId].players.map(p => ({
+              id: p.id,
+              name: p.name,
+              credits: p.credits,
+              ready: p.ready
+            }))
+          }));
+
+          // Notify other players
+          broadcastToRoom(roomId, {
+            type: 'player_joined',
+            player: player,
+            players: rooms[roomId].players.map(p => ({
+              id: p.id,
+              name: p.name,
+              credits: p.credits,
+              ready: p.ready
+            }))
+          }, ws);
+
+          // Start game only when exactly 16 players and all ready
+          if (rooms[roomId].players.length === 16 && rooms[roomId].players.every(p => p.ready)) {
+            startGame(roomId);
+          }
+          break;
+
+        case 'chat_message':
+          broadcastToRoom(roomId, {
+            type: 'chat_message',
+            sender: player.name,
+            text: message.text,
+            studentId: playerId
+          });
+
+          broadcastToRoom(roomId, {
+            type: 'student_talking',
+            studentId: playerId
+          });
+          break;
+
+        case 'student_caught':
+          if (rooms[roomId].gameState.monitor === playerId && rooms[roomId].gameState.gameStarted) {
+            const targetStudent = rooms[roomId].gameState.students[message.studentId];
+
+            if (targetStudent && !targetStudent.isExpelled) {
+              targetStudent.credits--;
+              rooms[roomId].players[message.studentId].credits = targetStudent.credits;
+
+              broadcastToRoom(roomId, {
+                type: 'student_caught',
+                studentId: message.studentId,
+                credits: targetStudent.credits
+              });
+
+              if (targetStudent.credits <= 0) {
+                targetStudent.isExpelled = true;
+                broadcastToRoom(roomId, {
+                  type: 'student_expelled',
+                  studentId: message.studentId
+                });
+              } else {
+                rooms[roomId].gameState.monitor = message.studentId;
+                broadcastToRoom(roomId, {
+                  type: 'new_monitor',
+                  studentId: message.studentId
+                });
+              }
+            }
+          }
+          break;
       }
-    }
-
-    if (data.type === "chat_message") {
-      broadcast(roomId, { 
-        type: "chat_message", 
-        sender: player.name, 
-        text: data.text,
-        studentId: playerId 
-      });
-      
-      // Show talking animation
-      broadcast(roomId, { 
-        type: "student_talking", 
-        studentId: playerId 
-      });
-    }
-
-    if (data.type === "student_caught") {
-      if (rooms[roomId].gameState.monitor !== playerId) return;
-      
-      let target = rooms[roomId].players.find(p => p.id === data.studentId);
-      if (!target) return;
-      
-      target.credits--;
-      
-      if (target.credits <= 0) {
-        target.isExpelled = true;
-        broadcast(roomId, { 
-          type: "student_expelled", 
-          studentId: target.id 
-        });
-      } else {
-        rooms[roomId].gameState.monitor = target.id;
-        broadcast(roomId, { 
-          type: "student_caught", 
-          studentId: target.id,
-          credits: target.credits
-        });
-        
-        broadcast(roomId, { 
-          type: "new_monitor", 
-          studentId: target.id 
-        });
-      }
+    } catch (error) {
+      console.error('Error processing message:', error);
     }
   });
 
-  ws.on("close", () => {
-    if (rooms[roomId]) {
-      rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== playerId);
-      broadcast(roomId, { 
-        type: "player_left", 
-        playerId: playerId,
-        players: rooms[roomId].players
-      });
+  ws.on('close', function close() {
+    console.log('Player disconnected');
+
+    // Remove player from room
+    rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== playerId);
+
+    // Reset monitor if needed
+    if (rooms[roomId].gameState.monitor === playerId) {
+      rooms[roomId].gameState.monitor = null;
     }
+
+    broadcastToRoom(roomId, {
+      type: 'player_left',
+      playerId: playerId,
+      players: rooms[roomId].players.map(p => ({
+        id: p.id,
+        name: p.name,
+        credits: p.credits,
+        ready: p.ready
+      }))
+    });
+  });
+
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err);
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
