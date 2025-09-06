@@ -69,7 +69,7 @@ const ARTISTS = [
     name: "Chaar Diwari",
     verse: "Kya behenchod game hai yeh?",
     color: "#c2a284",
-    image: "chaar.png"
+    image: "ChaarDiwari.png"
   },
   {
     name: "Playboi Carti",
