@@ -422,10 +422,6 @@
                         id="teacher-container"
                         class="bg-[var(--floor-tile2)] p-2 rounded-md pixel-border-inner"
                     >
-                        <div
-                            id="teacher"
-                            class="relative transition-all duration-1000 ease-in-out"
-                        ></div>
                     </div>
                 </div>
                 <!-- Benches -->
@@ -478,7 +474,7 @@
             // --- DOM ELEMENTS ---
             const gameStatus = document.getElementById("game-status");
             const benchesContainer = document.getElementById("benches");
-            const teacherEl = document.getElementById("teacher");
+            const teacherContainer = document.getElementById("teacher-container");
             const startModal = document.getElementById("start-modal");
             const joinGameBtn = document.getElementById("join-game-btn");
             const playerNameInput = document.getElementById("player-name-input");
@@ -607,7 +603,7 @@
                 console.log("Connecting to game server...");
                 
                 // In production, replace with your server URL
-                const wsUrl = "wss://class-chatter.onrender.com";
+                const wsUrl = "ws://localhost:8080";
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
@@ -640,16 +636,25 @@
             }
 
             function handleWebSocketMessage(message) {
+                console.log("Received message:", message);
+                
                 switch (message.type) {
                     case "player_joined":
                         updatePlayerCount(message.players.length);
-                        if (message.playerId === playerId) {
+                        if (message.playerId === playerId && message.playerName) {
                             playerNameEl.textContent = message.playerName;
                         }
                         if (message.roomId) {
                             currentRoom = message.roomId;
                             roomInfoEl.textContent = `Room: ${currentRoom}`;
                         }
+                        break;
+
+                    case "name_set":
+                        if (message.playerId === playerId) {
+                            playerNameEl.textContent = message.playerName;
+                        }
+                        updatePlayerCount(message.players.length);
                         break;
 
                     case "game_start":
@@ -734,10 +739,12 @@
                 });
 
                 // Setup teacher
-                teacherEl.innerHTML = `<div class="teacher-face" style="background-color: #333; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">MC</div>`;
-                teacherEl.parentElement.style.top = "0px";
-                teacherEl.parentElement.style.left = "50%";
-                teacherEl.parentElement.style.transform = "translateX(-50%)";
+                teacherContainer.innerHTML = `
+                    <div id="teacher" class="relative transition-all duration-1000 ease-in-out">
+                        <div class="teacher-face" style="background-color: #333; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">MC</div>
+                    </div>
+                `;
+                const teacherEl = document.getElementById("teacher");
                 teacherEl.classList.add("teacher-nod");
 
                 // Create benches and students
@@ -758,7 +765,7 @@
                             "student relative flex flex-col items-center cursor-pointer";
                         studentEl.innerHTML = `
                             <div class="speech-bubble">...</div>
-                            <div class="student-face" style="background-image: url('${artist.image}')"></div>
+                            <div class="student-face" style="background-color: ${artist.color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">${student.name.charAt(0)}</div>
                             <div class="text-xs text-center">${student.name.split(" ")[0]}</div>
                             <div class="text-xs text-yellow-300 mt-1.5">C: ${student.credits}</div>
                         `;
