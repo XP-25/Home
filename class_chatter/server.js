@@ -1,12 +1,33 @@
-
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+const http = require('http');
+const path = require('path');
+const fs = require('fs');
+
+// Create HTTP server to serve the HTML file
+const server = http.createServer((req, res) => {
+  if (req.url === '/') {
+    fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading index.html');
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(data);
+    });
+  } else {
+    res.writeHead(404);
+    res.end('Not found');
+  }
+});
+
+// Create WebSocket server
+const wss = new WebSocket.Server({ server });
 
 // Store multiple rooms
 let rooms = {};
 let roomCounter = 1;
 
-// Artist data (same as client-side)
+// Artist data
 const ARTISTS = [
   {
     name: "Kendrick Lamar",
@@ -117,8 +138,12 @@ rooms[roomCounter] = {
   }
 };
 
-wss.on('connection', function connection(ws) {
+wss.on('connection', function connection(ws, req) {
   console.log('New player connected');
+  
+  // Get client IP for logging
+  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  console.log('Client connected from:', clientIP);
   
   // Find or create a room for the player
   let roomId = findAvailableRoom();
@@ -186,7 +211,7 @@ wss.on('connection', function connection(ws) {
           });
           
           // Start game if all players are ready in this room
-          if (room.players.length === 16 && room.players.every(p => p.ready)) {
+          if (room.players.length === 4 && room.players.every(p => p.ready)) {
             startGame(roomId);
           }
           break;
@@ -262,12 +287,16 @@ wss.on('connection', function connection(ws) {
       }))
     });
   });
+  
+  ws.on('error', function error(err) {
+    console.error('WebSocket error:', err);
+  });
 });
 
 function findAvailableRoom() {
   // Find a room with available space
   for (const roomId in rooms) {
-    if (rooms[roomId].players.length < 16) {
+    if (rooms[roomId].players.length < 4) {
       return roomId;
     }
   }
@@ -303,7 +332,7 @@ function startGame(roomId) {
   const room = rooms[roomId];
   
   // Initialize game state
-  room.gameState.students = ARTISTS.map((artist, index) => ({
+  room.gameState.students = ARTISTS.slice(0, 4).map((artist, index) => ({
     id: index,
     name: artist.name,
     credits: room.players[index].credits,
@@ -328,4 +357,9 @@ function startGame(roomId) {
   });
 }
 
-console.log('WebSocket server running on port 8080');
+// Start the server
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`WebSocket server available at ws://localhost:${PORT}`);
+});
