@@ -603,8 +603,8 @@
                 console.log("Connecting to game server...");
                 
                 // Use dynamic URL based on current host
-                const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-                const wsUrl = `${protocol}//${window.location.host}`;
+                
+                const wsUrl = "https://class-chatter.onrender.com";
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
