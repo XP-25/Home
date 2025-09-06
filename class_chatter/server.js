@@ -35,22 +35,102 @@ let roomCounter = 1;
 let playerCounter = 0;
 
 const ARTISTS = [
-  { name: "Kendrick Lamar", verse: "I'm a sinner...", color: "#643200", image: "kendrick.png" },
-  { name: "Drake", verse: "Started from the bottom...", color: "#002244", image: "drake.png" },
-  { name: "J. Cole", verse: "No role models...", color: "#2f4f2f", image: "cole.png" },
-  { name: "Travis Scott", verse: "It's lit!", color: "#ff6600", image: "travis.png" },
-  { name: "Kanye West", verse: "Can't tell me nothing...", color: "#990000", image: "kanye.png" },
-  { name: "Future", verse: "Mask on...", color: "#003366", image: "future.png" },
-  { name: "Lil Wayne", verse: "A milli...", color: "#006600", image: "wayne.png" },
-  { name: "Eminem", verse: "Lose yourself...", color: "#000000", image: "eminem.png" },
-  { name: "50 Cent", verse: "Go shawty...", color: "#333333", image: "50cent.png" },
-  { name: "Nas", verse: "The world is yours...", color: "#663300", image: "nas.png" },
-  { name: "Jay-Z", verse: "Empire state...", color: "#000099", image: "jayz.png" },
-  { name: "Snoop Dogg", verse: "Drop it like it's hot...", color: "#3366cc", image: "snoop.png" },
-  { name: "Ice Cube", verse: "Today was a good day...", color: "#444444", image: "icecube.png" },
-  { name: "Nicki Minaj", verse: "Super bass...", color: "#ff00ff", image: "nicki.png" },
-  { name: "Cardi B", verse: "I like it like that...", color: "#cc0066", image: "cardi.png" },
-  { name: "A$AP Rocky", verse: "Praise the Lord...", color: "#6600cc", image: "asap.png" }
+  {
+    name: "Kendrick Lamar",
+    verse: "I'm a sinner who's probably gonna sin again, Lord forgive me!",
+    color: "#643200",
+    image: "kendrick.png"
+  },
+  {
+    name: "Drake",
+    verse: "Started from the bottom now we're here!",
+    color: "#c49159",
+    image: "drake.png"
+  },
+  {
+    name: "Travis Scott",
+    verse: "It's lit! Straight up!",
+    color: "#8c5829",
+    image: "travis.png"
+  },
+  {
+    name: "Pusha T",
+    verse: "If you know you know, it's not a game!",
+    color: "#5a3a1a",
+    image: "pusha.png"
+  },
+  {
+    name: "21 Savage",
+    verse: "I was born with a knife in my hand!",
+    color: "#a46422",
+    image: "savage.png"
+  },
+  {
+    name: "Ritviz",
+    verse: "Udd gaye, hum udd gaye, aasman ke parde!",
+    color: "#f4b41c",
+    image: "ritviz.png"
+  },
+  {
+    name: "Chaar Diwari",
+    verse: "Kya behenchod game hai yeh?",
+    color: "#c2a284",
+    image: "chaar.png"
+  },
+  {
+    name: "Playboi Carti",
+    verse: "What? What? What? Slatt!",
+    color: "#d2b48c",
+    image: "carti.png"
+  },
+  {
+    name: "Future",
+    verse: "Mask off, Molly, Percocet!",
+    color: "#6d4c3d",
+    image: "future.png"
+  },
+  {
+    name: "M.I.A.",
+    verse: "Live fast, die young, bad girls do it well!",
+    color: "#a46422",
+    image: "mia.png"
+  },
+  {
+    name: "HanumanKind",
+    verse: "Bajrang Bali ki jai!",
+    color: "#e0ac69",
+    image: "hanuman.png"
+  },
+  {
+    name: "Kanye West",
+    verse: "I am a god, even though I'm a man of God!",
+    color: "#4a2a0a",
+    image: "kanye.png"
+  },
+  {
+    name: "Dr. Dre",
+    verse: "Been there, done that, but I'm back for more!",
+    color: "#8c6f5a",
+    image: "dre.png"
+  },
+  {
+    name: "Metro Boomin",
+    verse: "If young Metro don't trust you, I'm gon' shoot you!",
+    color: "#46250e",
+    image: "metro.png"
+  },
+  {
+    name: "SZA",
+    verse: "I'm sorry I'm not more attractive, I'm sorry I'm not more ladylike!",
+    color: "#a46422",
+    image: "sza.png"
+  },
+  {
+    name: "Lana Del Rey",
+    verse: "My old man is a bad man, but I love him so!",
+    color: "#f8d8be",
+    image: "lana.png"
+  }
 ];
 
 // Broadcast helper
