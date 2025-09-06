@@ -39,22 +39,22 @@ const wss = new WebSocket.Server({ server });
 
 // Artist data (must have at least 16 entries)
 const ARTISTS = [
-  { name: "Kendrick Lamar", verse: "I'm a sinner who's probably gonna sin again, Lord forgive me!", color: "#643200", image: "kendrick.png" },
-  { name: "Drake", verse: "Started from the bottom now we're here!", color: "#c49159", image: "drake.png" },
-  { name: "Travis Scott", verse: "It's lit! Straight up!", color: "#8c5829", image: "travis.png" },
-  { name: "Pusha T", verse: "If you know you know, it's not a game!", color: "#5a3a1a", image: "pusha.png" },
-  { name: "21 Savage", verse: "I was born with a knife in my hand!", color: "#a46422", image: "savage.png" },
-  { name: "Ritviz", verse: "Udd gaye, hum udd gaye, aasman ke parde!", color: "#f4b41c", image: "ritviz.png" },
-  { name: "Chaar Diwari", verse: "Kya behenchod game hai yeh?", color: "#c2a284", image: "chaar.png" },
-  { name: "Playboi Carti", verse: "What? What? What? Slatt!", color: "#d2b48c", image: "carti.png" },
-  { name: "Future", verse: "Mask off, Molly, Percocet!", color: "#6d4c3d", image: "future.png" },
-  { name: "M.I.A.", verse: "Live fast, die young, bad girls do it well!", color: "#a46422", image: "mia.png" },
-  { name: "HanumanKind", verse: "Bajrang Bali ki jai!", color: "#e0ac69", image: "hanuman.png" },
-  { name: "Kanye West", verse: "I am a god, even though I'm a man of God!", color: "#4a2a0a", image: "kanye.png" },
-  { name: "Dr. Dre", verse: "Been there, done that, but I'm back for more!", color: "#8c6f5a", image: "dre.png" },
-  { name: "Metro Boomin", verse: "If young Metro don't trust you, I'm gon' shoot you!", color: "#46250e", image: "metro.png" },
-  { name: "SZA", verse: "I'm sorry I'm not more attractive, I'm sorry I'm not more ladylike!", color: "#a46422", image: "sza.png" },
-  { name: "Lana Del Rey", verse: "My old man is a bad man, but I love him so!", color: "#f8d8be", image: "lana.png" }
+  { name: "Kendrick Lamar", verse: "I'm a sinner who's probably gonna sin again, Lord forgive me!", color: "#643200", image: "ChaarDiwari.png" },
+  { name: "Drake", verse: "Started from the bottom now we're here!", color: "#c49159", image: "ChaarDiwari.png" },
+  { name: "Travis Scott", verse: "It's lit! Straight up!", color: "#8c5829", image: "ChaarDiwari.png" },
+  { name: "Pusha T", verse: "If you know you know, it's not a game!", color: "#5a3a1a", image: "ChaarDiwari.png" },
+  { name: "21 Savage", verse: "I was born with a knife in my hand!", color: "#a46422", image: "ChaarDiwari.png" },
+  { name: "Ritviz", verse: "Udd gaye, hum udd gaye, aasman ke parde!", color: "#f4b41c", image: "ChaarDiwari.png" },
+  { name: "Chaar Diwari", verse: "Kya behenchod game hai yeh?", color: "#c2a284", image: "ChaarDiwari.png" },
+  { name: "Playboi Carti", verse: "What? What? What? Slatt!", color: "#d2b48c", image: "ChaarDiwari.png" },
+  { name: "Future", verse: "Mask off, Molly, Percocet!", color: "#6d4c3d", image: "ChaarDiwari.png" },
+  { name: "M.I.A.", verse: "Live fast, die young, bad girls do it well!", color: "#a46422", image: "ChaarDiwari.png" },
+  { name: "HanumanKind", verse: "Bajrang Bali ki jai!", color: "#e0ac69", image: "ChaarDiwari.png" },
+  { name: "Kanye West", verse: "I am a god, even though I'm a man of God!", color: "#4a2a0a", image: "ChaarDiwari.png" },
+  { name: "Dr. Dre", verse: "Been there, done that, but I'm back for more!", color: "#8c6f5a", image: "ChaarDiwari.png" },
+  { name: "Metro Boomin", verse: "If young Metro don't trust you, I'm gon' shoot you!", color: "#46250e", image: "ChaarDiwari.png" },
+  { name: "SZA", verse: "I'm sorry I'm not more attractive, I'm sorry I'm not more ladylike!", color: "#a46422", image: "ChaarDiwari.png" },
+  { name: "Lana Del Rey", verse: "My old man is a bad man, but I love him so!", color: "#f8d8be", image: "ChaarDiwari.png" }
 ];
 
 let rooms = {};
@@ -103,19 +103,6 @@ wss.on('connection', function connection(ws) {
     }))
   }));
 
-  // Notify others
-  broadcastToRoom(roomId, {
-    type: 'player_joined',
-    playerId: playerId,
-    playerName: null,
-    players: room.players.filter(p => p.name).map(p => ({
-      id: p.id,
-      name: p.name,
-      credits: p.credits,
-      ready: p.ready
-    }))
-  }, ws);
-
   ws.on('message', function incoming(data) {
     try {
       const message = JSON.parse(data);
@@ -125,6 +112,20 @@ wss.on('connection', function connection(ws) {
           room.players[playerId].name = message.name;
           room.players[playerId].ready = true;
 
+          // Send confirmation to the player who set their name
+          ws.send(JSON.stringify({
+            type: 'name_set',
+            playerId: playerId,
+            playerName: message.name,
+            players: room.players.filter(p => p.name).map(p => ({
+              id: p.id,
+              name: p.name,
+              credits: p.credits,
+              ready: p.ready
+            }))
+          }));
+
+          // Notify other players
           broadcastToRoom(roomId, {
             type: 'player_joined',
             playerId: playerId,
@@ -135,7 +136,7 @@ wss.on('connection', function connection(ws) {
               credits: p.credits,
               ready: p.ready
             }))
-          });
+          }, ws);
 
           // Start game only when exactly 16 players and all ready
           if (room.players.length === 16 && room.players.every(p => p.ready)) {
@@ -144,9 +145,10 @@ wss.on('connection', function connection(ws) {
           break;
 
         case 'chat_message':
+          const senderName = room.players[playerId].name;
           broadcastToRoom(roomId, {
             type: 'chat_message',
-            sender: room.players[playerId].name,
+            sender: senderName,
             text: message.text,
             studentId: playerId
           });
