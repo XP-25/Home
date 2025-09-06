@@ -604,7 +604,7 @@
                 console.log("Connecting to game server...");
                 
                 // Use local server instead of remote one
-                const wsUrl = "https://class-chatter.onrender.com";
+                const wsUrl = "wss://class-chatter.onrender.com";
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
