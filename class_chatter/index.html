@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
     <style>
+        /* Your CSS remains the same */
         :root {
             --wood-dark: #6b5b4b;
             --wood-light: #8c6f5a;
@@ -504,37 +505,37 @@
                     name: "Kendrick Lamar",
                     verse: "I'm a sinner who's probably gonna sin again, Lord forgive me!",
                     color: "#643200",
-                    image: "ChaarDiwari.png"
+                    image: "kendrick.png"
                 },
                 {
                     name: "Drake",
                     verse: "Started from the bottom now we're here!",
                     color: "#c49159",
-                    image: "ChaarDiwari.png"
+                    image: "drake.png"
                 },
                 {
                     name: "Travis Scott",
                     verse: "It's lit! Straight up!",
                     color: "#8c5829",
-                    image: "ChaarDiwari.png"
+                    image: "travis.png"
                 },
                 {
                     name: "Pusha T",
                     verse: "If you know you know, it's not a game!",
                     color: "#5a3a1a",
-                    image: "ChaarDiwari.png"
+                    image: "pusha.png"
                 },
                 {
                     name: "21 Savage",
                     verse: "I was born with a knife in my hand!",
                     color: "#a46422",
-                    image: "ChaarDiwari.png"
+                    image: "savage.png"
                 },
                 {
                     name: "Ritviz",
                     verse: "Udd gaye, hum udd gaye, aasman ke parde!",
                     color: "#f4b41c",
-                    image: "ChaarDiwari.png"
+                    image: "ritviz.png"
                 },
                 {
                     name: "Chaar Diwari",
@@ -546,55 +547,55 @@
                     name: "Playboi Carti",
                     verse: "What? What? What? Slatt!",
                     color: "#d2b48c",
-                    image: "ChaarDiwari.png"
+                    image: "carti.png"
                 },
                 {
                     name: "Future",
                     verse: "Mask off, Molly, Percocet!",
                     color: "#6d4c3d",
-                    image: "ChaarDiwari.png"
+                    image: "future.png"
                 },
                 {
                     name: "M.I.A.",
                     verse: "Live fast, die young, bad girls do it well!",
                     color: "#a46422",
-                    image: "ChaarDiwari.png"
+                    image: "mia.png"
                 },
                 {
                     name: "HanumanKind",
                     verse: "Bajrang Bali ki jai!",
                     color: "#e0ac69",
-                    image: "ChaarDiwari.png"
+                    image: "hanuman.png"
                 },
                 {
                     name: "Kanye West",
                     verse: "I am a god, even though I'm a man of God!",
                     color: "#4a2a0a",
-                    image: "ChaarDiwari.png"
+                    image: "kanye.png"
                 },
                 {
                     name: "Dr. Dre",
                     verse: "Been there, done that, but I'm back for more!",
                     color: "#8c6f5a",
-                    image: "ChaarDiwari.png"
+                    image: "dre.png"
                 },
                 {
                     name: "Metro Boomin",
                     verse: "If young Metro don't trust you, I'm gon' shoot you!",
                     color: "#46250e",
-                    image: "ChaarDiwari.png"
+                    image: "metro.png"
                 },
                 {
                     name: "SZA",
                     verse: "I'm sorry I'm not more attractive, I'm sorry I'm not more ladylike!",
                     color: "#a46422",
-                    image: "ChaarDiwari.png"
+                    image: "sza.png"
                 },
                 {
                     name: "Lana Del Rey",
                     verse: "My old man is a bad man, but I love him so!",
                     color: "#f8d8be",
-                    image: "ChaarDiwari.png"
+                    image: "lana.png"
                 },
             ];
 
@@ -602,8 +603,8 @@
             function connectWebSocket() {
                 console.log("Connecting to game server...");
                 
-                // In production, replace with your server URL
-                const wsUrl = "wss://class-chatter.onrender.com";
+                // Use local server instead of remote one
+                const wsUrl = "ws://localhost:8080";
                 socket = new WebSocket(wsUrl);
 
                 socket.onopen = function() {
@@ -617,8 +618,12 @@
                 };
 
                 socket.onmessage = function(event) {
-                    const message = JSON.parse(event.data);
-                    handleWebSocketMessage(message);
+                    try {
+                        const message = JSON.parse(event.data);
+                        handleWebSocketMessage(message);
+                    } catch (error) {
+                        console.error("Error parsing message:", error);
+                    }
                 };
 
                 socket.onerror = function(error) {
@@ -640,9 +645,9 @@
                 
                 switch (message.type) {
                     case "player_joined":
-                        updatePlayerCount(message.players.length);
-                        if (message.playerId === playerId && message.playerName) {
-                            playerNameEl.textContent = message.playerName;
+                        updatePlayerCount(message.players ? message.players.length : 1);
+                        if (message.player && message.player.id === playerId) {
+                            playerNameEl.textContent = message.player.name;
                         }
                         if (message.roomId) {
                             currentRoom = message.roomId;
@@ -650,21 +655,21 @@
                         }
                         break;
 
-                    case "name_set":
-                        if (message.playerId === playerId) {
-                            playerNameEl.textContent = message.playerName;
+                    case "update_state":
+                        if (message.player && message.player.id === playerId) {
+                            playerNameEl.textContent = message.player.name;
+                            playerCreditsEl.textContent = message.player.credits;
                         }
-                        updatePlayerCount(message.players.length);
                         break;
 
                     case "game_start":
-                        initGame(message.students, message.teacher, message.firstMonitor);
+                        initGame(message.students, message.teacher, message.monitor);
                         break;
 
                     case "chat_message":
                         addChatMessage(
-                            message.sender,
-                            message.text,
+                            message.sender || "Player",
+                            message.text || message.message,
                             message.sender !== playerName
                         );
                         break;
@@ -702,12 +707,8 @@
                         break;
                         
                     case "player_left":
-                        updatePlayerCount(message.players.length);
+                        updatePlayerCount(message.players ? message.players.length : 1);
                         setStatusMessage("A player left the game", "red");
-                        break;
-                        
-                    case "room_full":
-                        setStatusMessage("Room is full. Creating a new room...", "blue");
                         break;
                 }
             }
