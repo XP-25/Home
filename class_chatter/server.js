@@ -1,293 +1,140 @@
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const WebSocket = require('ws');
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const WebSocket = require("ws");
 
-// Serve index.html and static assets
+const PORT = 8080;
+
+// Static file server
 const server = http.createServer((req, res) => {
-  if (req.url === '/') {
-    fs.readFile(path.join(__dirname, 'index.html'), (err, data) => {
-      if (err) {
-        res.writeHead(500);
-        res.end('Error loading index.html');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(data);
-    });
-    return;
-  }
+  let filePath = req.url === "/" ? "index.html" : req.url;
+  filePath = path.join(__dirname, filePath);
 
-  // Serve static files (images, js, css)
-  const filePath = path.join(__dirname, req.url);
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
-      res.end('Not found');
-      return;
+      res.end("Not found");
+    } else {
+      let ext = path.extname(filePath).toLowerCase();
+      let type = "text/html";
+      if (ext === ".js") type = "application/javascript";
+      if (ext === ".css") type = "text/css";
+      if (ext === ".png") type = "image/png";
+      if (ext === ".jpg" || ext === ".jpeg") type = "image/jpeg";
+      res.writeHead(200, { "Content-Type": type });
+      res.end(data);
     }
-    const ext = path.extname(req.url).toLowerCase();
-    let contentType = 'application/octet-stream';
-    if (ext === '.png') contentType = 'image/png';
-    else if (ext === '.js') contentType = 'application/javascript';
-    else if (ext === '.css') contentType = 'text/css';
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
   });
 });
 
+// WebSocket server
 const wss = new WebSocket.Server({ server });
-
-// Artist data (must have at least 16 entries)
-const ARTISTS = [
-  { name: "Kendrick Lamar", verse: "I'm a sinner who's probably gonna sin again, Lord forgive me!", color: "#643200", image: "ChaarDiwari.png" },
-  { name: "Drake", verse: "Started from the bottom now we're here!", color: "#c49159", image: "ChaarDiwari.png" },
-  { name: "Travis Scott", verse: "It's lit! Straight up!", color: "#8c5829", image: "ChaarDiwari.png" },
-  { name: "Pusha T", verse: "If you know you know, it's not a game!", color: "#5a3a1a", image: "ChaarDiwari.png" },
-  { name: "21 Savage", verse: "I was born with a knife in my hand!", color: "#a46422", image: "ChaarDiwari.png" },
-  { name: "Ritviz", verse: "Udd gaye, hum udd gaye, aasman ke parde!", color: "#f4b41c", image: "ChaarDiwari.png" },
-  { name: "Chaar Diwari", verse: "Kya behenchod game hai yeh?", color: "#c2a284", image: "ChaarDiwari.png" },
-  { name: "Playboi Carti", verse: "What? What? What? Slatt!", color: "#d2b48c", image: "ChaarDiwari.png" },
-  { name: "Future", verse: "Mask off, Molly, Percocet!", color: "#6d4c3d", image: "ChaarDiwari.png" },
-  { name: "M.I.A.", verse: "Live fast, die young, bad girls do it well!", color: "#a46422", image: "ChaarDiwari.png" },
-  { name: "HanumanKind", verse: "Bajrang Bali ki jai!", color: "#e0ac69", image: "ChaarDiwari.png" },
-  { name: "Kanye West", verse: "I am a god, even though I'm a man of God!", color: "#4a2a0a", image: "ChaarDiwari.png" },
-  { name: "Dr. Dre", verse: "Been there, done that, but I'm back for more!", color: "#8c6f5a", image: "ChaarDiwari.png" },
-  { name: "Metro Boomin", verse: "If young Metro don't trust you, I'm gon' shoot you!", color: "#46250e", image: "ChaarDiwari.png" },
-  { name: "SZA", verse: "I'm sorry I'm not more attractive, I'm sorry I'm not more ladylike!", color: "#a46422", image: "ChaarDiwari.png" },
-  { name: "Lana Del Rey", verse: "My old man is a bad man, but I love him so!", color: "#f8d8be", image: "ChaarDiwari.png" }
-];
 
 let rooms = {};
 let roomCounter = 1;
 let playerCounter = 0;
 
-// Initialize first room
-rooms[roomCounter] = {
-  players: [],
-  gameState: {
-    students: [],
-    teacher: { name: "MC Stan" },
-    monitor: null,
-    gameStarted: false
-  }
-};
+const ARTISTS = [
+  { name: "Kendrick Lamar", verse: "I'm a sinner...", color: "#643200", image: "kendrick.png" },
+  { name: "Drake", verse: "Started from the bottom...", color: "#002244", image: "drake.png" },
+  { name: "J. Cole", verse: "No role models...", color: "#2f4f2f", image: "cole.png" },
+  { name: "Travis Scott", verse: "It's lit!", color: "#ff6600", image: "travis.png" },
+  { name: "Kanye West", verse: "Can't tell me nothing...", color: "#990000", image: "kanye.png" },
+  { name: "Future", verse: "Mask on...", color: "#003366", image: "future.png" },
+  { name: "Lil Wayne", verse: "A milli...", color: "#006600", image: "wayne.png" },
+  { name: "Eminem", verse: "Lose yourself...", color: "#000000", image: "eminem.png" },
+  { name: "50 Cent", verse: "Go shawty...", color: "#333333", image: "50cent.png" },
+  { name: "Nas", verse: "The world is yours...", color: "#663300", image: "nas.png" },
+  { name: "Jay-Z", verse: "Empire state...", color: "#000099", image: "jayz.png" },
+  { name: "Snoop Dogg", verse: "Drop it like it's hot...", color: "#3366cc", image: "snoop.png" },
+  { name: "Ice Cube", verse: "Today was a good day...", color: "#444444", image: "icecube.png" },
+  { name: "Nicki Minaj", verse: "Super bass...", color: "#ff00ff", image: "nicki.png" },
+  { name: "Cardi B", verse: "I like it like that...", color: "#cc0066", image: "cardi.png" },
+  { name: "A$AP Rocky", verse: "Praise the Lord...", color: "#6600cc", image: "asap.png" }
+];
 
-wss.on('connection', function connection(ws) {
-  console.log('New player connected');
+// Broadcast helper
+function broadcast(roomId, msg) {
+  rooms[roomId].players.forEach(p => {
+    if (p.ws.readyState === WebSocket.OPEN) {
+      p.ws.send(JSON.stringify(msg));
+    }
+  });
+}
 
-  let roomId = findAvailableRoom();
+// Start game
+function startGame(roomId) {
   let room = rooms[roomId];
+  room.gameState.started = true;
+  room.gameState.monitor = room.players[Math.floor(Math.random() * room.players.length)].id;
+  broadcast(roomId, { type: "game_start", students: room.players, monitor: room.gameState.monitor });
+}
 
-  const playerId = playerCounter++;
-  room.players.push({
+wss.on("connection", ws => {
+  let roomId;
+  let playerId;
+
+  // Assign room
+  let room = Object.values(rooms).find(r => r.players.length < 16);
+  if (!room) {
+    roomId = "room" + roomCounter++;
+    rooms[roomId] = { players: [], gameState: { started: false, monitor: null } };
+  } else {
+    roomId = Object.keys(rooms).find(k => rooms[k] === room);
+  }
+
+  playerId = playerCounter++;
+  let player = {
     id: playerId,
-    ws: ws,
-    name: null,
-    ready: false,
+    name: "Waiting...",
     credits: 15,
-    roomId: roomId
-  });
+    ws,
+    ready: false
+  };
+  rooms[roomId].players.push(player);
 
-  ws.send(JSON.stringify({
-    type: 'player_joined',
-    playerId: playerId,
-    roomId: roomId,
-    players: room.players.filter(p => p.name).map(p => ({
-      id: p.id,
-      name: p.name,
-      credits: p.credits,
-      ready: p.ready
-    }))
-  }));
+  // Inform everyone
+  broadcast(roomId, { type: "player_joined", player });
 
-  ws.on('message', function incoming(data) {
-    try {
-      const message = JSON.parse(data);
+  ws.on("message", msg => {
+    let data = JSON.parse(msg);
 
-      switch (message.type) {
-        case 'set_name':
-          room.players.find(p => p.id === playerId).name = message.name;
-          room.players.find(p => p.id === playerId).ready = true;
+    if (data.type === "set_name") {
+      player.name = data.name;
+      player.ready = true;
+      broadcast(roomId, { type: "update_state", player });
 
-          ws.send(JSON.stringify({
-            type: 'name_set',
-            playerId: playerId,
-            playerName: message.name,
-            players: room.players.filter(p => p.name).map(p => ({
-              id: p.id,
-              name: p.name,
-              credits: p.credits,
-              ready: p.ready
-            }))
-          }));
-
-          broadcastToRoom(roomId, {
-            type: 'player_joined',
-            playerId: playerId,
-            playerName: message.name,
-            players: room.players.filter(p => p.name).map(p => ({
-              id: p.id,
-              name: p.name,
-              credits: p.credits,
-              ready: p.ready
-            }))
-          }, ws);
-
-          if (room.players.length >= 16 && room.players.every(p => p.ready)) {
-            console.log("All players ready. Starting game...");
-            startGame(roomId);
-          } else {
-            console.log("Players ready check:", room.players.map(p => ({ id: p.id, name: p.name, ready: p.ready })));
-          }
-          break;
-
-        case 'chat_message':
-          const senderName = room.players.find(p => p.id === playerId).name;
-          broadcastToRoom(roomId, {
-            type: 'chat_message',
-            sender: senderName,
-            text: message.text,
-            studentId: playerId
-          });
-          broadcastToRoom(roomId, {
-            type: 'student_talking',
-            studentId: playerId
-          });
-          break;
-
-        case 'student_caught':
-          if (room.gameState.monitor === playerId && room.gameState.gameStarted) {
-            const targetStudent = room.gameState.students.find(s => s.id === message.studentId);
-
-            if (targetStudent && !targetStudent.isExpelled) {
-              targetStudent.credits--;
-              room.players.find(p => p.id === message.studentId).credits = targetStudent.credits;
-
-              broadcastToRoom(roomId, {
-                type: 'student_caught',
-                studentId: message.studentId,
-                credits: targetStudent.credits
-              });
-
-              if (targetStudent.credits <= 0) {
-                targetStudent.isExpelled = true;
-                broadcastToRoom(roomId, {
-                  type: 'student_expelled',
-                  studentId: message.studentId
-                });
-              } else {
-                room.gameState.monitor = message.studentId;
-                broadcastToRoom(roomId, {
-                  type: 'new_monitor',
-                  studentId: message.studentId
-                });
-              }
-            }
-          }
-          break;
+      // Check if game can start
+      let room = rooms[roomId];
+      if (room.players.length >= 16 && room.players.every(p => p.ready) && !room.gameState.started) {
+        startGame(roomId);
       }
-    } catch (error) {
-      console.error('Error processing message:', error);
     }
-  });
 
-  ws.on('close', function close() {
-    console.log('Player disconnected');
+    if (data.type === "chat_message") {
+      broadcast(roomId, { type: "chat_message", playerId, message: data.message });
+    }
 
-    room.players = room.players.filter(p => p.id !== playerId);
-
-    if (room.gameState.monitor === playerId) {
-      if (room.players.length > 0) {
-        const newMonitor = room.players[Math.floor(Math.random() * room.players.length)].id;
-        room.gameState.monitor = newMonitor;
-        broadcastToRoom(roomId, { type: 'new_monitor', studentId: newMonitor });
+    if (data.type === "student_caught") {
+      if (rooms[roomId].gameState.monitor !== playerId) return;
+      let target = rooms[roomId].players.find(p => p.id === data.targetId);
+      if (!target) return;
+      target.credits--;
+      if (target.credits <= 0) {
+        broadcast(roomId, { type: "student_expelled", studentId: target.id });
       } else {
-        room.gameState.monitor = null;
+        rooms[roomId].gameState.monitor = target.id;
+        broadcast(roomId, { type: "student_caught", studentId: target.id });
       }
     }
-
-    broadcastToRoom(roomId, {
-      type: 'player_left',
-      playerId: playerId,
-      players: room.players.filter(p => p.name).map(p => ({
-        id: p.id,
-        name: p.name,
-        credits: p.credits,
-        ready: p.ready
-      }))
-    });
   });
 
-  ws.on('error', (err) => {
-    console.error('WebSocket error:', err);
+  ws.on("close", () => {
+    rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== playerId);
+    broadcast(roomId, { type: "player_left", playerId });
   });
 });
 
-function findAvailableRoom() {
-  for (const id in rooms) {
-    if (rooms[id].players.length < 16) {
-      return id;
-    }
-  }
-  roomCounter++;
-  rooms[roomCounter] = {
-    players: [],
-    gameState: {
-      students: [],
-      teacher: { name: "MC Stan" },
-      monitor: null,
-      gameStarted: false
-    }
-  };
-  return roomCounter;
-}
-
-function broadcastToRoom(roomId, message, excludeWs = null) {
-  if (!rooms[roomId]) return;
-
-  rooms[roomId].players.forEach(player => {
-    if (player.ws !== excludeWs && player.ws.readyState === WebSocket.OPEN) {
-      player.ws.send(JSON.stringify(message));
-    }
-  });
-}
-
-function startGame(roomId) {
-  const room = rooms[roomId];
-  console.log(`Starting game in room ${roomId} with ${room.players.length} players`);
-
-  room.gameState.students = room.players.map((player, index) => {
-    const artist = ARTISTS[index % ARTISTS.length];
-    return {
-      id: player.id,
-      name: artist.name,
-      credits: player.credits,
-      isStanding: false,
-      isExpelled: false,
-      benchmateId: null,
-      color: artist.color,
-      verse: artist.verse,
-      image: artist.image
-    };
-  });
-
-  room.gameState.students.forEach((s, i) => {
-    s.benchmateId = i % 2 === 0 ? room.gameState.students[i + 1]?.id : room.gameState.students[i - 1]?.id;
-  });
-
-  room.gameState.monitor = room.players[Math.floor(Math.random() * room.players.length)].id;
-  room.gameState.gameStarted = true;
-
-  broadcastToRoom(roomId, {
-    type: 'game_start',
-    students: room.gameState.students,
-    teacher: room.gameState.teacher,
-    firstMonitor: room.gameState.monitor
-  });
-}
-
-const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => {
-  console.log(`HTTP and WebSocket server running on port ${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });
