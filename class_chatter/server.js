@@ -1,39 +1,11 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-const WebSocket = require("ws");
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: 8080 });
 
-const PORT = 8080;
-
-// Static file server
-const server = http.createServer((req, res) => {
-  let filePath = req.url === "/" ? "index.html" : req.url;
-  filePath = path.join(__dirname, filePath);
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404);
-      res.end("Not found");
-    } else {
-      let ext = path.extname(filePath).toLowerCase();
-      let type = "text/html";
-      if (ext === ".js") type = "application/javascript";
-      if (ext === ".css") type = "text/css";
-      if (ext === ".png") type = "image/png";
-      if (ext === ".jpg" || ext === ".jpeg") type = "image/jpeg";
-      res.writeHead(200, { "Content-Type": type });
-      res.end(data);
-    }
-  });
-});
-
-// WebSocket server
-const wss = new WebSocket.Server({ server });
-
+// Store multiple rooms
 let rooms = {};
 let roomCounter = 1;
-let playerCounter = 0;
 
+// Artist data (same as client-side)
 const ARTISTS = [
   {
     name: "Kendrick Lamar",
@@ -133,88 +105,226 @@ const ARTISTS = [
   }
 ];
 
-// Broadcast helper
-function broadcast(roomId, msg) {
-  rooms[roomId].players.forEach(p => {
-    if (p.ws.readyState === WebSocket.OPEN) {
-      p.ws.send(JSON.stringify(msg));
-    }
-  });
-}
-
-// Start game
-function startGame(roomId) {
-  let room = rooms[roomId];
-  room.gameState.started = true;
-  room.gameState.monitor = room.players[Math.floor(Math.random() * room.players.length)].id;
-  broadcast(roomId, { type: "game_start", students: room.players, monitor: room.gameState.monitor });
-}
-
-wss.on("connection", ws => {
-  let roomId;
-  let playerId;
-
-  // Assign room
-  let room = Object.values(rooms).find(r => r.players.length < 16);
-  if (!room) {
-    roomId = "room" + roomCounter++;
-    rooms[roomId] = { players: [], gameState: { started: false, monitor: null } };
-  } else {
-    roomId = Object.keys(rooms).find(k => rooms[k] === room);
+// Initialize the first room
+rooms[roomCounter] = {
+  players: [],
+  gameState: {
+    students: [],
+    teacher: { name: "MC Stan" },
+    monitor: null,
+    gameStarted: false
   }
+};
 
-  playerId = playerCounter++;
-  let player = {
+wss.on('connection', function connection(ws) {
+  console.log('New player connected');
+  
+  // Find or create a room for the player
+  let roomId = findAvailableRoom();
+  let room = rooms[roomId];
+  
+  // Assign a unique ID to the player within the room
+  const playerId = room.players.length;
+  
+  // Add to players list in the room
+  room.players.push({
     id: playerId,
-    name: "Waiting...",
+    ws: ws,
+    name: null,
+    ready: false,
     credits: 15,
-    ws,
-    ready: false
+    roomId: roomId
+  });
+  
+  // Send current game state to the new player
+  ws.send(JSON.stringify({
+    type: 'player_joined',
+    playerId: playerId,
+    roomId: roomId,
+    players: room.players.map(p => ({ 
+      id: p.id, 
+      name: p.name, 
+      credits: p.credits, 
+      ready: p.ready 
+    }))
+  }));
+  
+  // Notify other players in the same room
+  broadcastToRoom(roomId, {
+    type: 'player_joined',
+    playerId: playerId,
+    playerName: null,
+    players: room.players.map(p => ({ 
+      id: p.id, 
+      name: p.name, 
+      credits: p.credits, 
+      ready: p.ready 
+    }))
+  }, ws);
+  
+  ws.on('message', function incoming(data) {
+    try {
+      const message = JSON.parse(data);
+      
+      switch (message.type) {
+        case 'set_name':
+          room.players[playerId].name = message.name;
+          room.players[playerId].ready = true;
+          
+          // Notify all players in the room
+          broadcastToRoom(roomId, {
+            type: 'player_joined',
+            playerId: playerId,
+            playerName: message.name,
+            players: room.players.map(p => ({ 
+              id: p.id, 
+              name: p.name, 
+              credits: p.credits, 
+              ready: p.ready 
+            }))
+          });
+          
+          // Start game if all players are ready in this room (minimum 2 for testing)
+          if (room.players.length >= 2 && room.players.every(p => p.ready)) {
+            startGame(roomId);
+          }
+          break;
+          
+        case 'chat_message':
+          // Relay chat message to all players in the room
+          broadcastToRoom(roomId, {
+            type: 'chat_message',
+            sender: room.players[playerId].name,
+            text: message.text,
+            studentId: playerId
+          });
+          
+          // Simulate student talking
+          broadcastToRoom(roomId, {
+            type: 'student_talking',
+            studentId: playerId
+          });
+          break;
+          
+        case 'student_caught':
+          // Handle catching another student
+          if (room.gameState.monitor === playerId && room.gameState.gameStarted) {
+            const targetStudent = room.gameState.students[message.studentId];
+            
+            if (targetStudent && !targetStudent.isExpelled) {
+              targetStudent.credits--;
+              room.players[message.studentId].credits = targetStudent.credits;
+              
+              broadcastToRoom(roomId, {
+                type: 'student_caught',
+                studentId: message.studentId,
+                credits: targetStudent.credits
+              });
+              
+              // If credits reach zero, expel the student
+              if (targetStudent.credits <= 0) {
+                targetStudent.isExpelled = true;
+                broadcastToRoom(roomId, {
+                  type: 'student_expelled',
+                  studentId: message.studentId
+                });
+              } else {
+                // Make the caught student the new monitor
+                room.gameState.monitor = message.studentId;
+                broadcastToRoom(roomId, {
+                  type: 'new_monitor',
+                  studentId: message.studentId
+                });
+              }
+            }
+          }
+          break;
+      }
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
+  });
+  
+  ws.on('close', function close() {
+    console.log('Player disconnected');
+    room.players = room.players.filter(p => p.id !== playerId);
+    
+    // Notify other players in the room
+    broadcastToRoom(roomId, {
+      type: 'player_left',
+      playerId: playerId,
+      players: room.players.map(p => ({ 
+        id: p.id, 
+        name: p.name, 
+        credits: p.credits, 
+        ready: p.ready 
+      }))
+    });
+  });
+});
+
+function findAvailableRoom() {
+  // Find a room with available space
+  for (const roomId in rooms) {
+    if (rooms[roomId].players.length < 16) {
+      return roomId;
+    }
+  }
+  
+  // If all rooms are full, create a new one
+  roomCounter++;
+  rooms[roomCounter] = {
+    players: [],
+    gameState: {
+      students: [],
+      teacher: { name: "MC Stan" },
+      monitor: null,
+      gameStarted: false
+    }
   };
-  rooms[roomId].players.push(player);
+  
+  return roomCounter;
+}
 
-  // Inform everyone
-  broadcast(roomId, { type: "player_joined", player });
-
-  ws.on("message", msg => {
-    let data = JSON.parse(msg);
-
-    if (data.type === "set_name") {
-      player.name = data.name;
-      player.ready = true;
-      broadcast(roomId, { type: "update_state", player });
-
-      // Check if game can start
-      let room = rooms[roomId];
-      if (room.players.length >= 16 && room.players.every(p => p.ready) && !room.gameState.started) {
-        startGame(roomId);
-      }
-    }
-
-    if (data.type === "chat_message") {
-      broadcast(roomId, { type: "chat_message", playerId, message: data.message });
-    }
-
-    if (data.type === "student_caught") {
-      if (rooms[roomId].gameState.monitor !== playerId) return;
-      let target = rooms[roomId].players.find(p => p.id === data.targetId);
-      if (!target) return;
-      target.credits--;
-      if (target.credits <= 0) {
-        broadcast(roomId, { type: "student_expelled", studentId: target.id });
-      } else {
-        rooms[roomId].gameState.monitor = target.id;
-        broadcast(roomId, { type: "student_caught", studentId: target.id });
-      }
+function broadcastToRoom(roomId, message, excludeWs = null) {
+  if (!rooms[roomId]) return;
+  
+  rooms[roomId].players.forEach(player => {
+    if (player.ws !== excludeWs && player.ws.readyState === WebSocket.OPEN) {
+      player.ws.send(JSON.stringify(message));
     }
   });
+}
 
-  ws.on("close", () => {
-    rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== playerId);
-    broadcast(roomId, { type: "player_left", playerId });
+function startGame(roomId) {
+  console.log(`Starting game in room ${roomId} with ${rooms[roomId].players.length} players`);
+  
+  const room = rooms[roomId];
+  
+  // Initialize game state
+  room.gameState.students = ARTISTS.map((artist, index) => ({
+    id: index,
+    name: artist.name,
+    credits: room.players[index] ? room.players[index].credits : 15,
+    isStanding: false,
+    isExpelled: false,
+    benchmateId: index % 2 === 0 ? index + 1 : index - 1,
+    color: artist.color,
+    verse: artist.verse,
+    image: artist.image
+  })).slice(0, room.players.length); // Only as many students as players
+  
+  // Randomly select first monitor
+  room.gameState.monitor = Math.floor(Math.random() * room.players.length);
+  room.gameState.gameStarted = true;
+  
+  // Notify all players in the room
+  broadcastToRoom(roomId, {
+    type: 'game_start',
+    students: room.gameState.students,
+    teacher: room.gameState.teacher,
+    firstMonitor: room.gameState.monitor
   });
-});
+}
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+console.log('WebSocket server running on port 8080');
