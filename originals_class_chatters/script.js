@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateConnectionStatus("connecting");
 
             // Connect to Socket.io server - using default URL
-            socket = io("http://localhost:3000", {
+            socket = io("https://class-chatter.onrender.com", {
                 transports: ['websocket', 'polling']
             });
 
@@ -986,3 +986,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
+
