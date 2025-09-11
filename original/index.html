@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Classroom Monitors - Multiplayer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --wood-dark: #6b5b4b;
+            --wood-light: #8c6f5a;
+            --wall-color: #a29587;
+            --floor-tile1: #7d7062;
+            --floor-tile2: #8a7f75;
+            --corridor-tile1: #666;
+            --corridor-tile2: #777;
+            --ui-bg: #4a3f35;
+            --ui-panel: #5a4f45;
+            --text-light: #f0e0d0;
+            --border-light: #f0e0d0;
+            --shadow-dark: #3a2f25;
+            --shadow-light: #ffffff;
+        }
+
+        body,
+        html {
+            height: 100vh;
+            overflow: hidden;
+            font-family: "VT323", monospace;
+            background-color: var(--ui-bg);
+            color: var(--text-light);
+        }
+
+        .pixel-border {
+            border: 4px solid var(--border-light);
+            box-shadow: inset -4px -4px 0px 0px var(--shadow-dark),
+                inset 4px 4px 0px 0px var(--shadow-light);
+        }
+
+        .pixel-border-inner {
+            border: 4px solid var(--border-light);
+            box-shadow: inset 4px 4px 0px 0px var(--shadow-dark),
+                inset -4px -4px 0px 0px var(--shadow-light);
+        }
+
+        .student-face,
+        .teacher-face {
+            width: 45px;
+            height: 45px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 40%;
+            z-index: 10;
+            background-repeat: no-repeat;
+        }
+
+        .student-bench {
+            width: 140px;
+            height: 60px;
+            position: relative;
+        }
+
+        .bench-number {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        .student.standing .student-face {
+            transform: translateY(-10px);
+            border: 3px solid #ff4136;
+            border-radius: 4px;
+        }
+
+        .speech-bubble {
+            display: none;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            background-color: white;
+            color: black;
+            padding: 2px 6px;
+            border-radius: 6px;
+            border: 2px solid black;
+            white-space: nowrap;
+            animation: pop-up 3s forwards;
+            z-index: 20;
+        }
+
+        .student.talking .speech-bubble {
+            display: block;
+        }
+
+        .student.sleeping .speech-bubble {
+            display: block;
+            content: "z-z-z";
+            background-color: #f0f0f0;
+        }
+
+        @keyframes pop-up {
+            0% {
+                transform: translateX(-50%) scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        .teacher-nod {
+            animation: nod 1.5s infinite ease-in-out;
+        }
+
+        @keyframes nod {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            height: 100%;
+        }
+
+        #classroom-container {
+            background-color: var(--shadow-dark);
+        }
+
+        .classroom-floor {
+            background-color: var(--floor-tile1);
+            background-image: linear-gradient(var(--floor-tile2) 50%, transparent 50%),
+                linear-gradient(90deg, var(--floor-tile2) 50%, transparent 50%);
+            background-size: 40px 40px;
+        }
+
+        .corridor-floor {
+            background-color: var(--corridor-tile1);
+            background-image: linear-gradient(var(--corridor-tile2) 50%, transparent 50%),
+                linear-gradient(90deg, var(--corridor-tile2) 50%, transparent 50%);
+            background-size: 30px 30px;
+        }
+
+        .wall {
+            background-color: var(--wall-color);
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 25%;
+            border-bottom: 8px solid var(--shadow-dark);
+        }
+
+        .window {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 120px;
+            height: 60px;
+            background-color: #87ceeb;
+            border: 6px solid var(--wood-dark);
+            box-shadow: inset 0 0 0 4px var(--wood-light);
+        }
+
+        .window-pane::before,
+        .window-pane::after {
+            content: "";
+            position: absolute;
+            background-color: var(--wood-dark);
+        }
+
+        .window-pane::before {
+            left: 50%;
+            top: -6px;
+            bottom: -6px;
+            width: 6px;
+            transform: translateX(-50%);
+        }
+
+        .window-pane::after {
+            top: 50%;
+            left: -6px;
+            right: -6px;
+            height: 6px;
+            transform: translateY(-50%);
+        }
+
+        .locker {
+            width: 80%;
+            height: 45px;
+            background-color: #95a5a6;
+            border: 4px solid #7f8c8d;
+            position: relative;
+        }
+
+        .locker::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 5px;
+            width: 4px;
+            height: 12px;
+            background: #34495e;
+            transform: translateY(-50%);
+        }
+
+        #chat-messages {
+            overflow-y: auto;
+            max-height: 250px;
+            min-height: 250px;
+        }
+
+        #chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-messages::-webkit-scrollbar-track {
+            background: var(--ui-panel);
+            border-radius: 4px;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: var(--wood-dark);
+            border-radius: 4px;
+        }
+
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--wood-light);
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 500px) {
+            .student-bench {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: auto !important;
+                height: auto;
+                background-color: var(--wood-light);
+                border-radius: 12px;
+                padding: 4px;
+                margin-bottom: 8px;
+            }
+
+            #benches {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 4px;
+                padding: 2px;
+            }
+
+            .student-face {
+                width: 40px;
+                height: 40px;
+            }
+
+            #chat-messages {
+                max-height: 150px;
+                min-height: 150px;
+            }
+
+        }
+
+        .expelled-verse {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 80%;
+            z-index: 100;
+            animation: fadeInOut 5s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        .room-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 1000;
+            font-size: 12px;
+        }
+
+        .connected {
+            background-color: green;
+        }
+
+        .disconnected {
+            background-color: red;
+        }
+
+        .connecting {
+            background-color: orange;
+        }
+
+        .artist-badge {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 1px solid white;
+        }
+
+        .verse-display {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .whatsapp-style {
+            background-color: #dcf8c6;
+            color: #000;
+            border-radius: 15px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            max-width: 80%;
+            word-wrap: break-word;
+            align-self: flex-end;
+        }
+
+        .whatsapp-style.benchmate {
+            background-color: #fff;
+            align-self: flex-start;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+
+        .player-list-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            padding: 3px;
+        }
+
+        .player-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .demo-mode {
+            background-color: #4a5568;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .chat-instruction {
+            font-size: 12px;
+            color: #a0aec0;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .teacher-sleeping .speech-bubble {
+            display: block;
+            content: "z-z-z";
+            background-color: #f0f0f0;
+        }
+
+        .expelled-player {
+            position: relative;
+            margin-bottom: 10px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .expelled-player::after {
+            content: "✖";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="p-4">
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="connection-status disconnected">Disconnected</div>
+
+    <!-- Game Container -->
+    <div id="game-container" class="w-full h-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-4">
+        <!-- Info Panel -->
+        <div
+            class="order-2 lg:order-1 w-full lg:w-1/3 h-1/4 lg:h-full pixel-border-inner bg-[var(--ui-panel)] p-4 flex flex-row lg:flex-col gap-4 MOB">
+            <div class="w-1/3 lg:w-full flex flex-col justify-between">
+                <div>
+                    <h1 class="text-3xl text-center NO_MOB">Classroom Monitors</h1>
+                    <p class="text-center text-yellow-300" id="player-count">
+                        Players: 0/16
+                    </p>
+                    <p class="text-center text-blue-300 text-sm" id="room-info">
+                        Room: Loading...
+                    </p>
+                </div>
+                <div id="player-info" class="text-lg text-center">
+                    <p>
+                        Your Artist:
+                        <span id="player-artist" class="font-bold text-purple-400">Not assigned yet</span>
+                    </p>
+                    <p>
+                        Behaviour Credits:
+                        <span id="player-credits" class="font-bold text-green-400">15</span>
+                    </p>
+                </div>
+                <!-- <div class="verse-display" id="verse-display">
+                    Your verse will appear here when expelled
+                </div> -->
+                <div id="game-status" class="text-center text-xl text-yellow-300 h-12">
+                    Waiting for players...
+                </div>
+                <div id="player-list-container" class="player-list hidden">
+                    <h3 class="text-center mb-2">Players in Room:</h3>
+                    <div id="player-list"></div>
+                </div>
+            </div>
+            <div class="w-2/3 lg:w-full flex-grow flex flex-col bg-[var(--shadow-dark)] pixel-border p-2">
+                <div class="text-center text-gray-400" id="chat-header">
+                    Private Chat with Benchmate
+                </div>
+                <div class="chat-instruction">
+                    You can only chat with your benchmate
+                </div>
+                <div id="chat-messages" class="flex-grow overflow-y-auto p-2 space-y-2 chat-container">
+                    <div class="text-center text-gray-400">
+                        Private messages with your benchmate will appear here
+                    </div>
+                </div>
+                <div class="flex mt-2">
+                    <input type="text" id="chat-input"
+                        class="w-full bg-[var(--text-light)] text-black p-2 pixel-border-inner focus:outline-none"
+                        placeholder="Message your benchmate..." disabled />
+                    <button id="send-btn" class="ml-2 bg-green-500 hover:bg-green-600 px-4 pixel-border" disabled>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classroom Panel -->
+        <div id="classroom-container"
+            class="order-1 lg:order-2 w-full lg:w-2/3 h-3/4 lg:h-full pixel-border p-2 relative">
+            <!-- Corridor -->
+            <div id="corridor" class="absolute top-0 left-0 h-full w-16 flex flex-col items-center py-4 space-y-4 z-0">
+                <div class="corridor-floor absolute inset-0"></div>
+                <div class="relative w-full h-full flex flex-col items-center justify-center space-y-2">
+                    <div class="locker"></div>
+                    <div class="locker"></div>
+                    <div class="locker"></div>
+                    <div class="locker"></div>
+                </div>
+                <div class="text-center transform -rotate-90 origin-center whitespace-nowrap absolute top-1/2 left-0 -translate-y-1/2 text-2xl"
+                    style="left: -5px">
+                    Corridor
+                </div>
+            </div>
+            <!-- Classroom -->
+            <div id="classroom" class="ml-16 h-full relative overflow-hidden">
+                <!-- Background Assets -->
+                <div class="classroom-floor absolute inset-0"></div>
+                <div class="wall"></div>
+                <div class="window">
+                    <div class="window-pane"></div>
+                </div>
+
+                <!-- Foreground Assets -->
+                <div
+                    class="absolute top-4 left-1/2 transform -translate-x-1/2 w-2/3 h-10 bg-green-800 pixel-border-inner flex items-center justify-center z-10">
+                    <span class="text-white">Blackboard</span>
+                </div>
+                <div id="exit-sign"
+                    class="hidden lg:flex absolute bottom-0 right-0 w-8 h-24 bg-red-700 pixel-border-inner items-center justify-center z-10">
+                    <span class="transform rotate-90 whitespace-nowrap">EMERGENCY</span>
+                </div>
+                <!-- Teacher Area -->
+                <!-- <div class="absolute top-20 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
+                    <div id="bubble-container" class="bg-[url('table.png')] bg-no-repeat bg-contain w-20 h-20 flex items-center justify-center mb-2">
+                        <div id="teacher" class="relative transition-all duration-1000 ease-in-out">
+                            <div class="teacher-face" style="background-image: url('SnoopS.png');top: 0px;" ></div>
+                            <div class="speech-bubble">z-z-z</div>
+                        </div>
+                    </div>
+                </div> -->
+                <!-- Teacher Area -->
+                <div class="absolute top-20 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-10">
+                    <!-- Table -->
+                    <div id="bubble-container"
+                        class="relative bg-[url('table.png')] bg-no-repeat bg-contain w-32 h-20 flex items-center justify-center">
+
+                        <!-- Teacher Face (only half showing above table) -->
+                        <div id="teacher"
+                            class="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16 overflow-hidden rounded-full border-0">
+                            <img src="SnoopS.png" class="object-cover w-full h-full clip-top-half teacher-face" />
+                        </div>
+
+                        <!-- Speech Bubble -->
+                        <div class="speech-bubble absolute -top-14 left-1/2 -translate-x-1/2">z-z-z</div>
+                    </div>
+                </div>
+
+
+                <!-- Benches -->
+                <div id="benches"
+                    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[45%] w-full h-2/3 grid grid-cols-2 gap-x-4 gap-y-2 px-4 z-10">
+                    <!-- Benches and students will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Start Modal -->
+    <div id="start-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-[var(--ui-bg)] pixel-border p-8 text-center max-w-lg">
+            <h2 class="text-4xl mb-4">Welcome to Classroom Monitors!</h2>
+            <p class="mb-2">You are about to join a classroom with up to 15 other artists.</p>
+            <p class="mb-2">
+                When the teacher catches someone talking, they become the monitor.
+            </p>
+            <p class="mb-4">
+                As monitor, you must catch other artists talking. Catch the artists by pressing the bench number on the
+                keyboard or clicking on the player. If your credits
+                reach zero, you'll be expelled and recite your verse!
+            </p>
+            <div class="mb-4">
+                <label for="player-name-input" class="block text-left mb-2">Your Name (not shown to others):</label>
+                <input type="text" id="player-name-input"
+                    class="w-full p-2 bg-[var(--text-light)] text-black pixel-border-inner"
+                    placeholder="Enter your name" maxlength="15" />
+            </div>
+            <button id="join-game-btn"
+                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-8 pixel-border">
+                Join Game
+            </button>
+        </div>
+    </div>
+
+
+
+    <!-- Instruction Modal -->
+    <div id="instruction-modal"
+        class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-[var(--ui-bg)] pixel-border p-6 text-center max-w-md">
+            <h2 class="text-3xl mb-4">Switch to Desktop Layout</h2>
+            <p class="mb-4">
+                For the best experience, click on the <strong>(⋮)</strong>
+                in your browser menu and select
+                <span class="text-yellow-300">Desktop layout</span>.
+            </p>
+            <button id="close-instruction"
+                class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 pixel-border">
+                Got it!
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Ad Modal -->
+    <div id="ad-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden"
+        style="font-family:'VT323', monospace;">
+        <div class="p-6 text-center max-w-md relative" style="background:var(--ui-bg);
+              border:4px solid var(--border-light);
+              box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
+                         inset 4px 4px 0px 0px var(--shadow-light);">
+
+            <h2 class="text-3xl mb-4 text-yellow-300">Sponsored</h2>
+
+            <!-- AdSense Ad Unit -->
+            <ins class="adsbygoogle" style="display:block;
+                margin:0 auto;
+                min-height:250px;
+                min-width:300px;" data-ad-client="YOUR-ADSENSE-CLIENT-ID" data-ad-slot="YOUR-AD-SLOT-ID"
+                data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+            <button id="close-ad" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4" style="border:4px solid var(--border-light);
+                   box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
+                              inset 4px 4px 0px 0px var(--shadow-light);">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+
+</body>
+
+</html>
