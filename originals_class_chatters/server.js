@@ -8,13 +8,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
+        origin: "https://raisexp.games",
         methods: ["GET", "POST"]
     }
 });
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'originals_class_chatters')));
 
 // Game state
 const rooms = new Map();
@@ -679,4 +679,5 @@ app.get('/api/rooms', (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+
 });
