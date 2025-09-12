@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
             name: "Travis Scott",
-            verse: "It's lit! Straight up!",
+            verse: "I'm the highest in the room",
             color: "#8c5829",
             face: "jack.png"
         },
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
             name: "Future",
-            verse: " I luv bad bitches",
+            verse: " You fuck around with me, it be a tragedy ",
             color: "#6d4c3d",
             face: "future.png"
         },
@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
             name: "KR$NA",
-            verse: "Farak Nahi PadtaNo time, i got no patience. Tujhe chahiye jung, bhej apni location",
+            verse: "No time, i got no patience. Tujhe chahiye jung, bhej apni location",
             color: "#8c6f5a",
             face: "krsna.png"
         },
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         {
             name: "The Weeknd",
-            verse: "Beggin’ on her knees to be popular",
+            verse: "She asked me if I do this every day, I said, 'Often'",
             color: "#f8d8be",
             face: "TheWeeknd.png"
         },
@@ -1021,4 +1021,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
+
 
