@@ -20,101 +20,101 @@ app.use(express.static(path.join(__dirname, 'public')));
 const rooms = new Map();
 const ARTISTS = [
     {
-        name: "Kendrick",
-        verse: "Quantum physics could never show you the world I was in",
-        color: "#643200",
-        face: "kendrick.png"
-    },
-    {
-        name: "Drake",
-        verse: "Checked the weather and it's getting real oppy outside",
-        color: "#c49159",
-        face: "drake.png"
-    },
-    {
-        name: "Travis Scott",
-        verse: "It's lit! Straight up!",
-        color: "#8c5829",
-        face: "jack.png"
-    },
-    {
-        name: "Pusha T",
-        verse: "If you know you know, it's not a game!",
-        color: "#5a3a1a",
-        face: "pusha.png"
-    },
-    {
-        name: "21 Savage",
-        verse: "How many credits you got? A lot!",
-        color: "#a46422",
-        face: "21.png"
-    },
-    {
-        name: "Ritviz",
-        verse: "Hum toh udd gaye ,Udd gaye, Udd gaye",
-        color: "#f4b41c",
-        face: "ritviz.png"
-    },
-    {
-        name: "Chaar Diwari",
-        verse: "Kya behenchod game hai yeh?",
-        color: "#c2a284",
-        face: "ChaarDiwari.png"
-    },
-    {
-        name: "Playboi Carti",
-        verse: "i et e mone an i kee'in it, i et e cah an i kee'in it",
-        color: "#d2b48c",
-        face: "playboi.png"
-    },
-    {
-        name: "Future",
-        verse: " I luv bad bitches",
-        color: "#6d4c3d",
-        face: "future.png"
-    },
-    {
-        name: "M.I.A.",
-        verse: "All I wanna do is 🔫🔫🔫🔫, and take your 💰\n {Admin: Props to M.I.A. for standing with refugees}",
-        color: "#a46422",
-        face: "mia.png"
-    },
-    {
-        name: "HanumanKind",
-        verse: "Beer and biryani too legit\nWhat you know about that\nCombination make ya flip",
-        color: "#e0ac69",
-        face: "hk.png"
-    },
-    {
-        name: "Kanye West",
-        verse: "I love your t**ties ‘cause they prove I can focus on two things at once",
-        color: "#4a2a0a",
-        face: "kw.png"
-    },
-    {
-        name: "KR$NA",
-        verse: "Farak Nahi PadtaNo time, i got no patience. Tujhe chahiye jung, bhej apni location",
-        color: "#8c6f5a",
-        face: "krsna.png"
-    },
-    {
-        name: "Metro Boomin",
-        verse: "Metro Boomin' want some more credits nigga",
-        color: "#46250e",
-        face: "metro.png"
-    },
-    {
-        name: "Fredo Again",
-        verse: "Breaking news—your DJ just got the ultimate drop: kicked out of school!",
-        color: "#a46422",
-        face: "fredo.png"
-    },
-    {
-        name: "The Weeknd",
-        verse: "Beggin’ on her knees to be popular",
-        color: "#f8d8be",
-        face: "TheWeeknd.png"
-    },
+            name: "Kendrick",
+            verse: "Quantum physics could never show you the world I was in",
+            color: "#643200",
+            face: "kendrick.png"
+        },
+        {
+            name: "Drake",
+            verse: "Checked the weather and it's getting real oppy outside",
+            color: "#c49159",
+            face: "drake.png"
+        },
+        {
+            name: "Travis Scott",
+            verse: "I'm the highest in the room",
+            color: "#8c5829",
+            face: "jack.png"
+        },
+        {
+            name: "Pusha T",
+            verse: "If you know you know, it's not a game!",
+            color: "#5a3a1a",
+            face: "pusha.png"
+        },
+        {
+            name: "21 Savage",
+            verse: "How many credits you got? A lot!",
+            color: "#a46422",
+            face: "21.png"
+        },
+        {
+            name: "Ritviz",
+            verse: "Hum toh udd gaye ,Udd gaye, Udd gaye",
+            color: "#f4b41c",
+            face: "ritviz.png"
+        },
+        {
+            name: "Chaar Diwari",
+            verse: "Kya behenchod game hai yeh?",
+            color: "#c2a284",
+            face: "ChaarDiwari.png"
+        },
+        {
+            name: "Playboi Carti",
+            verse: "i et e mone an i kee'in it, i et e cah an i kee'in it",
+            color: "#d2b48c",
+            face: "playboi.png"
+        },
+        {
+            name: "Future",
+            verse: " You fuck around with me, it be a tragedy ",
+            color: "#6d4c3d",
+            face: "future.png"
+        },
+        {
+            name: "M.I.A.",
+            verse: "All I wanna do is 🔫🔫🔫🔫, and take your 💰\n {Admin: Props to M.I.A. for standing with refugees}",
+            color: "#a46422",
+            face: "mia.png"
+        },
+        {
+            name: "HanumanKind",
+            verse: "Beer and biryani too legit\nWhat you know about that\nCombination make ya flip",
+            color: "#e0ac69",
+            face: "hk.png"
+        },
+        {
+            name: "Kanye West",
+            verse: "I love your t**ties ‘cause they prove I can focus on two things at once",
+            color: "#4a2a0a",
+            face: "kw.png"
+        },
+        {
+            name: "KR$NA",
+            verse: "No time, i got no patience. Tujhe chahiye jung, bhej apni location",
+            color: "#8c6f5a",
+            face: "krsna.png"
+        },
+        {
+            name: "Metro Boomin",
+            verse: "Metro Boomin' want some more credits nigga",
+            color: "#46250e",
+            face: "metro.png"
+        },
+        {
+            name: "Fredo Again",
+            verse: "Breaking news—your DJ just got the ultimate drop: kicked out of school!",
+            color: "#a46422",
+            face: "fredo.png"
+        },
+        {
+            name: "The Weeknd",
+            verse: "She asked me if I do this every day, I said, 'Often'",
+            color: "#f8d8be",
+            face: "TheWeeknd.png"
+        },
 ];
 
 class Player {
@@ -663,4 +663,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
 
