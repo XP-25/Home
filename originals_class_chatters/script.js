@@ -1,4 +1,3 @@
-
 // Show instructions automatically on mobile
 if (window.innerWidth < 1024) {
     document.getElementById("instruction-modal").classList.remove("hidden");
@@ -986,5 +985,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
+
 
 
