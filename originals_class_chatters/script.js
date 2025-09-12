@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
             updateConnectionStatus("connecting");
 
             // Connect to Socket.io server - using default URL
-            socket = io("classchatter-h3gsgyf9hmd6d4cz.centralindia-01.azurewebsites.net", {
+            socket = io("https://class-chatter.onrender.com", {
                 transports: ['websocket', 'polling']
             });
 
@@ -345,6 +345,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
+            // NEW: Handle player expelled UI update for all clients
+            socket.on("player_expelled_ui", (data) => {
+                console.log("Player expelled UI update:", data);
+                handlePlayerExpelledUI(data.playerId, data.artistName);
+            });
+
+            // NEW: Handle player left UI update for all clients
+            socket.on("player_left_ui", (data) => {
+                console.log("Player left UI update:", data);
+                handlePlayerLeftUI(data.playerId, data.artistName);
+            });
+
         } catch (error) {
             console.error("Failed to connect:", error);
             setStatusMessage("Connection failed", "red");
@@ -480,28 +492,6 @@ document.addEventListener("DOMContentLoaded", () => {
             case "player_left":
                 updatePlayerCount(data.players ? data.players.length : 1);
 
-                // Move player to corridor if they were expelled
-                if (data.playerId && data.playerId !== playerId) {
-                    const playerEl = document.getElementById(`student-${data.playerId}`);
-                    if (playerEl) {
-                        const expelledFace = playerEl.querySelector(".student-face").cloneNode(true);
-                        expelledFace.classList.add("mb-2", "z-20", "relative", "expelled-player");
-                        expelledFace.id = `expelled-${data.playerId}`;
-                        corridor.appendChild(expelledFace);
-                        playerEl.style.opacity = "0.3";
-                        playerEl.style.pointerEvents = "none";
-
-                    }
-                }
-
-                if (data.playerId === benchmateId) {
-                    setStatusMessage(`Your benchmate ${data.artistName} left the game`, "red");
-                    benchmateId = null;
-                    chatHeader.textContent = "Private Chat";
-                    chatInput.disabled = true;
-                    sendBtn.disabled = true;
-                }
-
                 // Update players list
                 allPlayers = allPlayers.filter(p => p.id !== data.playerId);
                 playerListContainer.classList.add('hidden');
@@ -536,6 +526,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
             default:
                 console.log("Unknown message type:", type);
+        }
+    }
+
+    // NEW: Handle player expelled UI update for all clients
+    function handlePlayerExpelledUI(playerId, artistName) {
+        // Move player to corridor
+        const playerEl = document.getElementById(`student-${playerId}`);
+        if (playerEl) {
+            const expelledFace = playerEl.querySelector(".student-face").cloneNode(true);
+            expelledFace.classList.add("mb-2", "z-20", "relative", "expelled-player");
+            expelledFace.id = `expelled-${playerId}`;
+            corridor.appendChild(expelledFace);
+            playerEl.style.opacity = "0.3";
+            playerEl.style.pointerEvents = "none";
+        }
+
+        // Update status message if it's the current player
+        if (playerId === benchmateId) {
+            setStatusMessage(`Your benchmate ${artistName} was expelled!`, "red");
+            benchmateId = null;
+            chatHeader.textContent = "Private Chat";
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
+        }
+    }
+
+    // NEW: Handle player left UI update for all clients
+    function handlePlayerLeftUI(playerId, artistName) {
+        // Move player to corridor
+        const playerEl = document.getElementById(`student-${playerId}`);
+        if (playerEl) {
+            const expelledFace = playerEl.querySelector(".student-face").cloneNode(true);
+            expelledFace.classList.add("mb-2", "z-20", "relative", "expelled-player");
+            expelledFace.id = `expelled-${playerId}`;
+            corridor.appendChild(expelledFace);
+            playerEl.style.opacity = "0.3";
+            playerEl.style.pointerEvents = "none";
+        }
+
+        // Update status message if it's the current player's benchmate
+        if (playerId === benchmateId) {
+            setStatusMessage(`Your benchmate ${artistName} left the game`, "red");
+            benchmateId = null;
+            chatHeader.textContent = "Private Chat";
+            chatInput.disabled = true;
+            sendBtn.disabled = true;
         }
     }
 
@@ -985,6 +1021,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
-
-
-
