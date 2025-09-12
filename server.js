@@ -8,113 +8,113 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "https://raisexp.games",
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
 
 // Serve static files
-app.use(express.static(path.join(__dirname, 'originals_class_chatters')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Game state
 const rooms = new Map();
 const ARTISTS = [
-           {
-            name: "Kendrick",
-            verse: "Quantum physics could never show you the world I was in",
-            color: "#643200",
-            face: "kendrick.png"
-        },
-        {
-            name: "Drake",
-            verse: "Checked the weather and it's getting real oppy outside",
-            color: "#c49159",
-            face: "drake.png"
-        },
-        {
-            name: "Travis Scott",
-            verse: "It's lit! Straight up!",
-            color: "#8c5829",
-            face: "jack.png"
-        },
-        {
-            name: "Pusha T",
-            verse: "If you know you know, it's not a game!",
-            color: "#5a3a1a",
-            face: "pusha.png"
-        },
-        {
-            name: "21 Savage",
-            verse: "How many credits you got? A lot!",
-            color: "#a46422",
-            face: "21.png"
-        },
-        {
-            name: "Ritviz",
-            verse: "Hum toh udd gaye ,Udd gaye, Udd gaye",
-            color: "#f4b41c",
-            face: "ritviz.png"
-        },
-        {
-            name: "Chaar Diwari",
-            verse: "Kya behenchod game hai yeh?",
-            color: "#c2a284",
-            face: "ChaarDiwari.png"
-        },
-        {
-            name: "Playboi Carti",
-            verse: "i et e mone an i kee'in it, i et e cah an i kee'in it",
-            color: "#d2b48c",
-            face: "playboi.png"
-        },
-        {
-            name: "Future",
-            verse: " I luv bad bitches",
-            color: "#6d4c3d",
-            face: "future.png"
-        },
-        {
-            name: "M.I.A.",
-            verse: "All I wanna do is 🔫🔫🔫🔫, and take your 💰\n {Admin: Props to M.I.A. for standing with refugees}",
-            color: "#a46422",
-            face: "mia.png"
-        },
-        {
-            name: "HanumanKind",
-            verse: "Beer and biryani too legit\nWhat you know about that\nCombination make ya flip",
-            color: "#e0ac69",
-            face: "hk.png"
-        },
-        {
-            name: "Kanye West",
-            verse: "I love your t**ties ‘cause they prove I can focus on two things at once",
-            color: "#4a2a0a",
-            face: "kw.png"
-        },
-        {
-            name: "KR$NA",
-            verse: "Farak Nahi PadtaNo time, i got no patience. Tujhe chahiye jung, bhej apni location",
-            color: "#8c6f5a",
-            face: "krsna.png"
-        },
-        {
-            name: "Metro Boomin",
-            verse: "Metro Boomin' want some more credits nigga",
-            color: "#46250e",
-            face: "metro.png"
-        },
-        {
-            name: "Fredo Again",
-            verse: "Breaking news—your DJ just got the ultimate drop: kicked out of school!",
-            color: "#a46422",
-            face: "fredo.png"
-        },
-        {
-            name: "The Weeknd",
-            verse: "Beggin’ on her knees to be popular",
-            color: "#f8d8be",
-            face: "TheWeeknd.png"
-        },
+    {
+        name: "Kendrick",
+        verse: "Quantum physics could never show you the world I was in",
+        color: "#643200",
+        face: "kendrick.png"
+    },
+    {
+        name: "Drake",
+        verse: "Checked the weather and it's getting real oppy outside",
+        color: "#c49159",
+        face: "drake.png"
+    },
+    {
+        name: "Travis Scott",
+        verse: "It's lit! Straight up!",
+        color: "#8c5829",
+        face: "jack.png"
+    },
+    {
+        name: "Pusha T",
+        verse: "If you know you know, it's not a game!",
+        color: "#5a3a1a",
+        face: "pusha.png"
+    },
+    {
+        name: "21 Savage",
+        verse: "How many credits you got? A lot!",
+        color: "#a46422",
+        face: "21.png"
+    },
+    {
+        name: "Ritviz",
+        verse: "Hum toh udd gaye ,Udd gaye, Udd gaye",
+        color: "#f4b41c",
+        face: "ritviz.png"
+    },
+    {
+        name: "Chaar Diwari",
+        verse: "Kya behenchod game hai yeh?",
+        color: "#c2a284",
+        face: "ChaarDiwari.png"
+    },
+    {
+        name: "Playboi Carti",
+        verse: "i et e mone an i kee'in it, i et e cah an i kee'in it",
+        color: "#d2b48c",
+        face: "playboi.png"
+    },
+    {
+        name: "Future",
+        verse: " I luv bad bitches",
+        color: "#6d4c3d",
+        face: "future.png"
+    },
+    {
+        name: "M.I.A.",
+        verse: "All I wanna do is 🔫🔫🔫🔫, and take your 💰\n {Admin: Props to M.I.A. for standing with refugees}",
+        color: "#a46422",
+        face: "mia.png"
+    },
+    {
+        name: "HanumanKind",
+        verse: "Beer and biryani too legit\nWhat you know about that\nCombination make ya flip",
+        color: "#e0ac69",
+        face: "hk.png"
+    },
+    {
+        name: "Kanye West",
+        verse: "I love your t**ties ‘cause they prove I can focus on two things at once",
+        color: "#4a2a0a",
+        face: "kw.png"
+    },
+    {
+        name: "KR$NA",
+        verse: "Farak Nahi PadtaNo time, i got no patience. Tujhe chahiye jung, bhej apni location",
+        color: "#8c6f5a",
+        face: "krsna.png"
+    },
+    {
+        name: "Metro Boomin",
+        verse: "Metro Boomin' want some more credits nigga",
+        color: "#46250e",
+        face: "metro.png"
+    },
+    {
+        name: "Fredo Again",
+        verse: "Breaking news—your DJ just got the ultimate drop: kicked out of school!",
+        color: "#a46422",
+        face: "fredo.png"
+    },
+    {
+        name: "The Weeknd",
+        verse: "Beggin’ on her knees to be popular",
+        color: "#f8d8be",
+        face: "TheWeeknd.png"
+    },
 ];
 
 class Player {
@@ -198,7 +198,10 @@ class Room {
             const benchmate = this.players.get(player.benchmateId);
             if (benchmate) {
                 benchmate.benchmateId = null;
-                benchmate.socket.emit("benchmate_left", { playerId: playerId });
+                benchmate.socket.emit("benchmate_left", { 
+                    playerId: playerId,
+                    artistName: player.artist.name 
+                });
 
                 // Try to find a new benchmate for the remaining player
                 this.tryReassignBenchmate(benchmate.id);
@@ -206,6 +209,12 @@ class Room {
         }
 
         this.players.delete(playerId);
+
+        // Send UI update to all clients about player leaving
+        this.broadcast("player_left_ui", {
+            playerId: playerId,
+            artistName: player.artist.name
+        });
 
         // Send updated players list to all clients
         this.broadcastPlayersList();
@@ -353,8 +362,6 @@ class Room {
 
         // Start the talking simulation after a delay
         setTimeout(() => {
-            // this.startTalkingSimulation();
-
             // After a short delay, select the first monitor
             const playerIds = Array.from(this.players.keys());
             const firstMonitorId = playerIds[Math.floor(Math.random() * playerIds.length)];
@@ -421,7 +428,10 @@ class Room {
             } else {
                 // Benchmate is expelled or doesn't exist
                 player.benchmateId = null;
-                this.sendToPlayer(playerId, "benchmate_left", { playerId: player.benchmateId });
+                this.sendToPlayer(playerId, "benchmate_left", { 
+                    playerId: player.benchmateId,
+                    artistName: player.artist.name 
+                });
             }
         }
     }
@@ -457,13 +467,20 @@ class Room {
             this.monitorId = null;
         }
 
+        // Send UI update to all clients about player expulsion
+        this.broadcast("player_expelled_ui", {
+            playerId: studentId,
+            artistName: student.artist.name
+        });
+
         // Notify benchmate about expulsion and try to reassign
         if (student.benchmateId) {
             const benchmate = this.players.get(student.benchmateId);
             if (benchmate) {
                 benchmate.benchmateId = null;
                 this.sendToPlayer(benchmate.id, "benchmate_expelled", {
-                    playerId: studentId
+                    playerId: studentId,
+                    artistName: student.artist.name
                 });
 
                 // Try to find a new benchmate for the remaining player
@@ -481,40 +498,6 @@ class Room {
             this.endGame();
         }
     }
-
-    // startTalkingSimulation() {
-    //     console.log(`Starting talking simulation in room ${this.id}`);
-    //     this.talkingInterval = setInterval(() => {
-    //         if (!this.gameStarted || this.teacherIsMonitoring) return;
-
-    //         // Select a random non-standing, non-expelled player to talk
-    //         const possibleTalkers = Array.from(this.players.values()).filter(
-    //             p => !p.isStanding && !p.isExpelled && p.id !== this.monitorId
-    //         );
-
-    //         if (possibleTalkers.length > 0 && Math.random() < 0.4) {
-    //             const talker = possibleTalkers[Math.floor(Math.random() * possibleTalkers.length)];
-
-    //             console.log(`${talker.artist.name} is talking in room ${this.id}`);
-    //             talker.isTalking = true;
-    //             this.broadcast("student_talking", {
-    //                 studentId: talker.id
-    //             });
-
-    //             setTimeout(() => {
-    //                 talker.isTalking = false;
-    //             }, 1000);
-
-    //             // If there's a monitor, they might catch the talker
-    //             if (this.monitorId && Math.random() < 0.6) {
-    //                 const monitor = this.players.get(this.monitorId);
-    //                 if (monitor && !monitor.isExpelled) {
-    //                     this.catchStudent(talker.id);
-    //                 }
-    //             }
-    //         }
-    //     }, 3000);
-    // }
 
     startTeacherBehavior() {
         console.log(`Starting teacher behavior simulation in room ${this.id}`);
@@ -679,5 +662,4 @@ app.get('/api/rooms', (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-
 });
