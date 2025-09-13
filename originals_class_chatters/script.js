@@ -1,4 +1,4 @@
-(adsbygoogle = window.adsbygoogle || []).push({});
+
 
 // Show instructions automatically on mobile
 if (window.innerWidth < 1024) {
@@ -156,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- AD MODAL FUNCTIONS ---
     function showAdModal() {
         if (adModal) {
+            (adsbygoogle = window.adsbygoogle || []).push({});
             adModal.classList.remove("hidden");
             adShownForExpulsion = true;
 
@@ -1023,6 +1024,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
+
 
 
 
