@@ -50,17 +50,19 @@
     color: white;
 }
 
-.originals{
+/* .originals{
 
-      border: 2px solid white;   /* aqua color border */
+      border: 2px solid white;   
       border-radius: 10px;
-      box-shadow: 0 0 15px white; /* glow effect */
+      box-shadow: 0 0 15px white;
 
-}
+} */
 
 .original{
-background-color: #0e0e16bb;
+background-color: #474778;
+opacity:0.5;
 }
+
 
 
 
