@@ -59,9 +59,10 @@
 } */
 
 .original{
-background-color: #474778;
-opacity:0.5;
+background-color: rgba(71, 71, 120, 0.25);
+border-radius: 5px;
 }
+
 
 
 
