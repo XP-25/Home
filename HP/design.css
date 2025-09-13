@@ -50,6 +50,16 @@
     color: white;
 }
 
+.originals{
+
+      border: 2px solid white;   /* aqua color border */
+      border-radius: 10px;
+      padding: 20px;
+      width: 250px;
+      text-align: center;
+      box-shadow: 0 0 15px #00ffcc; /* glow effect */
+
+}
 
 
 
