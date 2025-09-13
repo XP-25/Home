@@ -57,9 +57,14 @@
       padding: 20px;
       width: 250px;
       text-align: center;
-      box-shadow: 0 0 15px #00ffcc; /* glow effect */
+      box-shadow: 0 0 15px white; /* glow effect */
 
 }
+
+.original{
+background-color: #0e0e16bb;
+}
+
 
 
 
