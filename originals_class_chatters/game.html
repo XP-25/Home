@@ -493,6 +493,13 @@
             font-size: 12px;
             font-weight: bold;
         }
+
+        .adsize {
+
+            width: 500px;
+            height: 500px;
+
+        }
     </style>
 </head>
 
@@ -667,12 +674,7 @@
     <div id="instruction-modal"
         class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
         <div class="bg-[var(--ui-bg)] pixel-border p-6 text-center max-w-md">
-            <h2 class="text-3xl mb-4">Switch to Desktop Layout</h2>
-            <p class="mb-4">
-                For the best experience, click on the <strong>(⋮)</strong>
-                in your browser menu and select
-                <span class="text-yellow-300">Desktop layout</span>.
-            </p>
+            <h2 class="text-3xl mb-4">Switch to Desktop for better experience</h2>
             <button id="close-instruction"
                 class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 pixel-border">
                 Got it!
@@ -682,7 +684,7 @@
 
 
 
-<div id="ad-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden"
+<div id="ad-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden adsize"
     style="font-family:'VT323', monospace;">
     <div class="p-6 text-center max-w-md relative" style="background:var(--ui-bg);
           border:4px solid var(--border-light);
@@ -692,7 +694,7 @@
         <h2 class="text-3xl mb-4 text-yellow-300">Sponsored</h2>
 
         <!-- Ad container with fixed dimensions -->
-        <div style="width: 500px; height: 500px; margin: 0 auto;">
+    <div style="width: 500px; height: 500px; margin: 0 auto;">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397"
      crossorigin="anonymous"></script>
     <ins class="adsbygoogle"
@@ -708,7 +710,7 @@
 
         <button id="close-ad" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4" style="border:4px solid var(--border-light);
                box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
-                          inset 4px 4px 0px 0px var(--shadow-light);">
+                          inset 4px 4px 0px 0px var(--shadow-light);" onclick="location.reload();">
             Close
         </button>
     </div>
@@ -724,6 +726,7 @@
 </body>
 
 </html>
+
 
 
 
