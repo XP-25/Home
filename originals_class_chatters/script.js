@@ -1,5 +1,3 @@
-
-
 // Show instructions automatically on mobile
 if (window.innerWidth < 1024) {
     document.getElementById("instruction-modal").classList.remove("hidden");
@@ -156,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- AD MODAL FUNCTIONS ---
     function showAdModal() {
         if (adModal) {
-            (adsbygoogle = window.adsbygoogle || []).push({});
             adModal.classList.remove("hidden");
             adShownForExpulsion = true;
 
@@ -534,6 +531,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // NEW: Handle player expelled UI update for all clients
     function handlePlayerExpelledUI(playerId, artistName) {
+        // Check if this player is already in the corridor to avoid duplicates
+        const existingExpelled = document.getElementById(`expelled-${playerId}`);
+        if (existingExpelled) {
+            return; // Already in corridor, don't add again
+        }
+        
         // Move player to corridor
         const playerEl = document.getElementById(`student-${playerId}`);
         if (playerEl) {
@@ -545,7 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
             playerEl.style.pointerEvents = "none";
         }
 
-        // Update status message if it's the current player
+        // Update status message if it's the current player's benchmate
         if (playerId === benchmateId) {
             setStatusMessage(`Your benchmate ${artistName} was expelled!`, "red");
             benchmateId = null;
@@ -557,6 +560,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // NEW: Handle player left UI update for all clients
     function handlePlayerLeftUI(playerId, artistName) {
+        // Check if this player is already in the corridor to avoid duplicates
+        const existingExpelled = document.getElementById(`expelled-${playerId}`);
+        if (existingExpelled) {
+            return; // Already in corridor, don't add again
+        }
+        
         // Move player to corridor
         const playerEl = document.getElementById(`student-${playerId}`);
         if (playerEl) {
@@ -863,14 +872,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const artistName = student.artist?.name || 'Someone';
         setStatusMessage(`${artistName} has been expelled!`, "red");
 
-        const studentEl = document.getElementById(`student-${studentId}`);
-        if (studentEl) {
-            const expelledFace = studentEl.querySelector(".student-face").cloneNode(true);
-            expelledFace.classList.add("mb-2", "z-20", "relative", "expelled-player");
-            expelledFace.id = `expelled-${studentId}`;
-            corridor.appendChild(expelledFace);
-            studentEl.style.opacity = "0.3";
-            studentEl.style.pointerEvents = "none";
+        // Check if this player is already in the corridor to avoid duplicates
+        const existingExpelled = document.getElementById(`expelled-${studentId}`);
+        if (!existingExpelled) {
+            const studentEl = document.getElementById(`student-${studentId}`);
+            if (studentEl) {
+                const expelledFace = studentEl.querySelector(".student-face").cloneNode(true);
+                expelledFace.classList.add("mb-2", "z-20", "relative", "expelled-player");
+                expelledFace.id = `expelled-${studentId}`;
+                corridor.appendChild(expelledFace);
+                studentEl.style.opacity = "0.3";
+                studentEl.style.pointerEvents = "none";
+            }
         }
 
         if (studentId === playerId) {
@@ -1024,7 +1037,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Game initialization complete");
 });
-
-
-
-
