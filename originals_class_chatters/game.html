@@ -685,36 +685,50 @@
 
 
 <div id="ad-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden adsize"
-    style="font-family:'VT323', monospace;">
-    <div class="p-6 text-center max-w-md relative" style="background:var(--ui-bg);
-          border:4px solid var(--border-light);
-          box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
-                     inset 4px 4px 0px 0px var(--shadow-light);">
+     style="font-family:'VT323', monospace;">
+  <div class="p-6 text-center max-w-md relative" style="background:var(--ui-bg);
+        border:4px solid var(--border-light);
+        box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
+                   inset 4px 4px 0px 0px var(--shadow-light);">
 
-        <h2 class="text-3xl mb-4 text-yellow-300">Sponsored</h2>
+      <h2 class="text-3xl mb-4 text-yellow-300">Sponsored</h2>
 
-        <!-- Ad container with fixed dimensions -->
-    <div style="width: 500px; height: 500px; margin: 0 auto;">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397"
-     crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-     style="display:block; text-align:center;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-1330167000351397"
-     data-ad-slot="5961866861"></ins>
-        <script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-     </script>
-        </div>
+      <!-- Ad container -->
+      <div style="width: 500px; height: 500px; margin: 0 auto;">
+        <ins class="adsbygoogle"
+             style="display:inline-block; width:500px; height:500px;"
+             data-ad-client="ca-pub-1330167000351397"
+             data-ad-slot="5961866861"></ins>
+      </div>
 
-        <button id="close-ad" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4" style="border:4px solid var(--border-light);
-               box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
-                          inset 4px 4px 0px 0px var(--shadow-light);" onclick="window.location.href='www.raisexp.games';">
-            Close
-        </button>
-    </div>
+      <button id="close-ad" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4" 
+              style="border:4px solid var(--border-light);
+                     box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
+                                inset 4px 4px 0px 0px var(--shadow-light);"
+              onclick="window.location.href='www.raisexp.games';">
+          Close
+      </button>
+  </div>
 </div>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397" crossorigin="anonymous"></script>
+
+<script>
+function showAdModal() {
+    const modal = document.getElementById("ad-modal");
+    modal.classList.remove("hidden");
+
+    // Load ad only after showing modal
+    setTimeout(() => {
+        try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (e) {
+            console.error("AdSense push error:", e);
+        }
+    }, 100); // short delay so modal is visible
+}
+</script>
+
 
 
 
@@ -726,6 +740,7 @@
 </body>
 
 </html>
+
 
 
 
