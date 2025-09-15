@@ -684,33 +684,39 @@
 
 
 
-<div id="ad-modal" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden adsize"
+<div id="ad-modal" 
+     class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden adsize"
      style="font-family:'VT323', monospace;">
-  <div class="p-6 text-center max-w-md relative" style="background:var(--ui-bg);
-        border:4px solid var(--border-light);
-        box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
-                   inset 4px 4px 0px 0px var(--shadow-light);">
+  <div class="p-6 text-center relative w-full max-w-xl"
+       style="background:var(--ui-bg);
+              border:4px solid var(--border-light);
+              box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
+                         inset 4px 4px 0px 0px var(--shadow-light);">
 
       <h2 class="text-3xl mb-4 text-yellow-300">Sponsored</h2>
 
-      <!-- Ad container -->
-      <div style="width: 500px; height: 500px; margin: 0 auto;">
+      <!-- Responsive Ad container -->
+      <div style="width:100%; max-width:600px; margin:0 auto; display:flex; justify-content:center;">
         <ins class="adsbygoogle"
-             style="display:inline-block; width:500px; height:500px;"
+             style="display:block; width:100%;"
              data-ad-client="ca-pub-1330167000351397"
-             data-ad-slot="5961866861"></ins>
+             data-ad-slot="5961866861"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
       </div>
 
-      <button id="close-ad" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4" 
+      <button id="close-ad" 
+              class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 mt-4"
               style="border:4px solid var(--border-light);
                      box-shadow:inset -4px -4px 0px 0px var(--shadow-dark),
                                 inset 4px 4px 0px 0px var(--shadow-light);"
-              onclick="window.location.href='www.raisexp.games';">
+              onclick="window.location.href='https://www.raisexp.games';">
           Close
       </button>
   </div>
 </div>
 
+<!-- Load AdSense script -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397" crossorigin="anonymous"></script>
 
 <script>
@@ -725,9 +731,14 @@ function showAdModal() {
         } catch (e) {
             console.error("AdSense push error:", e);
         }
-    }, 100); // short delay so modal is visible
+    }, 150); // short delay so modal is visible before loading
 }
+
+document.getElementById("close-ad").addEventListener("click", () => {
+    document.getElementById("ad-modal").classList.add("hidden");
+});
 </script>
+
 
 
 
@@ -740,6 +751,7 @@ function showAdModal() {
 </body>
 
 </html>
+
 
 
 
