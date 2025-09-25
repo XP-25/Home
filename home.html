@@ -1,134 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RaiseXP Games</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <style>
-    * {margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif}
-    body {background:#121212;color:#fff;overflow-x:hidden}
+    <!-- Google Adsense -->
+    <meta name="google-adsense-account" content="ca-pub-1330167000351397">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397" crossorigin="anonymous"></script>
 
-    nav {width:100%;background:#1a1a2e;box-shadow:0 3px 5px rgba(0,0,0,0.3);position:sticky;top:0;z-index:10}
-    .nav-container {max-width:1400px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;flex-wrap:wrap}
-    .logo {display:flex;align-items:center;cursor:pointer}
-    .logo img {height:40px;width:40px;background:#474778;padding:3px;border-radius:50%}
-    .site-title {margin-left:10px;font-size:1.6rem;font-weight:bold;letter-spacing:1px;color:#FCF5E9}
-    .search-box {flex:1;max-width:400px;margin:10px auto;display:flex;align-items:center;background:#2b2b44;border-radius:25px;padding:5px 10px}
-    .search-box input {flex:1;border:none;background:transparent;color:#fff;padding:8px;font-size:0.9rem;outline:none}
-    .search-box button {background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer}
-    .contact a {color:white;font-size:1.2rem;margin-left:10px;text-decoration:none}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Free Online Games Instantly | RaiseXP</title>
+    <meta name="description" content="RaiseXP Games offers fun multiplayer browser games with fast, reliable gameplay. Join now to play Tic-tac-toe, Class Chatters, Sudoku, and more!">
+    
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a1a2e">
 
-    main {max-width:1400px;margin:20px auto;padding:0 20px}
-    .section-title {font-size:1.3rem;margin:10px 0;color:#fff}
-    .container {display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
-    .game-card {background:#1a1a2e;border:1px solid #333;border-radius:12px;overflow:hidden;transition:.3s}
-    .game-card:hover {transform:translateY(-8px);box-shadow:0 10px 20px rgba(0,0,0,0.3)}
-    .game-image {width:100%;height:180px;object-fit:cover}
-    .game-info {padding:15px}
-    .game-title {font-size:1.1rem;margin-bottom:8px;color:#fff}
-    .game-description {font-size:0.9rem;color:#aaa;margin-bottom:12px;height:38px;overflow:hidden}
-    .play-now {display:block;text-align:center;padding:10px;background:linear-gradient(45deg,#4e54c8,#8f94fb);border-radius:6px;color:white;font-weight:bold;text-decoration:none}
-    .play-now:hover {background:linear-gradient(45deg,#8f94fb,#4e54c8)}
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    #ads-desktop,#ads-mobile {background:#0e0e16bb;margin:30px auto;padding:20px;border-radius:8px;text-align:center}
-    #ads-mobile{display:none}
-    footer {background:#1a1a2e;border-top:1px solid #333;padding:20px;text-align:center;margin-top:40px}
-    footer p {color:#aaa;font-size:0.9rem;margin:5px}
+    <style>
+        /* CSS Reset and Global Styles */
+        :root {
+            --background-color: #121212;
+            --surface-color: #1a1a2e;
+            --primary-gradient: linear-gradient(45deg, #4e54c8, #8f94fb);
+            --primary-gradient-hover: linear-gradient(45deg, #8f94fb, #4e54c8);
+            --text-color: #FCF5E9;
+            --text-muted-color: #aaa;
+            --border-color: #333;
+            --originals-bg: rgba(71, 71, 120, 0.25);
+            --ads-bg: #0e0e16bb;
+        }
 
-    @media(max-width:768px){
-      .site-title {font-size:1.3rem}
-      .search-box {max-width:100%}
-      #ads-desktop{display:none}
-      #ads-mobile{display:block}
-    }
-  </style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* Header and Navigation */
+        .header {
+            background: var(--surface-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            padding: 0 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        
+        .logo img {
+            height: 35px;
+            width: 35px;
+            padding: 3px;
+            background-color: #474778;
+            border-radius: 5%;
+        }
+
+        .logo .site-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+            letter-spacing: 2px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            background: var(--background-color);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            width: 150px;
+            transition: width 0.3s ease;
+        }
+        
+        .search-input:focus {
+            width: 250px;
+        }
+
+        .search-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted-color);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            color: var(--text-color);
+        }
+
+        .contact a {
+            color: var(--text-color);
+            font-size: 1.5rem; /* 20px is about 1.25rem, let's make it bigger */
+            transition: color 0.3s ease;
+        }
+        
+        .contact a:hover {
+            color: #8f94fb; /* Highlight color from button */
+        }
+
+        /* Main Content */
+        .main-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            margin: 25px 0 10px 0;
+            font-size: 1.5rem;
+            color: var(--text-muted-color);
+        }
+
+        .originals-section {
+            background-color: var(--originals-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            justify-items: center;
+        }
+
+        .game-card {
+            width: 280px;
+            height: 350px;
+            border-radius: 10px;
+            background-color: var(--surface-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allows the button to stick to the bottom */
+        }
+
+        .game-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .game-description {
+            font-size: 0.9rem;
+            color: var(--text-muted-color);
+            margin-bottom: 15px;
+            height: 40px;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .play-now {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .play-now:hover {
+            background: var(--primary-gradient-hover);
+        }
+
+        /* Advertisement Section */
+        #ads-desktop, #ads-mobile {
+            background-color: var(--ads-bg);
+            padding: 20px;
+            margin: 30px auto;
+            max-width: 1200px;
+            width: 90%;
+            border-radius: 10px;
+        }
+        #ads-desktop h6, #ads-mobile h6 {
+            padding-bottom: 10px;
+            color: var(--text-muted-color);
+            text-align: center;
+        }
+        #ads-mobile {
+            display: none;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--surface-color);
+            padding: 20px;
+            text-align: center;
+            margin-top: 50px;
+            border-top: 1px solid var(--border-color);
+        }
+        .footer p {
+            color: var(--text-muted-color);
+            font-size: 0.9rem;
+        }
+        .footer a {
+            color: #8f94fb;
+            text-decoration: underline;
+        }
+
+        /* ----- Responsive Design ----- */
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 2.5%;
+            }
+            .logo .site-title {
+                font-size: 1.5rem;
+            }
+            .search-input {
+                width: 100px;
+            }
+            .search-input:focus {
+                width: 150px;
+            }
+            .nav-actions {
+                gap: 1rem;
+            }
+            .main-container {
+                width: 95%;
+                padding: 0;
+            }
+            .game-grid {
+                grid-template-columns: 1fr; /* Stack cards on mobile */
+                gap: 20px;
+            }
+            .game-card {
+                width: 95%;
+                max-width: 350px; /* Limit card width on mobile */
+            }
+        }
+        
+        @media (max-width: 767px) {
+            #ads-desktop { display: none; }
+            #ads-mobile { display: block; }
+        }
+    </style>
 </head>
 <body>
-  <nav>
-    <div class="nav-container">
-      <div class="logo" onclick="location.reload()">
-        <img src="HP/logo.svg" alt="RaiseXP-Logo">
-        <h1 class="site-title">RaiseXP</h1>
-      </div>
-      <div class="search-box">
-        <input type="text" placeholder="Search games...">
-        <button><i class="bi bi-search"></i></button>
-      </div>
-      <div class="contact">
-        <a href="https://www.instagram.com/raisexp.games/"><i class="bi bi-instagram"></i></a>
-      </div>
+    <header class="header">
+        <div class="logo" onclick="location.reload()">
+            <img src="https://placehold.co/35x35/474778/ffffff?text=R" alt="RaiseXP-Logo">
+            <h1 class="site-title">RaiseXP</h1>
+        </div>
+        <div class="nav-actions">
+            <div class="search-container">
+                <input type="text" placeholder="Search..." class="search-input">
+                <button class="search-btn"><i class="bi bi-search"></i></button>
+            </div>
+            <div class="contact">
+                <a href="https://www.instagram.com/raisexp.games/" target="_blank" title="Instagram"><i class="bi bi-instagram"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Originals Section -->
+        <section class="originals-section">
+            <h2 class="section-header">RaiseXP Originals</h2>
+            <div class="game-grid">
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/ffffff?text=Class+Chatters" alt="Class_Chatters" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">Class Chatters</h3>
+                        <p class="game-description">Know who's coming to the festi-viel</p>
+                        <a href="originals_class_chatters/game.html" class="play-now" target="_blank">PLAY NOW</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- All Games Section -->
+        <section class="all-games">
+            <h2 class="section-header">All Games</h2>
+            <div class="game-grid">
+                <!-- Tic-Tac-Toe Card -->
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/8f94fb?text=Tic-Tac-Toe" alt="Tic-Tac-Toe" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">Tic-Tac-Toe</h3>
+                        <p class="game-description">Make X or O horizontally, vertically or diagonally and WIN !!</p>
+                        <a href="2/toe.html" class="play-now" target="_blank">PLAY NOW</a>
+                    </div>
+                </div>
+                <!-- SOS Card-->
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/8f94fb?text=SOS" alt="SOS" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">SOS</h3>
+                        <p class="game-description">Place "S" and "O" letters on a grid to form "SOS" patterns in any direction</p>
+                        <a href="3/sos.html" class="play-now" target="_blank">PLAY NOW</a>
+                    </div>
+                </div>
+                <!-- Connect Four-->
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/8f94fb?text=Connect+Four" alt="ConnectFour" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">Connect Four</h3>
+                        <p class="game-description">Connect four of your discs in a row:Horizontally, Vertically, Diagonally</p>
+                        <a href="4/connect.html" class="play-now" target="_blank">PLAY NOW</a>
+                    </div>
+                </div>
+                <!-- typing-game-->
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/8f94fb?text=Typing+Game" alt="Typing Game" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">Typing Game</h3>
+                        <p class="game-description">Compete with friends in real-time duels or battle online players.</p>
+                        <a href="5/typing-game.html" class="play-now" target="_blank">PLAY NOW</a>
+                    </div>
+                </div>
+                <!-- Coming Soon -->
+                <div class="game-card">
+                    <img src="https://placehold.co/280x200/121212/aaaaaa?text=Coming+Soon" alt="Coming Soon" class="game-image">
+                    <div class="game-info">
+                        <h3 class="game-title">Coming Soon...</h3>
+                        <p class="game-description">More exciting games are on the way. Stay tuned!</p>
+                        <a href="#" class="play-now" style="opacity: 0.6; cursor: not-allowed;">COMING SOON</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="ads-desktop">
+        <h6>Advertisement</h6>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed" data-ad-client="ca-pub-1330167000351397" data-ad-slot="5316339969" loading="lazy"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
-  </nav>
 
-  <main>
-    <h2 class="section-title">RaiseXP Originals</h2>
-    <div class="container">
-      <div class="game-card">
-        <img src="originals_class_chatters/game.png" alt="Class Chatters" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">Class Chatters</h3>
-          <p class="game-description">Know who's coming to the festi-viel</p>
-          <a href="originals_class_chatters/game.html" class="play-now" target="_blank">PLAY NOW</a>
-        </div>
-      </div>
+    <div id="ads-mobile">
+        <h6>Advertisement</h6>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1330167000351397" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1330167000351397" data-ad-slot="2673034171" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
     </div>
+    
+    <footer class="footer">
+        <p class="copyright">© 2024 RaiseXP. All rights reserved.</p>
+        <p>
+            <a href="/privacy-policy.html" title="Privacy Policy" target="_blank">Privacy Policy</a>
+        </p>
+    </footer>
 
-    <h2 class="section-title">All Games</h2>
-    <div class="container">
-      <div class="game-card">
-        <img src="HP/toe.webp" alt="Tic Tac Toe" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">Tic-Tac-Toe</h3>
-          <p class="game-description">Make X or O in line and win!</p>
-          <a href="2/toe.html" class="play-now" target="_blank">PLAY NOW</a>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <img src="HP/sos.webp" alt="SOS" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">SOS</h3>
-          <p class="game-description">Form "SOS" patterns in any direction</p>
-          <a href="3/sos.html" class="play-now" target="_blank">PLAY NOW</a>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <img src="HP/connect.webp" alt="Connect Four" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">Connect Four</h3>
-          <p class="game-description">Connect four discs to win</p>
-          <a href="4/connect.html" class="play-now" target="_blank">PLAY NOW</a>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <img src="HP/type.webp" alt="Typing Game" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">Typing Game</h3>
-          <p class="game-description">Compete with friends in typing duels</p>
-          <a href="5/typing-game.html" class="play-now" target="_blank">PLAY NOW</a>
-        </div>
-      </div>
-
-      <div class="game-card">
-        <img src="HP/logo.webp" alt="Coming Soon" class="game-image">
-        <div class="game-info">
-          <h3 class="game-title">Coming Soon...</h3>
-          <p class="game-description">RaiseXP</p>
-          <a href="#" class="play-now">Other Games</a>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <div id="ads-desktop"><h6>Advertisement</h6></div>
-  <div id="ads-mobile"><h6>Advertisement</h6></div>
-
-  <footer>
-    <p class="copyright">© 2024 RaiseXP. All rights reserved.</p>
-    <p><a href="/privacy-policy.html" target="_blank">Privacy Policy</a></p>
-  </footer>
 </body>
 </html>
+
