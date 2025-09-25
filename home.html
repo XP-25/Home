@@ -347,7 +347,7 @@
         <!-- All Games Section -->
         <section class="all-games">
             <h2 class="section-header">All Games</h2>
-            <div class="game-grid">
+            <div class="game-grid" id="game-grid">
                 <!-- Tic-Tac-Toe Card -->
                 <div class="game-card">
                     <img src="HP/toe.webp" alt="Tic-Tac-Toe" class="game-image">
@@ -394,6 +394,9 @@
                     </div>
                 </div>
             </div>
+            <div id="no-results" style="text-align: center; font-size: 1.2rem; color: var(--text-muted-color); margin-top: 30px; display: none;">
+                <p>No games found matching your search.</p>
+            </div>
         </section>
     </main>
 
@@ -418,7 +421,43 @@
         </p>
     </footer>
 
+    <script>
+        // JavaScript for Search Functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.querySelector('.search-input');
+            const gameCards = document.querySelectorAll('.game-card');
+            const noResultsMessage = document.getElementById('no-results');
+
+            // Function to filter games based on search input
+            const filterGames = () => {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                let resultsFound = 0;
+
+                gameCards.forEach(card => {
+                    const title = card.querySelector('.game-title').textContent.toLowerCase();
+                    
+                    // Check if the game title includes the search term
+                    if (title.includes(searchTerm)) {
+                        card.style.display = 'flex'; // Show the card
+                        resultsFound++;
+                    } else {
+                        card.style.display = 'none'; // Hide the card
+                    }
+                });
+
+                // Show or hide the "no results" message
+                if (resultsFound === 0) {
+                    noResultsMessage.style.display = 'block';
+                } else {
+                    noResultsMessage.style.display = 'none';
+                }
+            };
+
+            // Add event listener to the search input
+            searchInput.addEventListener('keyup', filterGames);
+        });
+    </script>
+
 </body>
 </html>
-
 
