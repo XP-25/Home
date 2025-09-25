@@ -303,6 +303,9 @@
                 width: 95%;
                 max-width: 350px; /* Limit card width on mobile */
             }
+            input::placeholder {
+            color: transparent; /* makes placeholder invisible */
+              }
         }
         
         @media (max-width: 767px) {
@@ -346,7 +349,7 @@
 
         <!-- All Games Section -->
         <section class="all-games">
-            <h2 class="section-header">All Games</h2>
+            <h2 class="section-header"></h2>
             <div class="game-grid" id="game-grid">
                 <!-- Tic-Tac-Toe Card -->
                 <div class="game-card">
