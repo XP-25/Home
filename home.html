@@ -459,6 +459,16 @@
             // Add event listener to the search input
             searchInput.addEventListener('keyup', filterGames);
         });
+
+
+
+  const searchInput = document.querySelector(".search-input");
+  const searchBtn = document.querySelector(".search-btn");
+
+  searchBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // prevent form submission if inside a form
+    searchInput.focus();
+  });
     </script>
 
 </body>
