@@ -7,6 +7,51 @@
     <title>Sudoku</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+
+    <script>
+        window.googletag = window.googletag || { cmd: [] };
+
+        let rewardedSlot;
+
+        googletag.cmd.push(function() {
+            // Define the out-of-page rewarded ad slot
+            rewardedSlot = googletag.defineOutOfPageSlot('/23320027034/sudoku_game_video_reward', googletag.enums.OutOfPageFormat.REWARDED);
+
+            // Only proceed if the ad slot was successfully defined
+            if (rewardedSlot) {
+                rewardedSlot.addService(googletag.pubads());
+
+                // Event listener for when the user has earned the reward
+                googletag.pubads().addEventListener('rewardedSlotGranted', function(event) {
+                    console.log('Reward granted to the user.');
+                    // Calls the function in our game script to give the reward
+                    if (window.grantReward) {
+                        window.grantReward();
+                    }
+                });
+
+                // Event listener for when the ad is closed
+                googletag.pubads().addEventListener('rewardedSlotClosed', function(event) {
+                    console.log('Rewarded ad was closed.');
+                    // Calls the function in our game script to resume the game
+                    if (window.adClosed) {
+                        window.adClosed();
+                    }
+                });
+
+                // Event listener for when an ad is loaded and ready
+                googletag.pubads().addEventListener('rewardedSlotReady', function(event) {
+                    console.log('Rewarded ad is ready to be shown.');
+                });
+            }
+
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+
     <style>
         :root {
             --bg-color: #0B0C1E;
@@ -14,9 +59,7 @@
             --border-color: #31334A;
             --text-color: #E0E0E0;
             --accent-color: #FFFFFF;
-            /* White accent for outlines and hovers */
             --accent-highlight: rgba(255, 255, 255, 0.1);
-            /* Subtle white highlight for selected cell */
             --gold-accent: #FFC700;
             --error-color: #FB7185;
             --error-bg-color: rgba(251, 113, 133, 0.15);
@@ -101,7 +144,6 @@
         .cell.highlight,
         .cell.same-number {
             background-color: rgba(255, 255, 255, 0.07);
-            /* Brighter, translucent white for highlights */
         }
 
         .cell.persistent-error {
@@ -154,7 +196,6 @@
         .control-button.active {
             background-color: var(--accent-color);
             color: var(--bg-color);
-            /* Dark text on white active button */
             border-color: var(--accent-color);
         }
 
@@ -213,8 +254,7 @@
 
 <body class="flex flex-col items-center justify-center p-2 md:p-4 min-h-screen">
 
-    <div id="intro-screen"
-        class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 hidden w-full max-w-md border border-slate-700">
+    <div id="intro-screen" class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 hidden w-full max-w-md border border-slate-700">
         <h1 class="text-5xl font-bold text-white tracking-wider">SUDOKU</h1>
 
         <div id="best-score-container" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hidden">
@@ -227,8 +267,10 @@
                     <path d="M4 22h16" />
                     <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
                     <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                    <path d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" />
-                    <path d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
+                    <path
+                        d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" />
+                    <path
+                        d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
                 </svg>
                 All-Time Best
             </h3>
@@ -383,6 +425,25 @@
     </div>
 
     <script>
+        // This variable will store the function to run after a successful ad view.
+        let grantRewardCallback = null;
+
+        // This function will be called by the ad event listener when the user earns the reward.
+        window.grantReward = function () {
+            if (typeof grantRewardCallback === 'function') {
+                grantRewardCallback();
+            }
+            grantRewardCallback = null; // Reset for the next ad
+        }
+
+        // This function is called by the ad event listener when the ad is closed.
+        window.adClosed = function () {
+            // Restart the game timer if it was paused for the ad
+            if (window.S && window.S.timerInterval === null && !window.S.winModal.classList.contains('flex')) {
+                window.startTimer();
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const S = {
                 // UI Elements
@@ -438,6 +499,9 @@
                 isDailyChallenge: false,
             };
 
+            // Make key game functions and state accessible to the global ad callbacks
+            window.S = S;
+
             // --- Game Logic ---
 
             function generatePuzzle(rng = Math.random) {
@@ -452,7 +516,7 @@
                 S.userBoard = JSON.parse(JSON.stringify(S.board));
                 S.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
             }
-            
+
             function createPuzzle(board, holes, rng = Math.random) {
                 let puzzle = JSON.parse(JSON.stringify(board));
                 let attempts = holes;
@@ -672,9 +736,11 @@
                     S.timerEl.textContent = `${minutes}:${secondsValue}`;
                 }, 1000);
             }
+            window.startTimer = startTimer; // Make it globally accessible for adClosed callback
 
             function stopTimer() {
                 clearInterval(S.timerInterval);
+                S.timerInterval = null;
             }
 
             function calculateScore() {
@@ -868,14 +934,14 @@
                     e.preventDefault();
                     let row = parseInt(S.selectedCell.dataset.row);
                     let col = parseInt(S.selectedCell.dataset.col);
-                    
+
                     switch (e.key) {
                         case 'ArrowUp': row = Math.max(0, row - 1); break;
                         case 'ArrowDown': row = Math.min(8, row + 1); break;
                         case 'ArrowLeft': col = Math.max(0, col - 1); break;
                         case 'ArrowRight': col = Math.min(8, col + 1); break;
                     }
-                    
+
                     const newCell = getCell(row, col);
                     if (newCell) {
                         updateSelection(newCell);
@@ -907,20 +973,40 @@
             S.newGameBtn.addEventListener('click', startNewGame);
             S.modalNewGameBtn.addEventListener('click', startNewGame);
 
+            // --- MODIFIED AD-RELATED EVENT LISTENERS ---
+
             S.continueAfterAdBtn.addEventListener('click', () => {
-                S.adModal.classList.add('hidden');
-                S.adModal.classList.remove('flex');
-                S.extraChancesUsed++;
-                S.mistakes = 0;
-                S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
-                startTimer();
+                // Define what happens after a successful ad view
+                grantRewardCallback = function () {
+                    S.adModal.classList.add('hidden');
+                    S.adModal.classList.remove('flex');
+                    S.extraChancesUsed++;
+                    S.mistakes = 0;
+                    S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
+                };
+                // Show the ad
+                if (rewardedSlot) {
+                    rewardedSlot.makeRewardedVisible();
+                } else {
+                    alert('Ad not available right now. Please try again in a moment.');
+                    adClosed(); // Resume timer if ad fails to show
+                }
             });
 
             S.getHintAfterAdBtn.addEventListener('click', () => {
-                S.hintAdModal.classList.add('hidden');
-                S.hintAdModal.classList.remove('flex');
-                giveHint();
-                startTimer();
+                // Define what happens after a successful ad view
+                grantRewardCallback = function () {
+                    S.hintAdModal.classList.add('hidden');
+                    S.hintAdModal.classList.remove('flex');
+                    giveHint();
+                };
+                // Show the ad
+                if (rewardedSlot) {
+                    rewardedSlot.makeRewardedVisible();
+                } else {
+                    alert('Ad not available right now. Please try again in a moment.');
+                    adClosed(); // Resume timer if ad fails to show
+                }
             });
 
             S.dailyChallengeBtn.addEventListener('click', startDailyChallenge);
@@ -936,4 +1022,3 @@
 </body>
 
 </html>
-
