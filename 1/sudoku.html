@@ -15,27 +15,24 @@
         let rewardedSlotContinue = null;
         let rewardedSlotHint = null;
 
-googletag.cmd.push(function () {
-    // Define the rewarded ad slot for continuing the game (This one is correct!)
-    rewardedSlotContinue = googletag.defineOutOfPageSlot(
-        '/2535917/sudoku_game_video_reward', 
-        'div-gpt-ad-rewarded-continue'
-    ).addService(googletag.pubads());
+        googletag.cmd.push(function () {
+            // Define the rewarded ad slot for continuing the game
+            rewardedSlotContinue = googletag.defineOutOfPageSlot(
+                '/2535917/sudoku_game_video_reward',
+                'div-gpt-ad-rewarded-continue'
+            ).addService(googletag.pubads());
 
-    // Define the rewarded ad slot for getting a hint (FIX THIS ONE)
-    rewardedSlotHint = googletag.defineOutOfPageSlot(
-        '/2535917/sudoku-hint-reveal', // Use this correct path
-        'div-gpt-ad-rewarded-hint'
-    ).addService(googletag.pubads());
-});
-
+            // Define the rewarded ad slot for getting a hint
+            rewardedSlotHint = googletag.defineOutOfPageSlot(
+                '/2535917/sudoku-hint-reveal', // This path has been corrected
+                'div-gpt-ad-rewarded-hint'
+            ).addService(googletag.pubads());
 
             // Event listener for when a reward is granted
             googletag.pubads().addEventListener('rewardedSlotGranted', function (event) {
                 console.log('Reward granted for slot:', event.slot.getSlotElementId());
-                // The reward object contains the type and amount you configured in Ad Manager
                 console.log('Reward amount:', event.reward.amount, 'Reward type:', event.reward.type);
-                
+
                 // Grant the reward based on which ad was shown
                 if (event.slot === rewardedSlotContinue) {
                     window.grantContinueReward();
@@ -47,8 +44,7 @@ googletag.cmd.push(function () {
             // Event listener for when the rewarded ad is closed
             googletag.pubads().addEventListener('rewardedSlotClosed', function (event) {
                 console.log('Rewarded ad closed.');
-                // Resume game timer or other logic here
-                window.resumeGameTimer(); 
+                window.resumeGameTimer();
             });
 
             googletag.pubads().enableSingleRequest();
