@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/rewarded.js"></script>
 
     <script>
         window.googletag = window.googletag || { cmd: [] };
@@ -16,34 +16,28 @@
         let rewardedSlot;
 
         googletag.cmd.push(function() {
-            // Define the out-of-page rewarded ad slot
-            rewardedSlot = googletag.defineOutOfPageSlot('/23320027034/sudoku_game_video_reward', googletag.enums.OutOfPageFormat.REWARDED);
+            // Using a TEST ad unit is highly recommended for development
+            // Replace this with your own ad unit ID once everything is working
+            const AD_UNIT_ID = '/21775744923/example-rewarded-ad';
+            
+            rewardedSlot = googletag.defineOutOfPageSlot(AD_UNIT_ID, googletag.enums.OutOfPageFormat.REWARDED);
 
-            // Only proceed if the ad slot was successfully defined
             if (rewardedSlot) {
                 rewardedSlot.addService(googletag.pubads());
 
-                // Event listener for when the user has earned the reward
                 googletag.pubads().addEventListener('rewardedSlotGranted', function(event) {
-                    console.log('Reward granted to the user.');
-                    // Calls the function in our game script to give the reward
-                    if (window.grantReward) {
-                        window.grantReward();
-                    }
+                    console.log('Reward granted.');
+                    if (window.grantReward) window.grantReward();
                 });
 
-                // Event listener for when the ad is closed
                 googletag.pubads().addEventListener('rewardedSlotClosed', function(event) {
-                    console.log('Rewarded ad was closed.');
-                    // Calls the function in our game script to resume the game
-                    if (window.adClosed) {
-                        window.adClosed();
-                    }
+                    console.log('Rewarded ad closed.');
+                    if (window.adClosed) window.adClosed();
                 });
 
-                // Event listener for when an ad is loaded and ready
                 googletag.pubads().addEventListener('rewardedSlotReady', function(event) {
-                    console.log('Rewarded ad is ready to be shown.');
+                    console.log('Rewarded ad is ready.');
+                    if (window.onAdReady) window.onAdReady();
                 });
             }
 
@@ -66,188 +60,33 @@
             --fixed-text-color: #ffffffda;
             --notes-text-color: #64748B;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #grid-wrapper {
-            width: 95%;
-            max-width: 500px;
-            margin: 0 auto;
-            aspect-ratio: 1 / 1;
-        }
-
-        .sudoku-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            grid-template-rows: repeat(9, 1fr);
-            width: 100%;
-            height: 100%;
-            gap: 1px;
-            background-color: var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            transform: translateZ(0);
-            backface-visibility: hidden;
-        }
-
-        .sudoku-grid .cell {
-            background-color: var(--cell-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(1.1rem, 5vw, 2rem);
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .cell:nth-child(3n) {
-            border-right: 2px solid var(--border-color);
-        }
-
-        .cell:nth-child(9n) {
-            border-right: none;
-        }
-
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .cell.fixed {
-            color: var(--fixed-text-color);
-            font-weight: 600;
-        }
-
-        .cell.selected {
-            background-color: var(--accent-highlight);
-            outline: 3px solid var(--accent-color);
-            z-index: 10;
-        }
-
-        .cell.highlight,
-        .cell.same-number {
-            background-color: rgba(255, 255, 255, 0.07);
-        }
-
-        .cell.persistent-error {
-            background-color: var(--error-bg-color);
-            color: var(--error-color);
-        }
-
-        .cell.persistent-error::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid var(--error-color);
-            pointer-events: none;
-        }
-
-        .notes-grid {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-
-        .note-cell {
-            font-size: clamp(0.5rem, 1.5vw, 0.75rem);
-            color: var(--notes-text-color);
-            text-align: center;
-            line-height: 1.1;
-        }
-
-        .control-button,
-        .number-button {
-            background-color: var(--cell-color);
-            transition: all 0.2s ease;
-            border: 1px solid var(--border-color);
-        }
-
-        .control-button:hover,
-        .number-button:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        .control-button.active {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            border-color: var(--accent-color);
-        }
-
-        #best-score-container .font-bold {
-            color: var(--gold-accent);
-        }
-
-        #win-score {
-            color: var(--gold-accent);
-        }
-
-        .number-buttons-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        .number-button {
-            flex: 1 1 40px;
-            max-width: 50px;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        * { -webkit-tap-highlight-color: transparent; }
+        #grid-wrapper { width: 95%; max-width: 500px; margin: 0 auto; aspect-ratio: 1 / 1; }
+        .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); width: 100%; height: 100%; gap: 1px; background-color: var(--border-color); border-radius: 8px; overflow: hidden; border: 2px solid var(--border-color); transform: translateZ(0); backface-visibility: hidden; }
+        .sudoku-grid .cell { background-color: var(--cell-color); display: flex; justify-content: center; align-items: center; font-size: clamp(1.1rem, 5vw, 2rem); font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; position: relative; user-select: none; -webkit-user-select: none; }
+        .cell:nth-child(3n) { border-right: 2px solid var(--border-color); }
+        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--border-color); }
+        .cell.fixed { color: var(--fixed-text-color); font-weight: 600; }
+        .cell.selected { background-color: var(--accent-highlight); outline: 3px solid var(--accent-color); z-index: 10; }
+        .cell.highlight, .cell.same-number { background-color: rgba(255, 255, 255, 0.07); }
+        .cell.persistent-error { background-color: var(--error-bg-color); color: var(--error-color); }
+        .cell.persistent-error::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--error-color); pointer-events: none; }
+        .notes-grid { position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .note-cell { font-size: clamp(0.5rem, 1.5vw, 0.75rem); color: var(--notes-text-color); text-align: center; line-height: 1.1; }
+        .control-button, .number-button { background-color: var(--cell-color); transition: all 0.2s ease; border: 1px solid var(--border-color); }
+        .control-button:hover, .number-button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .control-button.active { background-color: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+        #best-score-container .font-bold, #win-score { color: var(--gold-accent); }
+        .number-buttons-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%; }
+        .number-button { flex: 1 1 40px; max-width: 50px; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
+        button:disabled { background-color: #31334A !important; color: #64748B !important; cursor: not-allowed; transform: scale(1) !important; }
         @media (min-width: 1024px) {
-            body {
-                overflow: hidden;
-            }
-
-            #grid-wrapper {
-                width: auto;
-                height: calc(100vh - 100px);
-                max-height: 650px;
-                max-width: 650px;
-            }
-
-            .number-buttons-container {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-                width: 100%;
-                max-width: 200px;
-            }
-
-            .number-button {
-                flex: auto;
-                max-width: none;
-            }
+            body { overflow: hidden; }
+            #grid-wrapper { width: auto; height: calc(100vh - 100px); max-height: 650px; max-width: 650px; }
+            .number-buttons-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; max-width: 200px; }
+            .number-button { flex: auto; max-width: none; }
         }
     </style>
 </head>
@@ -256,104 +95,40 @@
 
     <div id="intro-screen" class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 hidden w-full max-w-md border border-slate-700">
         <h1 class="text-5xl font-bold text-white tracking-wider">SUDOKU</h1>
-
         <div id="best-score-container" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hidden">
             <h3 class="text-xl font-bold text-slate-100 mb-3 flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    style="color: var(--gold-accent)">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                    <path d="M4 22h16" />
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                    <path
-                        d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" />
-                    <path
-                        d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
-                </svg>
-                All-Time Best
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold-accent);"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z"/><path d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z"/></svg> All-Time Best
             </h3>
-            <div id="best-score-details" class="text-slate-300 grid grid-cols-2 gap-x-4 gap-y-2 text-left">
-            </div>
+            <div id="best-score-details" class="text-slate-300 grid grid-cols-2 gap-x-4 gap-y-2 text-left"></div>
         </div>
-
-        <button id="daily-challenge-btn"
-            class="w-full p-4 rounded-lg bg-white text-slate-900 font-bold text-xl hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg">
-            Play Daily Challenge
-        </button>
-        <div class="relative flex py-2 items-center">
-            <div class="flex-grow border-t border-slate-600"></div>
-            <span class="flex-shrink mx-4 text-slate-400">OR</span>
-            <div class="flex-grow border-t border-slate-600"></div>
-        </div>
-
+        <button id="daily-challenge-btn" class="w-full p-4 rounded-lg bg-white text-slate-900 font-bold text-xl hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg">Play Daily Challenge</button>
+        <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-slate-600"></div><span class="flex-shrink mx-4 text-slate-400">OR</span><div class="flex-grow border-t border-slate-600"></div></div>
         <h2 class="text-2xl font-bold text-slate-100 mb-2">Start a New Game</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
-            <button data-difficulty="easy"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Easy</button>
-            <button data-difficulty="medium"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Medium</button>
-            <button data-difficulty="hard"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Hard</button>
-            <button data-difficulty="expert"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Expert</button>
-            <button data-difficulty="master"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Master</button>
-            <button data-difficulty="extreme"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Extreme</button>
+            <button data-difficulty="easy" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Easy</button>
+            <button data-difficulty="medium" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Medium</button>
+            <button data-difficulty="hard" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Hard</button>
+            <button data-difficulty="expert" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Expert</button>
+            <button data-difficulty="master" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Master</button>
+            <button data-difficulty="extreme" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Extreme</button>
         </div>
     </div>
 
-
-    <div id="game-container"
-        class="hidden w-full h-full max-w-7xl mx-auto flex-col lg:flex-row items-center justify-center lg:gap-8">
+    <div id="game-container" class="hidden w-full h-full max-w-7xl mx-auto flex-col lg:flex-row items-center justify-center lg:gap-8">
         <div class="flex flex-col items-center w-full lg:w-auto">
             <div class="w-full max-w-[500px] flex justify-between items-center mb-4 px-2">
-                <div class="text-md text-center">Difficulty<br><span id="difficulty"
-                        class="font-semibold text-white capitalize">Easy</span></div>
-                <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span>
-                </div>
+                <div class="text-md text-center">Difficulty<br><span id="difficulty" class="font-semibold text-white capitalize">Easy</span></div>
+                <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span></div>
                 <div id="timer" class="text-2xl font-semibold">00:00</div>
             </div>
-
-            <div id="grid-wrapper">
-                <div id="sudoku-grid" class="sudoku-grid"></div>
-            </div>
+            <div id="grid-wrapper"><div id="sudoku-grid" class="sudoku-grid"></div></div>
         </div>
-
         <div class="w-full lg:w-auto flex flex-col items-center gap-4 mt-4 lg:mt-0">
             <div class="w-full flex justify-center items-center gap-4 max-w-[500px] lg:max-w-[200px]">
-                <button id="notes-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Toggle Notes (N)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg></button>
-                <button id="erase-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Erase (Backspace)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                        <line x1="18" y1="9" x2="12" y2="15"></line>
-                        <line x1="12" y1="9" x2="18" y2="15"></line>
-                    </svg></button>
-                <button id="hint-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Get Hint">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"></path>
-                        <path
-                            d="M12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z">
-                        </path>
-                    </svg>
-                </button>
+                <button id="notes-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Toggle Notes (N)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button id="erase-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Erase (Backspace)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></button>
+                <button id="hint-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Get Hint"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"></path><path d="M12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"></path></svg></button>
             </div>
-
             <div class="number-buttons-container max-w-[500px] lg:max-w-[200px]">
                 <button data-num="1" class="number-button text-2xl p-3 rounded-md">1</button>
                 <button data-num="2" class="number-button text-2xl p-3 rounded-md">2</button>
@@ -365,16 +140,11 @@
                 <button data-num="8" class="number-button text-2xl p-3 rounded-md">8</button>
                 <button data-num="9" class="number-button text-2xl p-3 rounded-md">9</button>
             </div>
-
-            <button id="new-game-btn"
-                class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">
-                New Game
-            </button>
+            <button id="new-game-btn" class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">New Game</button>
         </div>
     </div>
 
-    <div id="win-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div id="win-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-3xl font-bold text-white mb-4">Congratulations!</h2>
             <p class="text-lg mb-4">You solved the puzzle!</p>
@@ -384,69 +154,59 @@
                 <span class="font-semibold">Mistakes:</span><span id="win-mistakes"></span>
                 <span class="font-semibold">Hints Used:</span><span id="win-hints"></span>
             </div>
-            <div id="win-score-display" class="mb-6">
-                <p class="text-lg">Score: <span id="win-score" class="font-bold"></span></p>
-            </div>
+            <div id="win-score-display" class="mb-6"><p class="text-lg">Score: <span id="win-score" class="font-bold"></span></p></div>
             <div class="flex flex-col gap-3">
-                <button id="share-btn"
-                    class="hidden w-full p-3 rounded-md bg-green-500 text-white font-bold text-lg hover:bg-green-400 transition-colors">
-                    Share Result
-                </button>
-                <button id="modal-new-game-btn"
-                    class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
-                    Play Again
-                </button>
+                <button id="share-btn" class="hidden w-full p-3 rounded-md bg-green-500 text-white font-bold text-lg hover:bg-green-400 transition-colors">Share Result</button>
+                <button id="modal-new-game-btn" class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">Play Again</button>
             </div>
         </div>
     </div>
 
-    <div id="ad-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div id="ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-2xl font-bold text-rose-400 mb-4">Out of chances!</h2>
             <p class="text-lg mb-6">Watch a short video ad to continue playing.</p>
-            <button id="continue-after-ad-btn"
-                class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
-                Watch Ad & Continue
-            </button>
+            <button id="continue-after-ad-btn" disabled class="w-full p-3 rounded-md font-bold text-lg transition-colors">Watch Ad & Continue</button>
         </div>
     </div>
 
-    <div id="hint-ad-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div id="hint-ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-2xl font-bold text-white mb-4">Need a hand?</h2>
             <p class="text-lg mb-6">Watch a short video ad to get a hint.</p>
-            <button id="get-hint-after-ad-btn"
-                class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
-                Watch Ad & Get Hint
-            </button>
+            <button id="get-hint-after-ad-btn" disabled class="w-full p-3 rounded-md font-bold text-lg transition-colors">Watch Ad & Get Hint</button>
         </div>
     </div>
 
     <script>
-        // This variable will store the function to run after a successful ad view.
+        // --- Ad Integration Logic ---
         let grantRewardCallback = null;
+        let isAdReady = false;
 
-        // This function will be called by the ad event listener when the user earns the reward.
         window.grantReward = function () {
             if (typeof grantRewardCallback === 'function') {
                 grantRewardCallback();
             }
-            grantRewardCallback = null; // Reset for the next ad
-        }
+            grantRewardCallback = null;
+        };
 
-        // This function is called by the ad event listener when the ad is closed.
         window.adClosed = function () {
-            // Restart the game timer if it was paused for the ad
             if (window.S && window.S.timerInterval === null && !window.S.winModal.classList.contains('flex')) {
                 window.startTimer();
             }
-        }
+            isAdReady = false;
+            document.getElementById('continue-after-ad-btn').disabled = true;
+            document.getElementById('get-hint-after-ad-btn').disabled = true;
+        };
+
+        window.onAdReady = function () {
+            isAdReady = true;
+            document.getElementById('continue-after-ad-btn').disabled = false;
+            document.getElementById('get-hint-after-ad-btn').disabled = false;
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             const S = {
-                // UI Elements
                 grid: document.getElementById('sudoku-grid'),
                 timerEl: document.getElementById('timer'),
                 mistakesEl: document.getElementById('mistakes'),
@@ -467,8 +227,6 @@
                 getHintAfterAdBtn: document.getElementById('get-hint-after-ad-btn'),
                 dailyChallengeBtn: document.getElementById('daily-challenge-btn'),
                 shareBtn: document.getElementById('share-btn'),
-
-                // Score/Stats Elements
                 bestScoreContainer: document.getElementById('best-score-container'),
                 bestScoreDetails: document.getElementById('best-score-details'),
                 winDifficultyEl: document.getElementById('win-difficulty'),
@@ -476,33 +234,12 @@
                 winMistakesEl: document.getElementById('win-mistakes'),
                 winHintsEl: document.getElementById('win-hints'),
                 winScoreEl: document.getElementById('win-score'),
-
-                // Game State
-                board: [],
-                solution: [],
-                userBoard: [],
-                notes: [],
-                mistakesBoard: [],
-                selectedCell: null,
-                mistakes: 0,
-                maxMistakes: 3,
-                hints: 3,
-                isNotesMode: false,
-                difficulty: 'easy',
-                holesToRemove: 40,
-                timerInterval: null,
-                seconds: 0,
-
-                // New Stats for Scoring
-                hintsUsed: 0,
-                extraChancesUsed: 0,
-                isDailyChallenge: false,
+                board: [], solution: [], userBoard: [], notes: [], mistakesBoard: [],
+                selectedCell: null, mistakes: 0, maxMistakes: 3, hints: 3, isNotesMode: false,
+                difficulty: 'easy', holesToRemove: 40, timerInterval: null, seconds: 0,
+                hintsUsed: 0, extraChancesUsed: 0, isDailyChallenge: false,
             };
-
-            // Make key game functions and state accessible to the global ad callbacks
             window.S = S;
-
-            // --- Game Logic ---
 
             function generatePuzzle(rng = Math.random) {
                 const base = [
@@ -510,509 +247,74 @@
                     [8, 5, 9, 7, 6, 1, 4, 2, 3], [4, 2, 6, 8, 5, 3, 7, 9, 1], [7, 1, 3, 9, 2, 4, 8, 5, 6],
                     [9, 6, 1, 5, 3, 7, 2, 8, 4], [2, 8, 7, 4, 1, 9, 6, 3, 5], [3, 4, 5, 2, 8, 6, 1, 7, 9]
                 ];
-                shuffle(base, rng);
-                S.solution = JSON.parse(JSON.stringify(base));
-                S.board = createPuzzle(base, S.holesToRemove, rng);
-                S.userBoard = JSON.parse(JSON.stringify(S.board));
-                S.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
+                shuffle(base, rng); S.solution = JSON.parse(JSON.stringify(base)); S.board = createPuzzle(base, S.holesToRemove, rng); S.userBoard = JSON.parse(JSON.stringify(S.board)); S.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
             }
-
             function createPuzzle(board, holes, rng = Math.random) {
-                let puzzle = JSON.parse(JSON.stringify(board));
-                let attempts = holes;
-                while (attempts > 0) {
-                    let row = Math.floor(rng() * 9);
-                    let col = Math.floor(rng() * 9);
-                    if (puzzle[row][col] !== 0) {
-                        puzzle[row][col] = 0;
-                        attempts--;
-                    }
-                }
-                return puzzle;
+                let p = JSON.parse(JSON.stringify(board)); let a = holes; while (a > 0) { let r = Math.floor(rng() * 9); let c = Math.floor(rng() * 9); if (p[r][c] !== 0) { p[r][c] = 0; a--; } } return p;
             }
-
-            function shuffle(board, rng = Math.random) {
-                for (let i = 0; i < 9; i += 3) {
-                    let r1 = i + Math.floor(rng() * 3);
-                    let r2 = i + Math.floor(rng() * 3);
-                    [board[r1], board[r2]] = [board[r2], board[r1]];
-                }
-                for (let i = 0; i < 9; i += 3) {
-                    let c1 = i + Math.floor(rng() * 3);
-                    let c2 = i + Math.floor(rng() * 3);
-                    for (let row = 0; row < 9; row++) {
-                        [board[row][c1], board[row][c2]] = [board[row][c2], board[row][c1]];
-                    }
-                }
-            }
-
-            // --- UI & Rendering ---
-
-            function renderBoard() {
-                S.grid.innerHTML = '';
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        const cell = document.createElement('div');
-                        cell.classList.add('cell');
-                        cell.dataset.row = r;
-                        cell.dataset.col = c;
-
-                        if (S.mistakesBoard[r][c]) {
-                            cell.classList.add('persistent-error');
-                        }
-
-                        const value = S.userBoard[r][c];
-                        if (S.board[r][c] !== 0) {
-                            cell.textContent = S.board[r][c];
-                            cell.classList.add('fixed');
-                        } else if (value !== 0) {
-                            cell.textContent = value;
-                        } else {
-                            const notesGrid = document.createElement('div');
-                            notesGrid.classList.add('notes-grid');
-                            const cellNotes = S.notes[r][c];
-                            if (cellNotes && cellNotes.size > 0) {
-                                for (let i = 1; i <= 9; i++) {
-                                    const noteCell = document.createElement('div');
-                                    noteCell.classList.add('note-cell');
-                                    noteCell.textContent = cellNotes.has(i) ? i : '';
-                                    notesGrid.appendChild(noteCell);
-                                }
-                            }
-                            cell.appendChild(notesGrid);
-                        }
-                        S.grid.appendChild(cell);
-                    }
-                }
-            }
-
-            function updateSelection(cellElement) {
-                document.querySelectorAll('.selected, .highlight, .same-number').forEach(c => c.classList.remove('selected', 'highlight', 'same-number'));
-
-                if (!cellElement) {
-                    S.selectedCell = null;
-                    return;
-                }
-
-                S.selectedCell = cellElement;
-                S.selectedCell.classList.add('selected');
-
-                const row = parseInt(cellElement.dataset.row);
-                const col = parseInt(cellElement.dataset.col);
-                const value = S.userBoard[row][col];
-
-                for (let i = 0; i < 9; i++) {
-                    getCell(row, i)?.classList.add('highlight');
-                    getCell(i, col)?.classList.add('highlight');
-                }
-                const startRow = Math.floor(row / 3) * 3;
-                const startCol = Math.floor(col / 3) * 3;
-                for (let r = 0; r < 3; r++) {
-                    for (let c = 0; c < 3; c++) {
-                        getCell(startRow + r, startCol + c)?.classList.add('highlight');
-                    }
-                }
-
-                if (value !== 0) {
-                    document.querySelectorAll('.cell').forEach(c => {
-                        const r = parseInt(c.dataset.row);
-                        const c_col = parseInt(c.dataset.col);
-                        if (!getCell(r, c_col).classList.contains('persistent-error') && S.userBoard[r][c_col] === value) {
-                            c.classList.add('same-number');
-                        }
-                    });
-                }
-            }
-
-
-            function getCell(row, col) {
-                return S.grid.querySelector(`[data-row='${row}'][data-col='${col}']`);
-            }
-
-            // --- Event Handlers ---
-
-            function handleCellClick(e) {
-                const cell = e.target.closest('.cell');
-                if (cell) {
-                    updateSelection(cell);
-                }
-            }
-
-            function handleNumberInput(num) {
-                if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
-                const row = parseInt(S.selectedCell.dataset.row);
-                const col = parseInt(S.selectedCell.dataset.col);
-
-                if (S.isNotesMode) {
-                    handleNoteInput(row, col, num);
-                } else {
-                    handleValueInput(row, col, num);
-                }
-
-                renderBoard();
-                updateSelection(getCell(row, col));
-            }
-
-            function handleValueInput(row, col, num) {
-                S.notes[row][col]?.clear();
-                S.userBoard[row][col] = num;
-
-                if (num === S.solution[row][col]) {
-                    S.mistakesBoard[row][col] = false;
-                    checkWin();
-                } else {
-                    S.mistakes++;
-                    S.mistakesBoard[row][col] = true;
-                    S.mistakesEl.textContent = `${S.mistakes} / ${S.maxMistakes}`;
-                    if (S.mistakes >= S.maxMistakes) {
-                        stopTimer();
-                        S.adModal.classList.remove('hidden');
-                        S.adModal.classList.add('flex');
-                    }
-                }
-            }
-
-            function handleNoteInput(row, col, num) {
-                if (S.userBoard[row][col] !== 0) return;
-                const cellNotes = S.notes[row][col];
-                if (cellNotes.has(num)) {
-                    cellNotes.delete(num);
-                } else {
-                    cellNotes.add(num);
-                }
-            }
-
-            function handleErase() {
-                if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
-                const row = parseInt(S.selectedCell.dataset.row);
-                const col = parseInt(S.selectedCell.dataset.col);
-                S.userBoard[row][col] = 0;
-                S.mistakesBoard[row][col] = false;
-                S.notes[row][col]?.clear();
-                renderBoard();
-                updateSelection(getCell(row, col));
-            }
-
-            function giveHint() {
-                if (S.hints <= 0) return;
-
-                let emptyCells = [];
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        if (S.userBoard[r][c] === 0) emptyCells.push({ r, c });
-                    }
-                }
-
-                if (emptyCells.length > 0) {
-                    const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                    S.userBoard[r][c] = S.solution[r][c];
-                    S.mistakesBoard[r][c] = false;
-                    S.notes[r][c]?.clear();
-                    S.hints--;
-                    S.hintsUsed++;
-                    S.hintBtn.title = `Get Hint (${S.hints} left)`;
-                    renderBoard();
-                    updateSelection(getCell(r, c));
-                    checkWin();
-                }
-            }
-
-            function handleHint() {
-                if (S.hints <= 0) {
-                    alert("You are out of hints!");
-                    return;
-                }
-                stopTimer();
-                S.hintAdModal.classList.remove('hidden');
-                S.hintAdModal.classList.add('flex');
-            }
-
-            function startTimer() {
-                if (S.timerInterval) clearInterval(S.timerInterval);
-                S.timerInterval = setInterval(() => {
-                    S.seconds++;
-                    const minutes = Math.floor(S.seconds / 60).toString().padStart(2, '0');
-                    const secondsValue = (S.seconds % 60).toString().padStart(2, '0');
-                    S.timerEl.textContent = `${minutes}:${secondsValue}`;
-                }, 1000);
-            }
-            window.startTimer = startTimer; // Make it globally accessible for adClosed callback
-
-            function stopTimer() {
-                clearInterval(S.timerInterval);
-                S.timerInterval = null;
-            }
-
-            function calculateScore() {
-                const difficultyMultipliers = {
-                    easy: 1, medium: 1.5, hard: 2, expert: 2.5, master: 3, extreme: 4
-                };
-                const baseScore = 10000 * (difficultyMultipliers[S.difficulty] || 1);
-                const timePenalty = S.seconds * 10;
-                const hintPenalty = S.hintsUsed * 500;
-                const extraChancePenalty = S.extraChancesUsed * 1000;
-                const finalScore = Math.max(0, baseScore - timePenalty - hintPenalty - extraChancePenalty);
-                return Math.round(finalScore);
-            }
-
-            function saveScore(score) {
-                const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore')) || { score: 0 };
-                if (score > bestScore.score) {
-                    const newBest = {
-                        score: score,
-                        difficulty: S.difficulty,
-                        time: S.timerEl.textContent,
-                        mistakes: S.mistakes
-                    };
-                    localStorage.setItem('sudokuBestScore', JSON.stringify(newBest));
-                    loadBestScore();
-                }
-            }
-
-            function loadBestScore() {
-                const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore'));
-                if (bestScore && bestScore.score > 0) {
-                    S.bestScoreDetails.innerHTML = `
-                        <strong class="text-slate-400">Score:</strong> <span class="font-bold">${bestScore.score.toLocaleString()}</span>
-                        <strong class="text-slate-400">Difficulty:</strong> <span class="capitalize">${bestScore.difficulty}</span>
-                        <strong class="text-slate-400">Time:</strong> <span>${bestScore.time}</span>
-                        <strong class="text-slate-400">Mistakes:</strong> <span>${bestScore.mistakes}</span>
-                    `;
-                    S.bestScoreContainer.classList.remove('hidden');
-                }
-            }
-
-            function checkWin() {
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        if (S.userBoard[r][c] !== S.solution[r][c]) return false;
-                    }
-                }
-                winGame();
-                return true;
-            }
-
-            function winGame() {
-                stopTimer();
-                const finalScore = calculateScore();
-
-                S.winDifficultyEl.textContent = S.difficulty;
-                S.winTimeEl.textContent = S.timerEl.textContent;
-                S.winMistakesEl.textContent = S.mistakes;
-                S.winHintsEl.textContent = S.hintsUsed;
-                S.winScoreEl.textContent = finalScore.toLocaleString();
-
-                S.winModal.classList.remove('hidden');
-                S.winModal.classList.add('flex');
-
-                if (S.isDailyChallenge) {
-                    const today = getTodaysDateString();
-                    localStorage.setItem(`dailyChallenge_${today}`, 'completed');
-                    S.shareBtn.classList.remove('hidden');
-                } else {
-                    S.shareBtn.classList.add('hidden');
-                }
-                S.isDailyChallenge = false;
-                saveScore(finalScore);
-            }
-
-            function toggleNotesMode() {
-                S.isNotesMode = !S.isNotesMode;
-                S.notesBtn.classList.toggle('active', S.isNotesMode);
-            }
-
-            function selectDifficulty(level, rng = Math.random) {
-                S.difficulty = level;
-                const holes = {
-                    easy: 40, medium: 50, hard: 55, expert: 58, master: 61, extreme: 64
-                };
-                S.holesToRemove = holes[level] || 50;
-                S.difficultyEl.textContent = level;
-                S.introScreen.classList.add('hidden');
-                S.introScreen.classList.remove('flex');
-                S.gameContainer.classList.remove('hidden');
-                S.gameContainer.classList.add('flex');
-                init(rng);
-            }
-
-            function getTodaysDateString() {
-                const today = new Date();
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-            function mulberry32(a) {
-                return function () {
-                    var t = a += 0x6D2B79F5;
-                    t = Math.imul(t ^ t >>> 15, t | 1);
-                    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
-                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
-                }
-            }
-
-            function checkDailyChallengeStatus() {
-                const today = getTodaysDateString();
-                if (localStorage.getItem(`dailyChallenge_${today}`)) {
-                    S.dailyChallengeBtn.textContent = 'Challenge Completed Today!';
-                    S.dailyChallengeBtn.disabled = true;
-                } else {
-                    S.dailyChallengeBtn.textContent = 'Play Daily Challenge';
-                    S.dailyChallengeBtn.disabled = false;
-                }
-            }
-
-            function startDailyChallenge() {
-                S.isDailyChallenge = true;
-                const today = getTodaysDateString();
-                let seed = 0;
-                for (let i = 0; i < today.length; i++) {
-                    seed += today.charCodeAt(i);
-                }
-                const random = mulberry32(seed);
-                const difficulties = ['medium', 'hard', 'expert', 'master', 'extreme'];
-                const dailyDifficulty = difficulties[Math.floor(random() * difficulties.length)];
-                selectDifficulty(dailyDifficulty, random);
-            }
-
-            async function handleShare() {
-                const shareData = {
-                    title: 'Sudoku Daily Challenge',
-                    text: `I completed the Sudoku Daily Challenge on ${S.difficulty} in ${S.timerEl.textContent} with a score of ${S.winScoreEl.textContent}! Can you beat me?`,
-                    url: window.location.href
-                };
-                try {
-                    if (navigator.share) {
-                        await navigator.share(shareData);
-                    } else {
-                        await navigator.clipboard.writeText(shareData.text + "\n" + shareData.url);
-                        alert("Challenge result copied to clipboard!");
-                    }
-                } catch (err) {
-                    console.error('Error sharing:', err);
-                    alert("Could not share. Result copied to clipboard instead!");
-                    await navigator.clipboard.writeText(shareData.text + "\n" + shareData.url);
-                }
-            }
-
-            function init(rng = Math.random) {
-                S.mistakes = 0;
-                S.hints = 3;
-                S.hintsUsed = 0;
-                S.extraChancesUsed = 0;
-                S.seconds = 0;
-                S.selectedCell = null;
-                S.isNotesMode = false;
-                S.mistakesBoard = Array(9).fill(null).map(() => Array(9).fill(false));
-                S.notesBtn.classList.remove('active');
-                S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
-                S.winModal.classList.add('hidden');
-                S.adModal.classList.add('hidden');
-                S.timerEl.textContent = '00:00';
-                S.hintBtn.title = `Get Hint (${S.hints} left)`;
-
-                generatePuzzle(rng);
-                renderBoard();
-                startTimer();
-            }
-
+            function shuffle(b, rng = Math.random) { for (let i = 0; i < 9; i += 3) { let r1 = i + Math.floor(rng() * 3); let r2 = i + Math.floor(rng() * 3); [b[r1], b[r2]] = [b[r2], b[r1]]; } for (let i = 0; i < 9; i += 3) { let c1 = i + Math.floor(rng() * 3); let c2 = i + Math.floor(rng() * 3); for (let r = 0; r < 9; r++) { [b[r][c1], b[r][c2]] = [b[r][c2], b[r][c1]]; } } }
+            function renderBoard() { S.grid.innerHTML = ''; for (let r = 0; r < 9; r++) { for (let c = 0; c < 9; c++) { const e = document.createElement('div'); e.className = 'cell'; e.dataset.row = r; e.dataset.col = c; if (S.mistakesBoard[r][c]) e.classList.add('persistent-error'); const v = S.userBoard[r][c]; if (S.board[r][c] !== 0) { e.textContent = S.board[r][c]; e.classList.add('fixed'); } else if (v !== 0) { e.textContent = v; } else { const n = document.createElement('div'); n.className = 'notes-grid'; const cn = S.notes[r][c]; if (cn && cn.size > 0) { for (let i = 1; i <= 9; i++) { const nc = document.createElement('div'); nc.className = 'note-cell'; nc.textContent = cn.has(i) ? i : ''; n.appendChild(nc); } } e.appendChild(n); } S.grid.appendChild(e); } } }
+            function updateSelection(e) { document.querySelectorAll('.selected, .highlight, .same-number').forEach(c => c.classList.remove('selected', 'highlight', 'same-number')); if (!e) { S.selectedCell = null; return; } S.selectedCell = e; S.selectedCell.classList.add('selected'); const r = parseInt(e.dataset.row); const c = parseInt(e.dataset.col); const v = S.userBoard[r][c]; for (let i = 0; i < 9; i++) { getCell(r, i)?.classList.add('highlight'); getCell(i, c)?.classList.add('highlight'); } const sr = Math.floor(r / 3) * 3; const sc = Math.floor(c / 3) * 3; for (let R = 0; R < 3; R++) for (let C = 0; C < 3; C++) getCell(sr + R, sc + C)?.classList.add('highlight'); if (v !== 0) { document.querySelectorAll('.cell').forEach(c => { const R = parseInt(c.dataset.row), C = parseInt(c.dataset.col); if (!getCell(R, C).classList.contains('persistent-error') && S.userBoard[R][C] === v) c.classList.add('same-number'); }); } }
+            function getCell(r, c) { return S.grid.querySelector(`[data-row='${r}'][data-col='${c}']`); }
+            function handleCellClick(e) { const c = e.target.closest('.cell'); if (c) updateSelection(c); }
+            function handleNumberInput(n) { if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return; const r = parseInt(S.selectedCell.dataset.row); const c = parseInt(S.selectedCell.dataset.col); if (S.isNotesMode) handleNoteInput(r, c, n); else handleValueInput(r, c, n); renderBoard(); updateSelection(getCell(r, c)); }
+            function handleValueInput(r, c, n) { S.notes[r][c]?.clear(); S.userBoard[r][c] = n; if (n === S.solution[r][c]) { S.mistakesBoard[r][c] = false; checkWin(); } else { S.mistakes++; S.mistakesBoard[r][c] = true; S.mistakesEl.textContent = `${S.mistakes} / ${S.maxMistakes}`; if (S.mistakes >= S.maxMistakes) { stopTimer(); S.adModal.classList.remove('hidden'); S.adModal.classList.add('flex'); } } }
+            function handleNoteInput(r, c, n) { if (S.userBoard[r][c] !== 0) return; const cn = S.notes[r][c]; if (cn.has(n)) cn.delete(n); else cn.add(n); }
+            function handleErase() { if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return; const r = parseInt(S.selectedCell.dataset.row); const c = parseInt(S.selectedCell.dataset.col); S.userBoard[r][c] = 0; S.mistakesBoard[r][c] = false; S.notes[r][c]?.clear(); renderBoard(); updateSelection(getCell(r, c)); }
+            function giveHint() { if (S.hints <= 0) return; let ec = []; for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (S.userBoard[r][c] === 0) ec.push({ r, c }); if (ec.length > 0) { const { r, c } = ec[Math.floor(Math.random() * ec.length)]; S.userBoard[r][c] = S.solution[r][c]; S.mistakesBoard[r][c] = false; S.notes[r][c]?.clear(); S.hints--; S.hintsUsed++; S.hintBtn.title = `Get Hint (${S.hints} left)`; renderBoard(); updateSelection(getCell(r, c)); checkWin(); } }
+            function handleHint() { if (S.hints <= 0) { alert("You are out of hints!"); return; } stopTimer(); S.hintAdModal.classList.remove('hidden'); S.hintAdModal.classList.add('flex'); }
+            function startTimer() { if (S.timerInterval) clearInterval(S.timerInterval); S.timerInterval = setInterval(() => { S.seconds++; const m = Math.floor(S.seconds / 60).toString().padStart(2, '0'); const s = (S.seconds % 60).toString().padStart(2, '0'); S.timerEl.textContent = `${m}:${s}`; }, 1000); }
+            window.startTimer = startTimer;
+            function stopTimer() { clearInterval(S.timerInterval); S.timerInterval = null; }
+            function calculateScore() { const m = { easy: 1, medium: 1.5, hard: 2, expert: 2.5, master: 3, extreme: 4 }; return Math.round(Math.max(0, 10000 * (m[S.difficulty] || 1) - S.seconds * 10 - S.hintsUsed * 500 - S.extraChancesUsed * 1000)); }
+            function saveScore(s) { const b = JSON.parse(localStorage.getItem('sudokuBestScore')) || { score: 0 }; if (s > b.score) { localStorage.setItem('sudokuBestScore', JSON.stringify({ score: s, difficulty: S.difficulty, time: S.timerEl.textContent, mistakes: S.mistakes })); loadBestScore(); } }
+            function loadBestScore() { const b = JSON.parse(localStorage.getItem('sudokuBestScore')); if (b && b.score > 0) { S.bestScoreDetails.innerHTML = `<strong class="text-slate-400">Score:</strong> <span class="font-bold">${b.score.toLocaleString()}</span><strong class="text-slate-400">Difficulty:</strong> <span class="capitalize">${b.difficulty}</span><strong class="text-slate-400">Time:</strong> <span>${b.time}</span><strong class="text-slate-400">Mistakes:</strong> <span>${b.mistakes}</span>`; S.bestScoreContainer.classList.remove('hidden'); } }
+            function checkWin() { for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (S.userBoard[r][c] !== S.solution[r][c]) return false; winGame(); return true; }
+            function winGame() { stopTimer(); const s = calculateScore(); S.winDifficultyEl.textContent = S.difficulty; S.winTimeEl.textContent = S.timerEl.textContent; S.winMistakesEl.textContent = S.mistakes; S.winHintsEl.textContent = S.hintsUsed; S.winScoreEl.textContent = s.toLocaleString(); S.winModal.classList.remove('hidden'); S.winModal.classList.add('flex'); if (S.isDailyChallenge) { const t = getTodaysDateString(); localStorage.setItem(`dailyChallenge_${t}`, 'completed'); S.shareBtn.classList.remove('hidden'); } else { S.shareBtn.classList.add('hidden'); } S.isDailyChallenge = false; saveScore(s); }
+            function toggleNotesMode() { S.isNotesMode = !S.isNotesMode; S.notesBtn.classList.toggle('active', S.isNotesMode); }
+            function selectDifficulty(l, rng = Math.random) { S.difficulty = l; const h = { easy: 40, medium: 50, hard: 55, expert: 58, master: 61, extreme: 64 }; S.holesToRemove = h[l] || 50; S.difficultyEl.textContent = l; S.introScreen.classList.add('hidden'); S.introScreen.classList.remove('flex'); S.gameContainer.classList.remove('hidden'); S.gameContainer.classList.add('flex'); init(rng); }
+            function getTodaysDateString() { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+            function mulberry32(a) { return function () { var t = a += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; } }
+            function checkDailyChallengeStatus() { const t = getTodaysDateString(); if (localStorage.getItem(`dailyChallenge_${t}`)) { S.dailyChallengeBtn.textContent = 'Challenge Completed Today!'; S.dailyChallengeBtn.disabled = true; } else { S.dailyChallengeBtn.textContent = 'Play Daily Challenge'; S.dailyChallengeBtn.disabled = false; } }
+            function startDailyChallenge() { S.isDailyChallenge = true; const t = getTodaysDateString(); let s = 0; for (let i = 0; i < t.length; i++) s += t.charCodeAt(i); const r = mulberry32(s); const d = ['medium', 'hard', 'expert', 'master', 'extreme']; selectDifficulty(d[Math.floor(r() * d.length)], r); }
+            async function handleShare() { const d = { title: 'Sudoku Daily Challenge', text: `I completed the Sudoku Daily Challenge on ${S.difficulty} in ${S.timerEl.textContent} with a score of ${S.winScoreEl.textContent}! Can you beat me?`, url: window.location.href }; try { if (navigator.share) await navigator.share(d); else { await navigator.clipboard.writeText(d.text + "\n" + d.url); alert("Challenge result copied to clipboard!"); } } catch (e) { console.error('Error sharing:', e); alert("Could not share. Result copied to clipboard instead!"); await navigator.clipboard.writeText(d.text + "\n" + d.url); } }
+            function init(rng = Math.random) { S.mistakes = 0; S.hints = 3; S.hintsUsed = 0; S.extraChancesUsed = 0; S.seconds = 0; S.selectedCell = null; S.isNotesMode = false; S.mistakesBoard = Array(9).fill(null).map(() => Array(9).fill(false)); S.notesBtn.classList.remove('active'); S.mistakesEl.textContent = `0 / ${S.maxMistakes}`; S.winModal.classList.add('hidden'); S.adModal.classList.add('hidden'); S.timerEl.textContent = '00:00'; S.hintBtn.title = `Get Hint (${S.hints} left)`; generatePuzzle(rng); renderBoard(); startTimer(); }
+            
             S.grid.addEventListener('click', handleCellClick);
-            S.numberButtons.forEach(btn => {
-                btn.addEventListener('click', () => handleNumberInput(parseInt(btn.dataset.num)));
-            });
-
-            document.addEventListener('keydown', e => {
-                if (e.key >= '1' && e.key <= '9') {
-                    handleNumberInput(parseInt(e.key));
-                } else if (e.key === 'Backspace' || e.key === 'Delete') {
-                    handleErase();
-                } else if (e.key.toLowerCase() === 'n') {
-                    toggleNotesMode();
-                } else if (e.key.startsWith('Arrow')) {
-                    if (!S.selectedCell) return;
-                    e.preventDefault();
-                    let row = parseInt(S.selectedCell.dataset.row);
-                    let col = parseInt(S.selectedCell.dataset.col);
-
-                    switch (e.key) {
-                        case 'ArrowUp': row = Math.max(0, row - 1); break;
-                        case 'ArrowDown': row = Math.min(8, row + 1); break;
-                        case 'ArrowLeft': col = Math.max(0, col - 1); break;
-                        case 'ArrowRight': col = Math.min(8, col + 1); break;
-                    }
-
-                    const newCell = getCell(row, col);
-                    if (newCell) {
-                        updateSelection(newCell);
-                    }
-                }
-            });
-
-            S.difficultyButtons.forEach(btn => {
-                btn.addEventListener('click', () => selectDifficulty(btn.dataset.difficulty));
-            });
-
+            S.numberButtons.forEach(b => b.addEventListener('click', () => handleNumberInput(parseInt(b.dataset.num))));
+            document.addEventListener('keydown', e => { if (e.key >= '1' && e.key <= '9') handleNumberInput(parseInt(e.key)); else if (e.key === 'Backspace' || e.key === 'Delete') handleErase(); else if (e.key.toLowerCase() === 'n') toggleNotesMode(); else if (e.key.startsWith('Arrow')) { if (!S.selectedCell) return; e.preventDefault(); let r = parseInt(S.selectedCell.dataset.row), c = parseInt(S.selectedCell.dataset.col); switch (e.key) { case 'ArrowUp': r = Math.max(0, r - 1); break; case 'ArrowDown': r = Math.min(8, r + 1); break; case 'ArrowLeft': c = Math.max(0, c - 1); break; case 'ArrowRight': c = Math.min(8, c + 1); break; } const nc = getCell(r, c); if (nc) updateSelection(nc); } });
+            S.difficultyButtons.forEach(b => b.addEventListener('click', () => selectDifficulty(b.dataset.difficulty)));
             S.notesBtn.addEventListener('click', toggleNotesMode);
             S.eraseBtn.addEventListener('click', handleErase);
             S.hintBtn.addEventListener('click', handleHint);
-
-            function startNewGame() {
-                stopTimer();
-                S.isDailyChallenge = false;
-                S.winModal.classList.add('hidden');
-                S.winModal.classList.remove('flex');
-                S.gameContainer.classList.add('hidden');
-                S.gameContainer.classList.remove('flex');
-                S.introScreen.classList.remove('hidden');
-                S.introScreen.classList.add('flex');
-                S.shareBtn.classList.add('hidden');
-                checkDailyChallengeStatus();
-            }
-
+            function startNewGame() { stopTimer(); S.isDailyChallenge = false; S.winModal.classList.add('hidden'); S.winModal.classList.remove('flex'); S.gameContainer.classList.add('hidden'); S.gameContainer.classList.remove('flex'); S.introScreen.classList.remove('hidden'); S.introScreen.classList.add('flex'); S.shareBtn.classList.add('hidden'); checkDailyChallengeStatus(); }
             S.newGameBtn.addEventListener('click', startNewGame);
             S.modalNewGameBtn.addEventListener('click', startNewGame);
 
-            // --- MODIFIED AD-RELATED EVENT LISTENERS ---
-
             S.continueAfterAdBtn.addEventListener('click', () => {
-                // Define what happens after a successful ad view
-                grantRewardCallback = function () {
+                if (!isAdReady) return;
+                grantRewardCallback = () => {
                     S.adModal.classList.add('hidden');
                     S.adModal.classList.remove('flex');
                     S.extraChancesUsed++;
                     S.mistakes = 0;
                     S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
                 };
-                // Show the ad
-                if (rewardedSlot) {
-                    rewardedSlot.makeRewardedVisible();
-                } else {
-                    alert('Ad not available right now. Please try again in a moment.');
-                    adClosed(); // Resume timer if ad fails to show
-                }
+                googletag.rewarded.makeRewardedVisible();
             });
-
             S.getHintAfterAdBtn.addEventListener('click', () => {
-                // Define what happens after a successful ad view
-                grantRewardCallback = function () {
+                if (!isAdReady) return;
+                grantRewardCallback = () => {
                     S.hintAdModal.classList.add('hidden');
                     S.hintAdModal.classList.remove('flex');
                     giveHint();
                 };
-                // Show the ad
-                if (rewardedSlot) {
-                    rewardedSlot.makeRewardedVisible();
-                } else {
-                    alert('Ad not available right now. Please try again in a moment.');
-                    adClosed(); // Resume timer if ad fails to show
-                }
+                googletag.rewarded.makeRewardedVisible();
             });
 
             S.dailyChallengeBtn.addEventListener('click', startDailyChallenge);
             S.shareBtn.addEventListener('click', handleShare);
 
-            // --- Initial Load ---
             loadBestScore();
             checkDailyChallengeStatus();
             S.introScreen.classList.remove('hidden');
