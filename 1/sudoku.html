@@ -9,56 +9,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0F172A;
-            /* slate-900 */
-            --cell-color: #1E293B;
-            /* slate-800 */
-            --border-color: #334155;
-            /* slate-700 */
-            --text-color: #E2E8F0;
-            /* slate-200 */
-            --accent-color: #54F2FF;
-            /* Custom Neon Cyan */
-            --accent-highlight: rgba(84, 242, 255, 0.1);
+            --bg-color: #0B0C1E;
+            --cell-color: #1C1D2E;
+            --border-color: #31334A;
+            --text-color: #E0E0E0;
+            --accent-color: #FFFFFF;
+            /* White accent for outlines and hovers */
+            --accent-highlight: rgba(255, 255, 255, 0.1);
+            /* Subtle white highlight for selected cell */
+            --gold-accent: #FFC700;
             --error-color: #FB7185;
-            /* rose-400 */
             --error-bg-color: rgba(251, 113, 133, 0.15);
-            --fixed-text-color: #94A3B8;
-            /* slate-400 */
+            --fixed-text-color: #ffffffda;
             --notes-text-color: #64748B;
-            /* slate-500 */
-        }
-
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Prevent ugly blue highlight on tap */
         * {
             -webkit-tap-highlight-color: transparent;
         }
 
         #grid-wrapper {
-            width: 100%;
-            max-width: min(95vw, 95vh - 200px);
+            width: 95%;
+            max-width: 500px;
             margin: 0 auto;
-        }
-
-        @media (min-width: 1024px) {
-            #grid-wrapper {
-                width: calc(100vh - 160px);
-                height: calc(100vh - 160px);
-                min-width: 450px;
-                max-width: 650px;
-            }
+            aspect-ratio: 1 / 1;
         }
 
         .sudoku-grid {
@@ -66,15 +50,13 @@
             grid-template-columns: repeat(9, 1fr);
             grid-template-rows: repeat(9, 1fr);
             width: 100%;
-            aspect-ratio: 1 / 1;
+            height: 100%;
             gap: 1px;
             background-color: var(--border-color);
             border-radius: 8px;
             overflow: hidden;
             border: 2px solid var(--border-color);
-            /* Prevent rendering jitters/shaking */
             transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
         }
 
@@ -83,7 +65,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(1.2rem, 5vw, 1.75rem);
+            font-size: clamp(1.1rem, 5vw, 2rem);
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s ease;
@@ -92,7 +74,6 @@
             -webkit-user-select: none;
         }
 
-        /* Add thicker lines for 3x3 sections */
         .cell:nth-child(3n) {
             border-right: 2px solid var(--border-color);
         }
@@ -113,14 +94,14 @@
 
         .cell.selected {
             background-color: var(--accent-highlight);
-            outline: 2px solid #FFFFFF;
+            outline: 3px solid var(--accent-color);
             z-index: 10;
         }
 
         .cell.highlight,
         .cell.same-number {
-            background-color: rgba(71, 85, 105, 0.5);
-            /* slate-600 with opacity */
+            background-color: rgba(255, 255, 255, 0.07);
+            /* Brighter, translucent white for highlights */
         }
 
         .cell.persistent-error {
@@ -151,7 +132,7 @@
         }
 
         .note-cell {
-            font-size: clamp(0.5rem, 2vw, 0.75rem);
+            font-size: clamp(0.5rem, 1.5vw, 0.75rem);
             color: var(--notes-text-color);
             text-align: center;
             line-height: 1.1;
@@ -159,8 +140,9 @@
 
         .control-button,
         .number-button {
+            background-color: var(--cell-color);
             transition: all 0.2s ease;
-            border: 1px solid #FFFFFF;
+            border: 1px solid var(--border-color);
         }
 
         .control-button:hover,
@@ -172,82 +154,47 @@
         .control-button.active {
             background-color: var(--accent-color);
             color: var(--bg-color);
+            /* Dark text on white active button */
             border-color: var(--accent-color);
         }
 
-        /* Mobile-specific improvements */
-        @media (max-width: 768px) {
-            #game-container {
-                padding: 0.5rem;
-            }
-
-            .number-button {
-                font-size: 1.5rem;
-                padding: 0.75rem;
-            }
-
-            .control-button {
-                padding: 0.75rem;
-            }
-
-            #grid-wrapper {
-                max-width: min(95vw, 95vh - 250px);
-            }
-
-            .sudoku-grid .cell {
-                font-size: clamp(1.1rem, 4.5vw, 1.5rem);
-            }
-
-            /* Horizontal number buttons for mobile */
-            .number-buttons-container {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .number-button {
-                flex: 1;
-                min-width: 45px;
-                max-width: 30px;
-                aspect-ratio: 1 / 1;
-            }
+        #best-score-container .font-bold {
+            color: var(--gold-accent);
         }
 
-        @media (max-width: 480px) {
-            #game-container {
-                padding: 0.25rem;
-            }
-
-            .number-button {
-                font-size: 1.25rem;
-                padding: 0.5rem;
-                align-content: justify;
-            }
-
-            .control-button {
-                padding: 0.5rem;
-            }
-
-            #grid-wrapper {
-                max-width: min(95vw, 95vh - 280px);
-            }
-
-            .sudoku-grid .cell {
-                font-size: clamp(1rem, 4vw, 1.25rem);
-            }
-
-            .number-button {
-                min-width: 55px;
-                max-width: 50px;
-                aspect-ratio: 1 / 1;
-            }
+        #win-score {
+            color: var(--gold-accent);
         }
 
-        /* Desktop layout */
+        .number-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .number-button {
+            flex: 1 1 40px;
+            max-width: 50px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         @media (min-width: 1024px) {
+            body {
+                overflow: hidden;
+            }
+
+            #grid-wrapper {
+                width: auto;
+                height: calc(100vh - 100px);
+                max-height: 650px;
+                max-width: 650px;
+            }
+
             .number-buttons-container {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
@@ -257,176 +204,179 @@
             }
 
             .number-button {
-                aspect-ratio: 1 / 1;
-            }
-        }
-
-
-        @media (min-width: 768px) and (max-width: 1023px) {
-
-
-            #game-container {
-                padding: 0.5rem;
-            }
-
-            .number-button {
-                font-size: 1.5rem;
-                padding: 0.75rem;
-            }
-
-            .control-button {
-                padding: 0.75rem;
-            }
-
-            #grid-wrapper {
-                max-width: min(95vw, 95vh - 250px);
-            }
-
-            .sudoku-grid .cell {
-                font-size: clamp(1.1rem, 4.5vw, 1.5rem);
-            }
-
-
-
-
-            /* Horizontal number buttons for mobile */
-            .number-buttons-container {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 0.5rem;
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .number-button {
-                flex: 1;
-                min-width: 45px;
-                max-width: 30px;
-                aspect-ratio: 1 / 1;
+                flex: auto;
+                max-width: none;
             }
         }
     </style>
 </head>
 
-<body class="flex flex-col items-center justify-center p-2 md:p-4 h-full">
+<body class="flex flex-col items-center justify-center p-2 md:p-4 min-h-screen">
 
-    <!-- Difficulty Modal -->
-    <div id="difficulty-modal" class="bg-slate-800 p-8 rounded-lg text-center shadow-xl flex flex-col gap-4">
-        <h2 class="text-3xl font-bold text-slate-100 mb-4">Select Difficulty</h2>
-        <button data-difficulty="easy"
-            class="difficulty-btn w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">Easy</button>
-        <button data-difficulty="medium"
-            class="difficulty-btn w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">Medium</button>
-        <button data-difficulty="hard"
-            class="difficulty-btn w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">Hard</button>
+    <div id="intro-screen"
+        class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 hidden w-full max-w-md border border-slate-700">
+        <h1 class="text-5xl font-bold text-white tracking-wider">SUDOKU</h1>
+
+        <div id="best-score-container" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hidden">
+            <h3 class="text-xl font-bold text-slate-100 mb-3 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    style="color: var(--gold-accent)">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                    <path d="M4 22h16" />
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                    <path d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" />
+                    <path d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
+                </svg>
+                All-Time Best
+            </h3>
+            <div id="best-score-details" class="text-slate-300 grid grid-cols-2 gap-x-4 gap-y-2 text-left">
+            </div>
+        </div>
+
+        <button id="daily-challenge-btn"
+            class="w-full p-4 rounded-lg bg-white text-slate-900 font-bold text-xl hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg">
+            Play Daily Challenge
+        </button>
+        <div class="relative flex py-2 items-center">
+            <div class="flex-grow border-t border-slate-600"></div>
+            <span class="flex-shrink mx-4 text-slate-400">OR</span>
+            <div class="flex-grow border-t border-slate-600"></div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-100 mb-2">Start a New Game</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
+            <button data-difficulty="easy"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Easy</button>
+            <button data-difficulty="medium"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Medium</button>
+            <button data-difficulty="hard"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Hard</button>
+            <button data-difficulty="expert"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Expert</button>
+            <button data-difficulty="master"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Master</button>
+            <button data-difficulty="extreme"
+                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Extreme</button>
+        </div>
     </div>
 
-    <div id="game-container"
-        class="hidden w-full h-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center lg:gap-8">
-        <!-- Game Content -->
-        <div class="flex flex-col lg:flex-row items-center justify-center w-full h-full gap-4 lg:gap-8">
-            <!-- Grid Section -->
-            <div class="flex flex-col items-center w-full lg:w-auto">
-                <!-- Game Info - Above the grid -->
-                <div class="w-full max-w-[500px] lg:max-w-none flex justify-between items-center mb-4 px-2">
-                    <div class="text-md text-center">Difficulty<br><span id="difficulty"
-                            class="font-semibold text-white">Easy</span></div>
-                    <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span>
-                    </div>
-                    <div id="timer" class="text-2xl font-semibold">00:00</div>
-                </div>
 
-                <!-- Sudoku Grid -->
-                <div id="grid-wrapper">
-                    <div id="sudoku-grid" class="sudoku-grid"></div>
+    <div id="game-container"
+        class="hidden w-full h-full max-w-7xl mx-auto flex-col lg:flex-row items-center justify-center lg:gap-8">
+        <div class="flex flex-col items-center w-full lg:w-auto">
+            <div class="w-full max-w-[500px] flex justify-between items-center mb-4 px-2">
+                <div class="text-md text-center">Difficulty<br><span id="difficulty"
+                        class="font-semibold text-white capitalize">Easy</span></div>
+                <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span>
                 </div>
+                <div id="timer" class="text-2xl font-semibold">00:00</div>
             </div>
 
-            <!-- Controls Section - Beside the grid -->
-            <div class="w-full lg:w-auto flex flex-col items-center gap-4 mt-4 lg:mt-0">
-                <!-- Control Buttons -->
-                <div class="w-full flex justify-center items-center gap-4 max-w-[500px] lg:max-w-[200px]">
-                    <button id="notes-btn"
-                        class="control-button flex-1 p-3 rounded-md bg-slate-800 flex justify-center items-center"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg></button>
-                    <button id="erase-btn"
-                        class="control-button flex-1 p-3 rounded-md bg-slate-800 flex justify-center items-center"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height-24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                            <line x1="18" y1="9" x2="12" y2="15"></line>
-                            <line x1="12" y1="9" x2="18" y2="15"></line>
-                        </svg></button>
-                    <button id="hint-btn"
-                        class="control-button flex-1 p-3 rounded-md bg-slate-800 flex justify-center items-center"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg></button>
-                </div>
+            <div id="grid-wrapper">
+                <div id="sudoku-grid" class="sudoku-grid"></div>
+            </div>
+        </div>
 
-                <!-- Number Buttons -->
-                <div class="number-buttons-container">
-                    <button data-num="1" class="number-button text-2xl p-3 rounded-md bg-slate-800">1</button>
-                    <button data-num="2" class="number-button text-2xl p-3 rounded-md bg-slate-800">2</button>
-                    <button data-num="3" class="number-button text-2xl p-3 rounded-md bg-slate-800">3</button>
-                    <button data-num="4" class="number-button text-2xl p-3 rounded-md bg-slate-800">4</button>
-                    <button data-num="5" class="number-button text-2xl p-3 rounded-md bg-slate-800">5</button>
-                    <button data-num="6" class="number-button text-2xl p-3 rounded-md bg-slate-800">6</button>
-                    <button data-num="7" class="number-button text-2xl p-3 rounded-md bg-slate-800">7</button>
-                    <button data-num="8" class="number-button text-2xl p-3 rounded-md bg-slate-800">8</button>
-                    <button data-num="9" class="number-button text-2xl p-3 rounded-md bg-slate-800">9</button>
-                </div>
+        <div class="w-full lg:w-auto flex flex-col items-center gap-4 mt-4 lg:mt-0">
+            <div class="w-full flex justify-center items-center gap-4 max-w-[500px] lg:max-w-[200px]">
+                <button id="notes-btn"
+                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
+                    title="Toggle Notes (N)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg></button>
+                <button id="erase-btn"
+                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
+                    title="Erase (Backspace)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                        <line x1="18" y1="9" x2="12" y2="15"></line>
+                        <line x1="12" y1="9" x2="18" y2="15"></line>
+                    </svg></button>
+                <button id="hint-btn"
+                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
+                    title="Get Hint">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"></path>
+                        <path
+                            d="M12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z">
+                        </path>
+                    </svg>
+                </button>
+            </div>
 
-                <!-- New Game Button -->
-                <button id="new-game-btn"
-                    class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">
-                    New Game
+            <div class="number-buttons-container max-w-[500px] lg:max-w-[200px]">
+                <button data-num="1" class="number-button text-2xl p-3 rounded-md">1</button>
+                <button data-num="2" class="number-button text-2xl p-3 rounded-md">2</button>
+                <button data-num="3" class="number-button text-2xl p-3 rounded-md">3</button>
+                <button data-num="4" class="number-button text-2xl p-3 rounded-md">4</button>
+                <button data-num="5" class="number-button text-2xl p-3 rounded-md">5</button>
+                <button data-num="6" class="number-button text-2xl p-3 rounded-md">6</button>
+                <button data-num="7" class="number-button text-2xl p-3 rounded-md">7</button>
+                <button data-num="8" class="number-button text-2xl p-3 rounded-md">8</button>
+                <button data-num="9" class="number-button text-2xl p-3 rounded-md">9</button>
+            </div>
+
+            <button id="new-game-btn"
+                class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">
+                New Game
+            </button>
+        </div>
+    </div>
+
+    <div id="win-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
+            <h2 class="text-3xl font-bold text-white mb-4">Congratulations!</h2>
+            <p class="text-lg mb-4">You solved the puzzle!</p>
+            <div id="win-stats" class="grid grid-cols-2 gap-x-4 text-left mb-6 bg-slate-700/50 p-4 rounded-md">
+                <span class="font-semibold">Difficulty:</span><span id="win-difficulty" class="capitalize"></span>
+                <span class="font-semibold">Time:</span><span id="win-time"></span>
+                <span class="font-semibold">Mistakes:</span><span id="win-mistakes"></span>
+                <span class="font-semibold">Hints Used:</span><span id="win-hints"></span>
+            </div>
+            <div id="win-score-display" class="mb-6">
+                <p class="text-lg">Score: <span id="win-score" class="font-bold"></span></p>
+            </div>
+            <div class="flex flex-col gap-3">
+                <button id="share-btn"
+                    class="hidden w-full p-3 rounded-md bg-green-500 text-white font-bold text-lg hover:bg-green-400 transition-colors">
+                    Share Result
+                </button>
+                <button id="modal-new-game-btn"
+                    class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
+                    Play Again
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Win Modal -->
-    <div id="win-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl">
-            <h2 class="text-3xl font-bold text-cyan-400 mb-4">Congratulations!</h2>
-            <p class="text-lg mb-2">You solved the puzzle!</p>
-            <p class="text-lg mb-6">Time: <span id="win-time"></span></p>
-            <button id="modal-new-game-btn"
-                class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
-                Play Again
-            </button>
-        </div>
-    </div>
-
-    <!-- Ad Modal -->
-    <div id="ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl">
+    <div id="ad-modal"
+        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-2xl font-bold text-rose-400 mb-4">Out of chances!</h2>
             <p class="text-lg mb-6">Watch a short video ad to continue playing.</p>
             <button id="continue-after-ad-btn"
-                class="w-full p-3 rounded-md bg-cyan-500 text-slate-900 font-bold text-lg hover:bg-cyan-400 transition-colors">
+                class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
                 Watch Ad & Continue
             </button>
         </div>
     </div>
 
-    <!-- Hint Ad Modal -->
     <div id="hint-ad-modal"
         class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl">
-            <h2 class="text-2xl font-bold text-cyan-400 mb-4">Need a hand?</h2>
+        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
+            <h2 class="text-2xl font-bold text-white mb-4">Need a hand?</h2>
             <p class="text-lg mb-6">Watch a short video ad to get a hint.</p>
             <button id="get-hint-after-ad-btn"
-                class="w-full p-3 rounded-md bg-cyan-500 text-slate-900 font-bold text-lg hover:bg-cyan-400 transition-colors">
+                class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
                 Watch Ad & Get Hint
             </button>
         </div>
@@ -435,6 +385,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const S = {
+                // UI Elements
                 grid: document.getElementById('sudoku-grid'),
                 timerEl: document.getElementById('timer'),
                 mistakesEl: document.getElementById('mistakes'),
@@ -444,9 +395,8 @@
                 winModal: document.getElementById('win-modal'),
                 adModal: document.getElementById('ad-modal'),
                 hintAdModal: document.getElementById('hint-ad-modal'),
-                difficultyModal: document.getElementById('difficulty-modal'),
+                introScreen: document.getElementById('intro-screen'),
                 gameContainer: document.getElementById('game-container'),
-                winTimeEl: document.getElementById('win-time'),
                 notesBtn: document.getElementById('notes-btn'),
                 eraseBtn: document.getElementById('erase-btn'),
                 hintBtn: document.getElementById('hint-btn'),
@@ -454,13 +404,24 @@
                 difficultyButtons: document.querySelectorAll('.difficulty-btn'),
                 continueAfterAdBtn: document.getElementById('continue-after-ad-btn'),
                 getHintAfterAdBtn: document.getElementById('get-hint-after-ad-btn'),
+                dailyChallengeBtn: document.getElementById('daily-challenge-btn'),
+                shareBtn: document.getElementById('share-btn'),
 
+                // Score/Stats Elements
+                bestScoreContainer: document.getElementById('best-score-container'),
+                bestScoreDetails: document.getElementById('best-score-details'),
+                winDifficultyEl: document.getElementById('win-difficulty'),
+                winTimeEl: document.getElementById('win-time'),
+                winMistakesEl: document.getElementById('win-mistakes'),
+                winHintsEl: document.getElementById('win-hints'),
+                winScoreEl: document.getElementById('win-score'),
+
+                // Game State
                 board: [],
                 solution: [],
                 userBoard: [],
                 notes: [],
                 mistakesBoard: [],
-
                 selectedCell: null,
                 mistakes: 0,
                 maxMistakes: 3,
@@ -468,32 +429,36 @@
                 isNotesMode: false,
                 difficulty: 'easy',
                 holesToRemove: 40,
-
                 timerInterval: null,
                 seconds: 0,
+
+                // New Stats for Scoring
+                hintsUsed: 0,
+                extraChancesUsed: 0,
+                isDailyChallenge: false,
             };
 
             // --- Game Logic ---
 
-            function generatePuzzle() {
+            function generatePuzzle(rng = Math.random) {
                 const base = [
                     [5, 3, 4, 6, 7, 8, 9, 1, 2], [6, 7, 2, 1, 9, 5, 3, 4, 8], [1, 9, 8, 3, 4, 2, 5, 6, 7],
                     [8, 5, 9, 7, 6, 1, 4, 2, 3], [4, 2, 6, 8, 5, 3, 7, 9, 1], [7, 1, 3, 9, 2, 4, 8, 5, 6],
                     [9, 6, 1, 5, 3, 7, 2, 8, 4], [2, 8, 7, 4, 1, 9, 6, 3, 5], [3, 4, 5, 2, 8, 6, 1, 7, 9]
                 ];
-                shuffle(base);
+                shuffle(base, rng);
                 S.solution = JSON.parse(JSON.stringify(base));
-                S.board = createPuzzle(base, S.holesToRemove);
+                S.board = createPuzzle(base, S.holesToRemove, rng);
                 S.userBoard = JSON.parse(JSON.stringify(S.board));
                 S.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
             }
-
-            function createPuzzle(board, holes) {
+            
+            function createPuzzle(board, holes, rng = Math.random) {
                 let puzzle = JSON.parse(JSON.stringify(board));
                 let attempts = holes;
                 while (attempts > 0) {
-                    let row = Math.floor(Math.random() * 9);
-                    let col = Math.floor(Math.random() * 9);
+                    let row = Math.floor(rng() * 9);
+                    let col = Math.floor(rng() * 9);
                     if (puzzle[row][col] !== 0) {
                         puzzle[row][col] = 0;
                         attempts--;
@@ -502,15 +467,15 @@
                 return puzzle;
             }
 
-            function shuffle(board) {
+            function shuffle(board, rng = Math.random) {
                 for (let i = 0; i < 9; i += 3) {
-                    let r1 = i + Math.floor(Math.random() * 3);
-                    let r2 = i + Math.floor(Math.random() * 3);
+                    let r1 = i + Math.floor(rng() * 3);
+                    let r2 = i + Math.floor(rng() * 3);
                     [board[r1], board[r2]] = [board[r2], board[r1]];
                 }
                 for (let i = 0; i < 9; i += 3) {
-                    let c1 = i + Math.floor(Math.random() * 3);
-                    let c2 = i + Math.floor(Math.random() * 3);
+                    let c1 = i + Math.floor(rng() * 3);
+                    let c2 = i + Math.floor(rng() * 3);
                     for (let row = 0; row < 9; row++) {
                         [board[row][c1], board[row][c2]] = [board[row][c2], board[row][c1]];
                     }
@@ -541,10 +506,8 @@
                         } else {
                             const notesGrid = document.createElement('div');
                             notesGrid.classList.add('notes-grid');
-                            cell.appendChild(notesGrid);
-
                             const cellNotes = S.notes[r][c];
-                            if (cellNotes.size > 0) {
+                            if (cellNotes && cellNotes.size > 0) {
                                 for (let i = 1; i <= 9; i++) {
                                     const noteCell = document.createElement('div');
                                     noteCell.classList.add('note-cell');
@@ -552,6 +515,7 @@
                                     notesGrid.appendChild(noteCell);
                                 }
                             }
+                            cell.appendChild(notesGrid);
                         }
                         S.grid.appendChild(cell);
                     }
@@ -559,8 +523,7 @@
             }
 
             function updateSelection(cellElement) {
-                if (S.selectedCell) S.selectedCell.classList.remove('selected');
-                document.querySelectorAll('.highlight, .same-number, .conflict').forEach(c => c.classList.remove('highlight', 'same-number', 'conflict'));
+                document.querySelectorAll('.selected, .highlight, .same-number').forEach(c => c.classList.remove('selected', 'highlight', 'same-number'));
 
                 if (!cellElement) {
                     S.selectedCell = null;
@@ -575,14 +538,14 @@
                 const value = S.userBoard[row][col];
 
                 for (let i = 0; i < 9; i++) {
-                    getCell(row, i).classList.add('highlight');
-                    getCell(i, col).classList.add('highlight');
+                    getCell(row, i)?.classList.add('highlight');
+                    getCell(i, col)?.classList.add('highlight');
                 }
                 const startRow = Math.floor(row / 3) * 3;
                 const startCol = Math.floor(col / 3) * 3;
                 for (let r = 0; r < 3; r++) {
                     for (let c = 0; c < 3; c++) {
-                        getCell(startRow + r, startCol + c).classList.add('highlight');
+                        getCell(startRow + r, startCol + c)?.classList.add('highlight');
                     }
                 }
 
@@ -596,6 +559,7 @@
                     });
                 }
             }
+
 
             function getCell(row, col) {
                 return S.grid.querySelector(`[data-row='${row}'][data-col='${col}']`);
@@ -626,19 +590,20 @@
             }
 
             function handleValueInput(row, col, num) {
-                S.notes[row][col].clear();
-                S.userBoard[row][col] = num; // Set the user board with the input number
+                S.notes[row][col]?.clear();
+                S.userBoard[row][col] = num;
 
                 if (num === S.solution[row][col]) {
-                    S.mistakesBoard[row][col] = false; // It's correct, clear any error
+                    S.mistakesBoard[row][col] = false;
                     checkWin();
                 } else {
                     S.mistakes++;
-                    S.mistakesBoard[row][col] = true; // It's incorrect, mark as error
+                    S.mistakesBoard[row][col] = true;
                     S.mistakesEl.textContent = `${S.mistakes} / ${S.maxMistakes}`;
                     if (S.mistakes >= S.maxMistakes) {
                         stopTimer();
                         S.adModal.classList.remove('hidden');
+                        S.adModal.classList.add('flex');
                     }
                 }
             }
@@ -658,8 +623,8 @@
                 const row = parseInt(S.selectedCell.dataset.row);
                 const col = parseInt(S.selectedCell.dataset.col);
                 S.userBoard[row][col] = 0;
-                S.mistakesBoard[row][col] = false; // Clear the error state
-                S.notes[row][col].clear();
+                S.mistakesBoard[row][col] = false;
+                S.notes[row][col]?.clear();
                 renderBoard();
                 updateSelection(getCell(row, col));
             }
@@ -677,29 +642,34 @@
                 if (emptyCells.length > 0) {
                     const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                     S.userBoard[r][c] = S.solution[r][c];
-                    S.mistakesBoard[r][c] = false; // Ensure it's not marked as an error
-                    S.notes[r][c].clear();
+                    S.mistakesBoard[r][c] = false;
+                    S.notes[r][c]?.clear();
                     S.hints--;
+                    S.hintsUsed++;
+                    S.hintBtn.title = `Get Hint (${S.hints} left)`;
                     renderBoard();
+                    updateSelection(getCell(r, c));
                     checkWin();
                 }
             }
 
             function handleHint() {
-                if (S.hints <= 0) return;
+                if (S.hints <= 0) {
+                    alert("You are out of hints!");
+                    return;
+                }
                 stopTimer();
                 S.hintAdModal.classList.remove('hidden');
+                S.hintAdModal.classList.add('flex');
             }
 
-            // --- Timer ---
-
             function startTimer() {
-                clearInterval(S.timerInterval);
+                if (S.timerInterval) clearInterval(S.timerInterval);
                 S.timerInterval = setInterval(() => {
                     S.seconds++;
                     const minutes = Math.floor(S.seconds / 60).toString().padStart(2, '0');
-                    const seconds = (S.seconds % 60).toString().padStart(2, '0');
-                    S.timerEl.textContent = `${minutes}:${seconds}`;
+                    const secondsValue = (S.seconds % 60).toString().padStart(2, '0');
+                    S.timerEl.textContent = `${minutes}:${secondsValue}`;
                 }, 1000);
             }
 
@@ -707,7 +677,44 @@
                 clearInterval(S.timerInterval);
             }
 
-            // --- Game State ---
+            function calculateScore() {
+                const difficultyMultipliers = {
+                    easy: 1, medium: 1.5, hard: 2, expert: 2.5, master: 3, extreme: 4
+                };
+                const baseScore = 10000 * (difficultyMultipliers[S.difficulty] || 1);
+                const timePenalty = S.seconds * 10;
+                const hintPenalty = S.hintsUsed * 500;
+                const extraChancePenalty = S.extraChancesUsed * 1000;
+                const finalScore = Math.max(0, baseScore - timePenalty - hintPenalty - extraChancePenalty);
+                return Math.round(finalScore);
+            }
+
+            function saveScore(score) {
+                const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore')) || { score: 0 };
+                if (score > bestScore.score) {
+                    const newBest = {
+                        score: score,
+                        difficulty: S.difficulty,
+                        time: S.timerEl.textContent,
+                        mistakes: S.mistakes
+                    };
+                    localStorage.setItem('sudokuBestScore', JSON.stringify(newBest));
+                    loadBestScore();
+                }
+            }
+
+            function loadBestScore() {
+                const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore'));
+                if (bestScore && bestScore.score > 0) {
+                    S.bestScoreDetails.innerHTML = `
+                        <strong class="text-slate-400">Score:</strong> <span class="font-bold">${bestScore.score.toLocaleString()}</span>
+                        <strong class="text-slate-400">Difficulty:</strong> <span class="capitalize">${bestScore.difficulty}</span>
+                        <strong class="text-slate-400">Time:</strong> <span>${bestScore.time}</span>
+                        <strong class="text-slate-400">Mistakes:</strong> <span>${bestScore.mistakes}</span>
+                    `;
+                    S.bestScoreContainer.classList.remove('hidden');
+                }
+            }
 
             function checkWin() {
                 for (let r = 0; r < 9; r++) {
@@ -721,8 +728,26 @@
 
             function winGame() {
                 stopTimer();
+                const finalScore = calculateScore();
+
+                S.winDifficultyEl.textContent = S.difficulty;
                 S.winTimeEl.textContent = S.timerEl.textContent;
+                S.winMistakesEl.textContent = S.mistakes;
+                S.winHintsEl.textContent = S.hintsUsed;
+                S.winScoreEl.textContent = finalScore.toLocaleString();
+
                 S.winModal.classList.remove('hidden');
+                S.winModal.classList.add('flex');
+
+                if (S.isDailyChallenge) {
+                    const today = getTodaysDateString();
+                    localStorage.setItem(`dailyChallenge_${today}`, 'completed');
+                    S.shareBtn.classList.remove('hidden');
+                } else {
+                    S.shareBtn.classList.add('hidden');
+                }
+                S.isDailyChallenge = false;
+                saveScore(finalScore);
             }
 
             function toggleNotesMode() {
@@ -730,24 +755,86 @@
                 S.notesBtn.classList.toggle('active', S.isNotesMode);
             }
 
-            function selectDifficulty(level) {
+            function selectDifficulty(level, rng = Math.random) {
                 S.difficulty = level;
-                if (level === 'easy') S.holesToRemove = 40;
-                if (level === 'medium') S.holesToRemove = 50;
-                if (level === 'hard') S.holesToRemove = 55;
-
-                S.difficultyEl.textContent = level.charAt(0).toUpperCase() + level.slice(1);
-                S.difficultyModal.classList.add('hidden');
+                const holes = {
+                    easy: 40, medium: 50, hard: 55, expert: 58, master: 61, extreme: 64
+                };
+                S.holesToRemove = holes[level] || 50;
+                S.difficultyEl.textContent = level;
+                S.introScreen.classList.add('hidden');
+                S.introScreen.classList.remove('flex');
                 S.gameContainer.classList.remove('hidden');
                 S.gameContainer.classList.add('flex');
-                init();
+                init(rng);
             }
 
-            // --- Initialization ---
+            function getTodaysDateString() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
 
-            function init() {
+            function mulberry32(a) {
+                return function () {
+                    var t = a += 0x6D2B79F5;
+                    t = Math.imul(t ^ t >>> 15, t | 1);
+                    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                }
+            }
+
+            function checkDailyChallengeStatus() {
+                const today = getTodaysDateString();
+                if (localStorage.getItem(`dailyChallenge_${today}`)) {
+                    S.dailyChallengeBtn.textContent = 'Challenge Completed Today!';
+                    S.dailyChallengeBtn.disabled = true;
+                } else {
+                    S.dailyChallengeBtn.textContent = 'Play Daily Challenge';
+                    S.dailyChallengeBtn.disabled = false;
+                }
+            }
+
+            function startDailyChallenge() {
+                S.isDailyChallenge = true;
+                const today = getTodaysDateString();
+                let seed = 0;
+                for (let i = 0; i < today.length; i++) {
+                    seed += today.charCodeAt(i);
+                }
+                const random = mulberry32(seed);
+                const difficulties = ['medium', 'hard', 'expert', 'master', 'extreme'];
+                const dailyDifficulty = difficulties[Math.floor(random() * difficulties.length)];
+                selectDifficulty(dailyDifficulty, random);
+            }
+
+            async function handleShare() {
+                const shareData = {
+                    title: 'Sudoku Daily Challenge',
+                    text: `I completed the Sudoku Daily Challenge on ${S.difficulty} in ${S.timerEl.textContent} with a score of ${S.winScoreEl.textContent}! Can you beat me?`,
+                    url: window.location.href
+                };
+                try {
+                    if (navigator.share) {
+                        await navigator.share(shareData);
+                    } else {
+                        await navigator.clipboard.writeText(shareData.text + "\n" + shareData.url);
+                        alert("Challenge result copied to clipboard!");
+                    }
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                    alert("Could not share. Result copied to clipboard instead!");
+                    await navigator.clipboard.writeText(shareData.text + "\n" + shareData.url);
+                }
+            }
+
+            function init(rng = Math.random) {
                 S.mistakes = 0;
                 S.hints = 3;
+                S.hintsUsed = 0;
+                S.extraChancesUsed = 0;
                 S.seconds = 0;
                 S.selectedCell = null;
                 S.isNotesMode = false;
@@ -756,13 +843,14 @@
                 S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
                 S.winModal.classList.add('hidden');
                 S.adModal.classList.add('hidden');
+                S.timerEl.textContent = '00:00';
+                S.hintBtn.title = `Get Hint (${S.hints} left)`;
 
-                generatePuzzle();
+                generatePuzzle(rng);
                 renderBoard();
                 startTimer();
             }
 
-            // --- Event Listeners ---
             S.grid.addEventListener('click', handleCellClick);
             S.numberButtons.forEach(btn => {
                 btn.addEventListener('click', () => handleNumberInput(parseInt(btn.dataset.num)));
@@ -771,6 +859,27 @@
             document.addEventListener('keydown', e => {
                 if (e.key >= '1' && e.key <= '9') {
                     handleNumberInput(parseInt(e.key));
+                } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                    handleErase();
+                } else if (e.key.toLowerCase() === 'n') {
+                    toggleNotesMode();
+                } else if (e.key.startsWith('Arrow')) {
+                    if (!S.selectedCell) return;
+                    e.preventDefault();
+                    let row = parseInt(S.selectedCell.dataset.row);
+                    let col = parseInt(S.selectedCell.dataset.col);
+                    
+                    switch (e.key) {
+                        case 'ArrowUp': row = Math.max(0, row - 1); break;
+                        case 'ArrowDown': row = Math.min(8, row + 1); break;
+                        case 'ArrowLeft': col = Math.max(0, col - 1); break;
+                        case 'ArrowRight': col = Math.min(8, col + 1); break;
+                    }
+                    
+                    const newCell = getCell(row, col);
+                    if (newCell) {
+                        updateSelection(newCell);
+                    }
                 }
             });
 
@@ -784,9 +893,15 @@
 
             function startNewGame() {
                 stopTimer();
+                S.isDailyChallenge = false;
+                S.winModal.classList.add('hidden');
+                S.winModal.classList.remove('flex');
                 S.gameContainer.classList.add('hidden');
                 S.gameContainer.classList.remove('flex');
-                S.difficultyModal.classList.remove('hidden');
+                S.introScreen.classList.remove('hidden');
+                S.introScreen.classList.add('flex');
+                S.shareBtn.classList.add('hidden');
+                checkDailyChallengeStatus();
             }
 
             S.newGameBtn.addEventListener('click', startNewGame);
@@ -794,6 +909,8 @@
 
             S.continueAfterAdBtn.addEventListener('click', () => {
                 S.adModal.classList.add('hidden');
+                S.adModal.classList.remove('flex');
+                S.extraChancesUsed++;
                 S.mistakes = 0;
                 S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
                 startTimer();
@@ -801,14 +918,22 @@
 
             S.getHintAfterAdBtn.addEventListener('click', () => {
                 S.hintAdModal.classList.add('hidden');
+                S.hintAdModal.classList.remove('flex');
                 giveHint();
                 startTimer();
             });
 
-            // Initialize the game
-            S.difficultyModal.classList.remove('hidden');
+            S.dailyChallengeBtn.addEventListener('click', startDailyChallenge);
+            S.shareBtn.addEventListener('click', handleShare);
+
+            // --- Initial Load ---
+            loadBestScore();
+            checkDailyChallengeStatus();
+            S.introScreen.classList.remove('hidden');
+            S.introScreen.classList.add('flex');
         });
     </script>
 </body>
 
 </html>
+
