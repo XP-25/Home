@@ -7,6 +7,54 @@
     <title>Sudoku</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js" crossorigin="anonymous"></script>
+    <script>
+        window.googletag = window.googletag || { cmd: [] };
+
+        let rewardedSlotContinue = null;
+        let rewardedSlotHint = null;
+
+        googletag.cmd.push(function () {
+            // Define the rewarded ad slot for continuing the game
+            rewardedSlotContinue = googletag.defineOutOfPageSlot(
+                '/6355419/Travel/Europe/France/Paris', // Replace with your ad unit path
+                'div-gpt-ad-rewarded-continue'
+            ).addService(googletag.pubads());
+
+            // Define the rewarded ad slot for getting a hint
+            rewardedSlotHint = googletag.defineOutOfPageSlot(
+                '/6355419/Travel/Europe/France/Paris', // Replace with your ad unit path
+                'div-gpt-ad-rewarded-hint'
+            ).addService(googletag.pubads());
+
+
+            // Event listener for when a reward is granted
+            googletag.pubads().addEventListener('rewardedSlotGranted', function (event) {
+                console.log('Reward granted for slot:', event.slot.getSlotElementId());
+                // The reward object contains the type and amount you configured in Ad Manager
+                console.log('Reward amount:', event.reward.amount, 'Reward type:', event.reward.type);
+                
+                // Grant the reward based on which ad was shown
+                if (event.slot === rewardedSlotContinue) {
+                    window.grantContinueReward();
+                } else if (event.slot === rewardedSlotHint) {
+                    window.grantHintReward();
+                }
+            });
+
+            // Event listener for when the rewarded ad is closed
+            googletag.pubads().addEventListener('rewardedSlotClosed', function (event) {
+                console.log('Rewarded ad closed.');
+                // Resume game timer or other logic here
+                window.resumeGameTimer(); 
+            });
+
+            googletag.pubads().enableSingleRequest();
+            googletag.enableServices();
+        });
+    </script>
+
     <style>
         :root {
             --bg-color: #0B0C1E;
@@ -21,375 +69,90 @@
             --fixed-text-color: #ffffffda;
             --notes-text-color: #64748B;
         }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        * {
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #grid-wrapper {
-            width: 95%;
-            max-width: 500px;
-            margin: 0 auto;
-            aspect-ratio: 1 / 1;
-        }
-
-        .sudoku-grid {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            grid-template-rows: repeat(9, 1fr);
-            width: 100%;
-            height: 100%;
-            gap: 1px;
-            background-color: var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid var(--border-color);
-            transform: translateZ(0);
-            backface-visibility: hidden;
-        }
-
-        .sudoku-grid .cell {
-            background-color: var(--cell-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(1.1rem, 5vw, 2rem);
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            position: relative;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        .cell:nth-child(3n) {
-            border-right: 2px solid var(--border-color);
-        }
-
-        .cell:nth-child(9n) {
-            border-right: none;
-        }
-
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .cell.fixed {
-            color: var(--fixed-text-color);
-            font-weight: 600;
-        }
-
-        .cell.selected {
-            background-color: var(--accent-highlight);
-            outline: 3px solid var(--accent-color);
-            z-index: 10;
-        }
-
-        .cell.highlight,
-        .cell.same-number {
-            background-color: rgba(255, 255, 255, 0.07);
-        }
-
-        .cell.persistent-error {
-            background-color: var(--error-bg-color);
-            color: var(--error-color);
-        }
-
-        .cell.persistent-error::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border: 2px solid var(--error-color);
-            pointer-events: none;
-        }
-
-        .notes-grid {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
-            bottom: 2px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-        }
-
-        .note-cell {
-            font-size: clamp(0.5rem, 1.5vw, 0.75rem);
-            color: var(--notes-text-color);
-            text-align: center;
-            line-height: 1.1;
-        }
-
-        .control-button,
-        .number-button {
-            background-color: var(--cell-color);
-            transition: all 0.2s ease;
-            border: 1px solid var(--border-color);
-            position: relative;
-        }
-
-        .control-button:hover,
-        .number-button:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        .control-button.active {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            border-color: var(--accent-color);
-        }
-
-        #best-score-container .font-bold {
-            color: var(--gold-accent);
-        }
-
-        #win-score {
-            color: var(--gold-accent);
-        }
-
-        .number-buttons-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            width: 100%;
-        }
-
-        .number-button {
-            flex: 1 1 40px;
-            max-width: 50px;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        * { -webkit-tap-highlight-color: transparent; }
+        #grid-wrapper { width: 95%; max-width: 500px; margin: 0 auto; aspect-ratio: 1 / 1; }
+        .sudoku-grid { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); width: 100%; height: 100%; gap: 1px; background-color: var(--border-color); border-radius: 8px; overflow: hidden; border: 2px solid var(--border-color); transform: translateZ(0); backface-visibility: hidden; }
+        .sudoku-grid .cell { background-color: var(--cell-color); display: flex; justify-content: center; align-items: center; font-size: clamp(1.1rem, 5vw, 2rem); font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; position: relative; user-select: none; -webkit-user-select: none; }
+        .cell:nth-child(3n) { border-right: 2px solid var(--border-color); }
+        .cell:nth-child(9n) { border-right: none; }
+        .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid var(--border-color); }
+        .cell.fixed { color: var(--fixed-text-color); font-weight: 600; }
+        .cell.selected { background-color: var(--accent-highlight); outline: 3px solid var(--accent-color); z-index: 10; }
+        .cell.highlight, .cell.same-number { background-color: rgba(255, 255, 255, 0.07); }
+        .cell.persistent-error { background-color: var(--error-bg-color); color: var(--error-color); }
+        .cell.persistent-error::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 2px solid var(--error-color); pointer-events: none; }
+        .notes-grid { position: absolute; top: 2px; left: 2px; right: 2px; bottom: 2px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+        .note-cell { font-size: clamp(0.5rem, 1.5vw, 0.75rem); color: var(--notes-text-color); text-align: center; line-height: 1.1; }
+        .control-button, .number-button { background-color: var(--cell-color); transition: all 0.2s ease; border: 1px solid var(--border-color); }
+        .control-button:hover, .number-button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        .control-button.active { background-color: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+        .control-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #best-score-container .font-bold { color: var(--gold-accent); }
+        #win-score { color: var(--gold-accent); }
+        .number-buttons-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%; }
+        .number-button { flex: 1 1 40px; max-width: 50px; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
         @media (min-width: 1024px) {
-            body {
-                overflow: hidden;
-            }
-
-            #grid-wrapper {
-                width: auto;
-                height: calc(100vh - 100px);
-                max-height: 650px;
-                max-width: 650px;
-            }
-
-            .number-buttons-container {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 0.5rem;
-                width: 100%;
-                max-width: 200px;
-            }
-
-            .number-button {
-                flex: auto;
-                max-width: none;
-            }
-        }
-
-        /* Keyboard shortcut notification bubbles */
-        .keyboard-shortcut {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background-color: var(--gold-accent);
-            color: var(--bg-color);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            pointer-events: none;
-        }
-
-        /* Ad container styling */
-        #ad-container {
-            width: 100%;
-            height: 100%;
-            background-color: var(--cell-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #ad-container h3 {
-            margin-bottom: 15px;
-            color: var(--accent-color);
-        }
-
-        #ad-container p {
-            margin-bottom: 20px;
-            color: var(--text-color);
-        }
-
-        #simulate-ad-btn {
-            background-color: var(--gold-accent);
-            color: var(--bg-color);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        #simulate-ad-btn:hover {
-            background-color: #e6b400;
-        }
-
-        .ad-modal-content {
-            max-width: 400px;
-            width: 90%;
+            body { overflow: hidden; }
+            #grid-wrapper { width: auto; height: calc(100vh - 100px); max-height: 650px; max-width: 650px; }
+            .number-buttons-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; width: 100%; max-width: 200px; }
+            .number-button { flex: auto; max-width: none; }
         }
     </style>
 </head>
 
 <body class="flex flex-col items-center justify-center p-2 md:p-4 min-h-screen">
 
-    <div id="intro-screen"
-        class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 w-full max-w-md border border-slate-700">
+    <div id="intro-screen" class="bg-black/30 backdrop-blur-sm p-6 md:p-8 rounded-lg text-center shadow-2xl flex-col gap-5 hidden w-full max-w-md border border-slate-700">
         <h1 class="text-5xl font-bold text-white tracking-wider">SUDOKU</h1>
-
         <div id="best-score-container" class="bg-slate-800/50 p-4 rounded-lg border border-slate-700 hidden">
             <h3 class="text-xl font-bold text-slate-100 mb-3 flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    style="color: var(--gold-accent)">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                    <path d="M4 22h16" />
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-                    <path d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" />
-                    <path d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
-                </svg>
-                All-Time Best
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--gold-accent)">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /> <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /> <path d="M4 22h16" /> <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /> <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /> <path d="M9.17 9a3 3 0 0 0-2.34 1.15L6.5 10.5l-1 .5c-1 1-2 2.5-2 4.5v1h4v-1c0-1.5.5-3 1.5-4l.5-1-1.17-1.15Z" /> <path d="M14.83 9a3 3 0 0 1 2.34 1.15L17.5 10.5l1 .5c1 1 2 2.5 2 4.5v1h-4v-1c0-1.5-.5-3-1.5-4l-.5-1 1.17-1.15Z" />
+                </svg> All-Time Best
             </h3>
-            <div id="best-score-details" class="text-slate-300 grid grid-cols-2 gap-x-4 gap-y-2 text-left">
-            </div>
+            <div id="best-score-details" class="text-slate-300 grid grid-cols-2 gap-x-4 gap-y-2 text-left"></div>
         </div>
-
-        <button id="daily-challenge-btn"
-            class="w-full p-4 rounded-lg bg-white text-slate-900 font-bold text-xl hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg">
-            Play Daily Challenge
-        </button>
+        <button id="daily-challenge-btn" class="w-full p-4 rounded-lg bg-white text-slate-900 font-bold text-xl hover:bg-slate-200 transition-all duration-300 transform hover:scale-105 shadow-lg">Play Daily Challenge</button>
         <div class="relative flex py-2 items-center">
-            <div class="flex-grow border-t border-slate-600"></div>
-            <span class="flex-shrink mx-4 text-slate-400">OR</span>
-            <div class="flex-grow border-t border-slate-600"></div>
+            <div class="flex-grow border-t border-slate-600"></div> <span class="flex-shrink mx-4 text-slate-400">OR</span> <div class="flex-grow border-t border-slate-600"></div>
         </div>
-
         <h2 class="text-2xl font-bold text-slate-100 mb-2">Start a New Game</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3 w-full">
-            <button data-difficulty="easy"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Easy</button>
-            <button data-difficulty="medium"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Medium</button>
-            <button data-difficulty="hard"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Hard</button>
-            <button data-difficulty="expert"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Expert</button>
-            <button data-difficulty="master"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Master</button>
-            <button data-difficulty="extreme"
-                class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Extreme</button>
+            <button data-difficulty="easy" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Easy</button>
+            <button data-difficulty="medium" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Medium</button>
+            <button data-difficulty="hard" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Hard</button>
+            <button data-difficulty="expert" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Expert</button>
+            <button data-difficulty="master" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Master</button>
+            <button data-difficulty="extreme" class="difficulty-btn w-full p-3 rounded-md bg-slate-700 font-semibold text-lg hover:bg-slate-600 transition-colors">Extreme</button>
         </div>
     </div>
 
-    <div id="game-container"
-        class="hidden w-full h-full max-w-7xl mx-auto flex-col lg:flex-row items-center justify-center lg:gap-8">
+    <div id="game-container" class="hidden w-full h-full max-w-7xl mx-auto flex-col lg:flex-row items-center justify-center lg:gap-8">
         <div class="flex flex-col items-center w-full lg:w-auto">
             <div class="w-full max-w-[500px] flex justify-between items-center mb-4 px-2">
-                <div class="text-md text-center">Difficulty<br><span id="difficulty"
-                        class="font-semibold text-white capitalize">Easy</span></div>
-                <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span>
-                </div>
+                <div class="text-md text-center">Difficulty<br><span id="difficulty" class="font-semibold text-white capitalize">Easy</span></div>
+                <div class="text-md text-center">Mistakes<br><span id="mistakes" class="font-semibold">0 / 3</span></div>
                 <div id="timer" class="text-2xl font-semibold">00:00</div>
             </div>
-
             <div id="grid-wrapper">
                 <div id="sudoku-grid" class="sudoku-grid"></div>
             </div>
         </div>
-
         <div class="w-full lg:w-auto flex flex-col items-center gap-4 mt-4 lg:mt-0">
             <div class="w-full flex justify-center items-center gap-4 max-w-[500px] lg:max-w-[200px]">
-                <button id="notes-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Toggle Notes (N)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                    </svg>
-                    <div class="keyboard-shortcut">N</div>
-                </button>
-                <button id="erase-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Erase (Backspace)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
-                        <line x1="18" y1="9" x2="12" y2="15"></line>
-                        <line x1="12" y1="9" x2="18" y2="15"></line>
-                    </svg>
-                </button>
-                <button id="hint-btn"
-                    class="control-button flex-1 p-3 rounded-md flex justify-center items-center"
-                    title="Get Hint (H)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"></path>
-                        <path d="M12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"></path>
-                    </svg>
-                    <div class="keyboard-shortcut">H</div>
-                </button>
+                <button id="notes-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Toggle Notes (N)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button id="erase-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Erase (Backspace)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></button>
+                <button id="hint-btn" class="control-button flex-1 p-3 rounded-md flex justify-center items-center" title="Get Hint"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"></path><path d="M12 2C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"></path></svg></button>
             </div>
-
             <div class="number-buttons-container max-w-[500px] lg:max-w-[200px]">
-                <button data-num="1" class="number-button text-2xl p-3 rounded-md">1</button>
-                <button data-num="2" class="number-button text-2xl p-3 rounded-md">2</button>
-                <button data-num="3" class="number-button text-2xl p-3 rounded-md">3</button>
-                <button data-num="4" class="number-button text-2xl p-3 rounded-md">4</button>
-                <button data-num="5" class="number-button text-2xl p-3 rounded-md">5</button>
-                <button data-num="6" class="number-button text-2xl p-3 rounded-md">6</button>
-                <button data-num="7" class="number-button text-2xl p-3 rounded-md">7</button>
-                <button data-num="8" class="number-button text-2xl p-3 rounded-md">8</button>
-                <button data-num="9" class="number-button text-2xl p-3 rounded-md">9</button>
+                <button data-num="1" class="number-button text-2xl p-3 rounded-md">1</button> <button data-num="2" class="number-button text-2xl p-3 rounded-md">2</button> <button data-num="3" class="number-button text-2xl p-3 rounded-md">3</button> <button data-num="4" class="number-button text-2xl p-3 rounded-md">4</button> <button data-num="5" class="number-button text-2xl p-3 rounded-md">5</button> <button data-num="6" class="number-button text-2xl p-3 rounded-md">6</button> <button data-num="7" class="number-button text-2xl p-3 rounded-md">7</button> <button data-num="8" class="number-button text-2xl p-3 rounded-md">8</button> <button data-num="9" class="number-button text-2xl p-3 rounded-md">9</button>
             </div>
-
-            <button id="new-game-btn"
-                class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">
-                New Game
-            </button>
+            <button id="new-game-btn" class="w-full mt-2 p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors max-w-[500px] lg:max-w-[200px]">New Game</button>
         </div>
     </div>
 
-    <div id="win-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+    <div id="win-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
         <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-3xl font-bold text-white mb-4">Congratulations!</h2>
             <p class="text-lg mb-4">You solved the puzzle!</p>
@@ -403,45 +166,59 @@
                 <p class="text-lg">Score: <span id="win-score" class="font-bold"></span></p>
             </div>
             <div class="flex flex-col gap-3">
-                <button id="share-btn"
-                    class="hidden w-full p-3 rounded-md bg-green-500 text-white font-bold text-lg hover:bg-green-400 transition-colors">
-                    Share Result
-                </button>
-                <button id="modal-new-game-btn"
-                    class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">
-                    Play Again
-                </button>
+                <button id="share-btn" class="hidden w-full p-3 rounded-md bg-green-500 text-white font-bold text-lg hover:bg-green-400 transition-colors">Share Result</button>
+                <button id="modal-new-game-btn" class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors">Play Again</button>
             </div>
         </div>
     </div>
 
-    <div id="ad-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700 ad-modal-content">
+    <div id="ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-2xl font-bold text-rose-400 mb-4">Out of chances!</h2>
             <p class="text-lg mb-6">Watch a short video ad to continue playing.</p>
-            <div id="ad-container">
-                <h3>Advertisement</h3>
-                <p>This is where your video ad would play</p>
-                <button id="simulate-ad-btn">Simulate Ad Completion</button>
-            </div>
+            <button id="continue-after-ad-btn" class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors" disabled>Loading Ad...</button>
         </div>
     </div>
 
-    <div id="hint-ad-modal"
-        class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700 ad-modal-content">
+    <div id="hint-ad-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 text-slate-100 p-8 rounded-lg text-center shadow-xl max-w-sm w-full border border-slate-700">
             <h2 class="text-2xl font-bold text-white mb-4">Need a hand?</h2>
             <p class="text-lg mb-6">Watch a short video ad to get a hint.</p>
-            <div id="hint-ad-container">
-                <h3>Advertisement</h3>
-                <p>This is where your video ad would play</p>
-                <button id="simulate-hint-ad-btn">Simulate Ad Completion</button>
-            </div>
+            <button id="get-hint-after-ad-btn" class="w-full p-3 rounded-md bg-white text-slate-900 font-bold text-lg hover:bg-slate-200 transition-colors" disabled>Loading Ad...</button>
         </div>
     </div>
 
+    <div id='div-gpt-ad-rewarded-continue'></div>
+    <div id='div-gpt-ad-rewarded-hint'></div>
+
     <script>
+        // --- AD REWARD FUNCTIONS (called from GPT listeners) ---
+        function grantContinueReward() {
+            const S = window.SudokuGame;
+            S.adModal.classList.add('hidden');
+            S.adModal.classList.remove('flex');
+            S.extraChancesUsed++;
+            S.mistakes = 0;
+            S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
+            startTimer(); // Resume timer after reward is granted
+        }
+        window.grantContinueReward = grantContinueReward;
+
+        function grantHintReward() {
+            const S = window.SudokuGame;
+            S.hintAdModal.classList.add('hidden');
+            S.hintAdModal.classList.remove('flex');
+            giveHint();
+            startTimer(); // Resume timer after reward is granted
+        }
+        window.grantHintReward = grantHintReward;
+
+        function resumeGameTimer() {
+            startTimer();
+        }
+        window.resumeGameTimer = resumeGameTimer;
+
+        // --- MAIN GAME SCRIPT ---
         document.addEventListener('DOMContentLoaded', () => {
             const S = {
                 // UI Elements
@@ -461,8 +238,8 @@
                 hintBtn: document.getElementById('hint-btn'),
                 numberButtons: document.querySelectorAll('.number-button'),
                 difficultyButtons: document.querySelectorAll('.difficulty-btn'),
-                simulateAdBtn: document.getElementById('simulate-ad-btn'),
-                simulateHintAdBtn: document.getElementById('simulate-hint-ad-btn'),
+                continueAfterAdBtn: document.getElementById('continue-after-ad-btn'),
+                getHintAfterAdBtn: document.getElementById('get-hint-after-ad-btn'),
                 dailyChallengeBtn: document.getElementById('daily-challenge-btn'),
                 shareBtn: document.getElementById('share-btn'),
 
@@ -476,30 +253,14 @@
                 winScoreEl: document.getElementById('win-score'),
 
                 // Game State
-                board: [],
-                solution: [],
-                userBoard: [],
-                notes: [],
-                mistakesBoard: [],
-                selectedCell: null,
-                mistakes: 0,
-                maxMistakes: 3,
-                hints: 3,
-                isNotesMode: false,
-                difficulty: 'easy',
-                holesToRemove: 40,
-                timerInterval: null,
-                seconds: 0,
-                isAdPlaying: false,
-
-                // New Stats for Scoring
-                hintsUsed: 0,
-                extraChancesUsed: 0,
-                isDailyChallenge: false,
+                board: [], solution: [], userBoard: [], notes: [], mistakesBoard: [],
+                selectedCell: null, mistakes: 0, maxMistakes: 3, hints: 3,
+                isNotesMode: false, difficulty: 'easy', holesToRemove: 40,
+                timerInterval: null, seconds: 0, hintsUsed: 0, extraChancesUsed: 0, isDailyChallenge: false,
             };
+            window.SudokuGame = S; // Make state globally accessible for ad callbacks
 
             // --- Game Logic ---
-
             function generatePuzzle(rng = Math.random) {
                 const base = [
                     [5, 3, 4, 6, 7, 8, 9, 1, 2], [6, 7, 2, 1, 9, 5, 3, 4, 8], [1, 9, 8, 3, 4, 2, 5, 6, 7],
@@ -512,7 +273,7 @@
                 S.userBoard = JSON.parse(JSON.stringify(S.board));
                 S.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
             }
-            
+
             function createPuzzle(board, holes, rng = Math.random) {
                 let puzzle = JSON.parse(JSON.stringify(board));
                 let attempts = holes;
@@ -543,7 +304,6 @@
             }
 
             // --- UI & Rendering ---
-
             function renderBoard() {
                 S.grid.innerHTML = '';
                 for (let r = 0; r < 9; r++) {
@@ -552,11 +312,7 @@
                         cell.classList.add('cell');
                         cell.dataset.row = r;
                         cell.dataset.col = c;
-
-                        if (S.mistakesBoard[r][c]) {
-                            cell.classList.add('persistent-error');
-                        }
-
+                        if (S.mistakesBoard[r][c]) { cell.classList.add('persistent-error'); }
                         const value = S.userBoard[r][c];
                         if (S.board[r][c] !== 0) {
                             cell.textContent = S.board[r][c];
@@ -584,19 +340,12 @@
 
             function updateSelection(cellElement) {
                 document.querySelectorAll('.selected, .highlight, .same-number').forEach(c => c.classList.remove('selected', 'highlight', 'same-number'));
-
-                if (!cellElement) {
-                    S.selectedCell = null;
-                    return;
-                }
-
+                if (!cellElement) { S.selectedCell = null; return; }
                 S.selectedCell = cellElement;
                 S.selectedCell.classList.add('selected');
-
                 const row = parseInt(cellElement.dataset.row);
                 const col = parseInt(cellElement.dataset.col);
                 const value = S.userBoard[row][col];
-
                 for (let i = 0; i < 9; i++) {
                     getCell(row, i)?.classList.add('highlight');
                     getCell(i, col)?.classList.add('highlight');
@@ -608,7 +357,6 @@
                         getCell(startRow + r, startCol + c)?.classList.add('highlight');
                     }
                 }
-
                 if (value !== 0) {
                     document.querySelectorAll('.cell').forEach(c => {
                         const r = parseInt(c.dataset.row);
@@ -625,26 +373,20 @@
             }
 
             // --- Event Handlers ---
-
             function handleCellClick(e) {
-                if (S.isAdPlaying) return;
                 const cell = e.target.closest('.cell');
-                if (cell) {
-                    updateSelection(cell);
-                }
+                if (cell) { updateSelection(cell); }
             }
 
             function handleNumberInput(num) {
-                if (S.isAdPlaying || !S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
+                if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
                 const row = parseInt(S.selectedCell.dataset.row);
                 const col = parseInt(S.selectedCell.dataset.col);
-
                 if (S.isNotesMode) {
                     handleNoteInput(row, col, num);
                 } else {
                     handleValueInput(row, col, num);
                 }
-
                 renderBoard();
                 updateSelection(getCell(row, col));
             }
@@ -652,7 +394,6 @@
             function handleValueInput(row, col, num) {
                 S.notes[row][col]?.clear();
                 S.userBoard[row][col] = num;
-
                 if (num === S.solution[row][col]) {
                     S.mistakesBoard[row][col] = false;
                     checkWin();
@@ -662,25 +403,29 @@
                     S.mistakesEl.textContent = `${S.mistakes} / ${S.maxMistakes}`;
                     if (S.mistakes >= S.maxMistakes) {
                         stopTimer();
-                        S.isAdPlaying = true;
+                        S.continueAfterAdBtn.textContent = 'Loading Ad...';
+                        S.continueAfterAdBtn.disabled = true;
                         S.adModal.classList.remove('hidden');
                         S.adModal.classList.add('flex');
+                        // Set a listener to enable the button when the ad is ready
+                        googletag.pubads().addEventListener('rewardedSlotReady', function (event) {
+                           if (event.slot === rewardedSlotContinue) {
+                                S.continueAfterAdBtn.textContent = 'Watch Ad & Continue';
+                                S.continueAfterAdBtn.disabled = false;
+                           }
+                        });
                     }
                 }
             }
-
+            
             function handleNoteInput(row, col, num) {
                 if (S.userBoard[row][col] !== 0) return;
                 const cellNotes = S.notes[row][col];
-                if (cellNotes.has(num)) {
-                    cellNotes.delete(num);
-                } else {
-                    cellNotes.add(num);
-                }
+                if (cellNotes.has(num)) { cellNotes.delete(num); } else { cellNotes.add(num); }
             }
 
             function handleErase() {
-                if (S.isAdPlaying || !S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
+                if (!S.selectedCell || S.selectedCell.classList.contains('fixed')) return;
                 const row = parseInt(S.selectedCell.dataset.row);
                 const col = parseInt(S.selectedCell.dataset.col);
                 S.userBoard[row][col] = 0;
@@ -690,16 +435,10 @@
                 updateSelection(getCell(row, col));
             }
 
-            function giveHint() {
+            window.giveHint = function () { // Make it global for reward callback
                 if (S.hints <= 0) return;
-
                 let emptyCells = [];
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        if (S.userBoard[r][c] === 0) emptyCells.push({ r, c });
-                    }
-                }
-
+                for (let r = 0; r < 9; r++) { for (let c = 0; c < 9; c++) { if (S.userBoard[r][c] === 0) emptyCells.push({ r, c }); } }
                 if (emptyCells.length > 0) {
                     const { r, c } = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                     S.userBoard[r][c] = S.solution[r][c];
@@ -715,18 +454,22 @@
             }
 
             function handleHint() {
-                if (S.isAdPlaying) return;
-                
-                if (S.hints <= 0) {
-                    S.isAdPlaying = true;
-                    S.hintAdModal.classList.remove('hidden');
-                    S.hintAdModal.classList.add('flex');
-                    return;
-                }
-                giveHint();
+                if (S.hints <= 0) { alert("You are out of hints!"); return; }
+                stopTimer();
+                S.getHintAfterAdBtn.textContent = 'Loading Ad...';
+                S.getHintAfterAdBtn.disabled = true;
+                S.hintAdModal.classList.remove('hidden');
+                S.hintAdModal.classList.add('flex');
+                // Set a listener to enable the button when the ad is ready
+                googletag.pubads().addEventListener('rewardedSlotReady', function (event) {
+                    if (event.slot === rewardedSlotHint) {
+                        S.getHintAfterAdBtn.textContent = 'Watch Ad & Get Hint';
+                        S.getHintAfterAdBtn.disabled = false;
+                    }
+                });
             }
 
-            function startTimer() {
+            window.startTimer = function() { // Make it global for reward callback
                 if (S.timerInterval) clearInterval(S.timerInterval);
                 S.timerInterval = setInterval(() => {
                     S.seconds++;
@@ -736,14 +479,10 @@
                 }, 1000);
             }
 
-            function stopTimer() {
-                clearInterval(S.timerInterval);
-            }
+            function stopTimer() { clearInterval(S.timerInterval); }
 
             function calculateScore() {
-                const difficultyMultipliers = {
-                    easy: 1, medium: 1.5, hard: 2, expert: 2.5, master: 3, extreme: 4
-                };
+                const difficultyMultipliers = { easy: 1, medium: 1.5, hard: 2, expert: 2.5, master: 3, extreme: 4 };
                 const baseScore = 10000 * (difficultyMultipliers[S.difficulty] || 1);
                 const timePenalty = S.seconds * 10;
                 const hintPenalty = S.hintsUsed * 500;
@@ -751,16 +490,11 @@
                 const finalScore = Math.max(0, baseScore - timePenalty - hintPenalty - extraChancePenalty);
                 return Math.round(finalScore);
             }
-
+            
             function saveScore(score) {
                 const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore')) || { score: 0 };
                 if (score > bestScore.score) {
-                    const newBest = {
-                        score: score,
-                        difficulty: S.difficulty,
-                        time: S.timerEl.textContent,
-                        mistakes: S.mistakes
-                    };
+                    const newBest = { score: score, difficulty: S.difficulty, time: S.timerEl.textContent, mistakes: S.mistakes };
                     localStorage.setItem('sudokuBestScore', JSON.stringify(newBest));
                     loadBestScore();
                 }
@@ -769,22 +503,13 @@
             function loadBestScore() {
                 const bestScore = JSON.parse(localStorage.getItem('sudokuBestScore'));
                 if (bestScore && bestScore.score > 0) {
-                    S.bestScoreDetails.innerHTML = `
-                        <strong class="text-slate-400">Score:</strong> <span class="font-bold">${bestScore.score.toLocaleString()}</span>
-                        <strong class="text-slate-400">Difficulty:</strong> <span class="capitalize">${bestScore.difficulty}</span>
-                        <strong class="text-slate-400">Time:</strong> <span>${bestScore.time}</span>
-                        <strong class="text-slate-400">Mistakes:</strong> <span>${bestScore.mistakes}</span>
-                    `;
+                    S.bestScoreDetails.innerHTML = `<strong class="text-slate-400">Score:</strong> <span class="font-bold">${bestScore.score.toLocaleString()}</span> <strong class="text-slate-400">Difficulty:</strong> <span class="capitalize">${bestScore.difficulty}</span> <strong class="text-slate-400">Time:</strong> <span>${bestScore.time}</span> <strong class="text-slate-400">Mistakes:</strong> <span>${bestScore.mistakes}</span>`;
                     S.bestScoreContainer.classList.remove('hidden');
                 }
             }
 
             function checkWin() {
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        if (S.userBoard[r][c] !== S.solution[r][c]) return false;
-                    }
-                }
+                for (let r = 0; r < 9; r++) { for (let c = 0; c < 9; c++) { if (S.userBoard[r][c] !== S.solution[r][c]) return false; } }
                 winGame();
                 return true;
             }
@@ -792,16 +517,13 @@
             function winGame() {
                 stopTimer();
                 const finalScore = calculateScore();
-
                 S.winDifficultyEl.textContent = S.difficulty;
                 S.winTimeEl.textContent = S.timerEl.textContent;
                 S.winMistakesEl.textContent = S.mistakes;
                 S.winHintsEl.textContent = S.hintsUsed;
                 S.winScoreEl.textContent = finalScore.toLocaleString();
-
                 S.winModal.classList.remove('hidden');
                 S.winModal.classList.add('flex');
-
                 if (S.isDailyChallenge) {
                     const today = getTodaysDateString();
                     localStorage.setItem(`dailyChallenge_${today}`, 'completed');
@@ -814,16 +536,13 @@
             }
 
             function toggleNotesMode() {
-                if (S.isAdPlaying) return;
                 S.isNotesMode = !S.isNotesMode;
                 S.notesBtn.classList.toggle('active', S.isNotesMode);
             }
 
             function selectDifficulty(level, rng = Math.random) {
                 S.difficulty = level;
-                const holes = {
-                    easy: 40, medium: 50, hard: 55, expert: 58, master: 61, extreme: 64
-                };
+                const holes = { easy: 40, medium: 50, hard: 55, expert: 58, master: 61, extreme: 64 };
                 S.holesToRemove = holes[level] || 50;
                 S.difficultyEl.textContent = level;
                 S.introScreen.classList.add('hidden');
@@ -865,9 +584,7 @@
                 S.isDailyChallenge = true;
                 const today = getTodaysDateString();
                 let seed = 0;
-                for (let i = 0; i < today.length; i++) {
-                    seed += today.charCodeAt(i);
-                }
+                for (let i = 0; i < today.length; i++) { seed += today.charCodeAt(i); }
                 const random = mulberry32(seed);
                 const difficulties = ['medium', 'hard', 'expert', 'master', 'extreme'];
                 const dailyDifficulty = difficulties[Math.floor(random() * difficulties.length)];
@@ -895,70 +612,43 @@
             }
 
             function init(rng = Math.random) {
-                S.mistakes = 0;
-                S.hints = 3;
-                S.hintsUsed = 0;
-                S.extraChancesUsed = 0;
-                S.seconds = 0;
-                S.selectedCell = null;
-                S.isNotesMode = false;
-                S.isAdPlaying = false;
+                S.mistakes = 0; S.hints = 3; S.hintsUsed = 0; S.extraChancesUsed = 0;
+                S.seconds = 0; S.selectedCell = null; S.isNotesMode = false;
                 S.mistakesBoard = Array(9).fill(null).map(() => Array(9).fill(false));
                 S.notesBtn.classList.remove('active');
                 S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
                 S.winModal.classList.add('hidden');
                 S.adModal.classList.add('hidden');
-                S.hintAdModal.classList.add('hidden');
                 S.timerEl.textContent = '00:00';
                 S.hintBtn.title = `Get Hint (${S.hints} left)`;
-
                 generatePuzzle(rng);
                 renderBoard();
                 startTimer();
             }
 
-            // --- Event Listeners ---
-
+            // --- Initial Event Listeners ---
             S.grid.addEventListener('click', handleCellClick);
-            S.numberButtons.forEach(btn => {
-                btn.addEventListener('click', () => handleNumberInput(parseInt(btn.dataset.num)));
-            });
-
+            S.numberButtons.forEach(btn => { btn.addEventListener('click', () => handleNumberInput(parseInt(btn.dataset.num))); });
             document.addEventListener('keydown', e => {
-                if (S.isAdPlaying) return;
-                
-                if (e.key >= '1' && e.key <= '9') {
-                    handleNumberInput(parseInt(e.key));
-                } else if (e.key === 'Backspace' || e.key === 'Delete') {
-                    handleErase();
-                } else if (e.key.toLowerCase() === 'n') {
-                    toggleNotesMode();
-                } else if (e.key.toLowerCase() === 'h') {
-                    handleHint();
-                } else if (e.key.startsWith('Arrow')) {
+                if (e.key >= '1' && e.key <= '9') { handleNumberInput(parseInt(e.key)); } 
+                else if (e.key === 'Backspace' || e.key === 'Delete') { handleErase(); } 
+                else if (e.key.toLowerCase() === 'n') { toggleNotesMode(); } 
+                else if (e.key.startsWith('Arrow')) {
                     if (!S.selectedCell) return;
                     e.preventDefault();
-                    let row = parseInt(S.selectedCell.dataset.row);
-                    let col = parseInt(S.selectedCell.dataset.col);
-                    
+                    let row = parseInt(S.selectedCell.dataset.row); let col = parseInt(S.selectedCell.dataset.col);
                     switch (e.key) {
                         case 'ArrowUp': row = Math.max(0, row - 1); break;
                         case 'ArrowDown': row = Math.min(8, row + 1); break;
                         case 'ArrowLeft': col = Math.max(0, col - 1); break;
                         case 'ArrowRight': col = Math.min(8, col + 1); break;
                     }
-                    
                     const newCell = getCell(row, col);
-                    if (newCell) {
-                        updateSelection(newCell);
-                    }
+                    if (newCell) { updateSelection(newCell); }
                 }
             });
 
-            S.difficultyButtons.forEach(btn => {
-                btn.addEventListener('click', () => selectDifficulty(btn.dataset.difficulty));
-            });
-
+            S.difficultyButtons.forEach(btn => { btn.addEventListener('click', () => selectDifficulty(btn.dataset.difficulty)); });
             S.notesBtn.addEventListener('click', toggleNotesMode);
             S.eraseBtn.addEventListener('click', handleErase);
             S.hintBtn.addEventListener('click', handleHint);
@@ -979,22 +669,16 @@
             S.newGameBtn.addEventListener('click', startNewGame);
             S.modalNewGameBtn.addEventListener('click', startNewGame);
 
-            S.simulateAdBtn.addEventListener('click', () => {
-                S.adModal.classList.add('hidden');
-                S.adModal.classList.remove('flex');
-                S.isAdPlaying = false;
-                S.extraChancesUsed++;
-                S.mistakes = 0;
-                S.mistakesEl.textContent = `0 / ${S.maxMistakes}`;
-                startTimer();
+            S.continueAfterAdBtn.addEventListener('click', () => {
+                // The actual reward is granted in the 'rewardedSlotGranted' listener
+                // This button just triggers the ad display
+                googletag.pubads().display(rewardedSlotContinue);
             });
 
-            S.simulateHintAdBtn.addEventListener('click', () => {
-                S.hintAdModal.classList.add('hidden');
-                S.hintAdModal.classList.remove('flex');
-                S.isAdPlaying = false;
-                giveHint();
-                startTimer();
+            S.getHintAfterAdBtn.addEventListener('click', () => {
+                 // The actual reward is granted in the 'rewardedSlotGranted' listener
+                // This button just triggers the ad display
+                googletag.pubads().display(rewardedSlotHint);
             });
 
             S.dailyChallengeBtn.addEventListener('click', startDailyChallenge);
