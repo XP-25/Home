@@ -15,18 +15,19 @@
         let rewardedSlotContinue = null;
         let rewardedSlotHint = null;
 
-        googletag.cmd.push(function () {
-            // Define the rewarded ad slot for continuing the game
-            rewardedSlotContinue = googletag.defineOutOfPageSlot(
-                '/2535917/sudoku_game_video_reward', // Replace with your ad unit path
-                'div-gpt-ad-rewarded-continue'
-            ).addService(googletag.pubads());
+googletag.cmd.push(function () {
+    // Define the rewarded ad slot for continuing the game (This one is correct!)
+    rewardedSlotContinue = googletag.defineOutOfPageSlot(
+        '/2535917/sudoku_game_video_reward', 
+        'div-gpt-ad-rewarded-continue'
+    ).addService(googletag.pubads());
 
-            // Define the rewarded ad slot for getting a hint
-            rewardedSlotHint = googletag.defineOutOfPageSlot(
-                '/6355419/Travel/Europe/France/Paris', // Replace with your ad unit path
-                'div-gpt-ad-rewarded-hint'
-            ).addService(googletag.pubads());
+    // Define the rewarded ad slot for getting a hint (FIX THIS ONE)
+    rewardedSlotHint = googletag.defineOutOfPageSlot(
+        '/2535917/sudoku-hint-reveal', // Use this correct path
+        'div-gpt-ad-rewarded-hint'
+    ).addService(googletag.pubads());
+});
 
 
             // Event listener for when a reward is granted
